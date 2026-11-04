@@ -475,7 +475,7 @@ $("sr").addEventListener("click",e=>{const b=e.target.closest("[data-u]");if(b)o
 $("obs").onclick=()=>{S.obSkip=true;save();$("ob").classList.add("hide");applyRole();show()};
 (()=>{const i=new Image();i.src=LOGO_H;i.className="nlogo";i.alt="Ruckly";document.querySelector(".nav").prepend(i)})();
 /* ===== ONLINE ACCOUNTS: paste your Supabase values here ===== */
-const SB_URL="",SB_KEY="";
+const SB_URL="https://mskrrxlcyujolnkeeqxf.supabase.co",SB_KEY="sb_publishable_Y-6LqjajluQ56z1e0MosKQ_jHjPMV5p";
 let sb=null,user=null,aum="s";
 function loadSb(){return new Promise(r=>{if(!SB_URL||!SB_KEY)return r();const c=document.createElement("script");c.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js";c.onload=()=>{sb=supabase.createClient(SB_URL,SB_KEY);r()};c.onerror=()=>r();document.head.appendChild(c)})}
 function auUi(){$("aus").classList.toggle("on",aum==="s");$("aul").classList.toggle("on",aum==="l");$("aup").classList.toggle("hide",aum==="l");$("aug").textContent=aum==="s"?"Create account":"Log in";$("aud").classList.toggle("hide",!!sb);$("auw").autocomplete=aum==="s"?"new-password":"current-password"}
