@@ -177,6 +177,51 @@ div[style*="gap:4px"]{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))!
 .thumb b{display:block;font-size:15px}
 .sess .pill{font-size:12px}
 @media(max-width:600px){#nsu{display:none}}
+/* ---- followers / following lists ---- */
+.fc{background:var(--bg);border:0;border-radius:10px;padding:8px;text-align:center;color:var(--tx);font:inherit;cursor:pointer;transition:transform .12s,background .12s}
+.fc:hover{background:#0c1f4a}.fc:active{transform:scale(.96)}.fc:focus-visible,.flp:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+#fl{z-index:65}#cf{z-index:70}
+.flc{width:min(100%,440px);height:min(84vh,680px);display:flex;flex-direction:column;padding:0;margin:0;overflow:hidden}
+.flh{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--bd)}
+.flh .link{text-decoration:none;font-size:28px;line-height:1;width:32px;padding:0;color:var(--tx)}
+.fltabs{display:flex;border-bottom:1px solid var(--bd)}
+.fltabs button{flex:1;background:none;border:0;border-bottom:2px solid transparent;color:var(--mut);padding:11px 4px;font:inherit;font-size:13px;font-weight:700}
+.fltabs button.on{color:var(--tx);border-bottom-color:var(--ac)}
+.flq{margin:10px 12px 4px;width:calc(100% - 24px);padding:9px 12px;border:1px solid var(--bd);border-radius:10px;background:#0a1839;color:var(--tx);font:inherit}
+.flb{flex:1;overflow:auto;padding:4px 12px 12px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.flr{display:flex;align-items:center;gap:10px;padding:8px 0}
+.flp{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;color:var(--tx);text-align:left;font:inherit;cursor:pointer;border-radius:8px}
+.flp b,.flp .mut{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.flp .mut{font-size:13px}
+.fla{display:flex;gap:6px;align-items:center;flex:0 0 auto}.fla .fb{margin:0;padding:6px 12px;font-size:13px}
+.fx{background:none;border:0;color:var(--mut);font-size:15px;width:30px;height:30px;border-radius:50%}.fx:hover{background:rgba(255,255,255,.08)}
+.fsk{display:block;border-radius:6px;background:linear-gradient(90deg,#10234e,#1a3570,#10234e);background-size:200% 100%;animation:fsh 1.2s linear infinite}
+@keyframes fsh{to{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){.fsk{animation:none}}
+/* ---- post grid + viewer + rugby-ball badge ---- */
+.tile{position:relative;display:block;width:100%;aspect-ratio:1;overflow:hidden;border-radius:4px;background:#000;border:0;padding:0;cursor:pointer;color:#fff}
+.tile video{width:100%;height:100%;object-fit:cover;pointer-events:none;display:block}
+.tile:hover::after,.tile:focus-visible::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.22)}
+.tile:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.tses{height:100%;display:grid;place-content:center;gap:2px;text-align:center;padding:6px;background:linear-gradient(135deg,#1c3f8f,#0b1a3b 60%,#14543f)}
+.tses b{font-size:26px;line-height:1}.tses span{font-size:11px;opacity:.8}.tses em{font-style:normal;font-size:11px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbd{position:absolute;top:6px;right:6px;font-size:13px;text-shadow:0 1px 3px #000;z-index:1}
+#pv{z-index:55}
+.pvc{width:min(100%,480px);max-height:94vh;overflow:auto;margin:0;padding:12px;overscroll-behavior:contain}
+.pvh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.pvi{display:flex;gap:6px;margin-top:8px;position:sticky;bottom:-12px;background:var(--card);padding:8px 0 4px}
+.pvi input{flex:1;margin:0;padding:10px;border:1px solid var(--bd);border-radius:10px;background:#0a1839;color:var(--tx);font:inherit;min-width:0}
+.pvi .fb{margin:0}
+.fx:disabled{opacity:.3}
+.bdg2,.bdg{border-radius:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 22'%3E%3Cg transform='rotate(-24 15 11)'%3E%3Cellipse cx='15' cy='11' rx='14' ry='9' fill='%23ff3d5c' stroke='%23fff' stroke-width='1.4'/%3E%3Cpath d='M4.6 6q3.2 5 0 10M25.4 6q-3.2 5 0 10' fill='none' stroke='%23fff' stroke-width='1.1' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E") center/100% 100% no-repeat;min-width:28px;height:20px;padding:0 3px;font-size:10px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+.bdg2{top:-8px;right:-14px}
+/* ---- full-page post view, trajectories tile ---- */
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}#hlist>.tgrid{grid-column:1/-1}
+.tpt{position:absolute;left:6px;bottom:6px;font-size:12px;font-weight:800;text-shadow:0 1px 3px #000;z-index:1}
+#pv{padding:0;place-items:stretch;background:var(--bg)}
+.pvc{width:min(100%,560px);height:100%;max-height:none;margin:0 auto;border-radius:0;border-top:0;border-bottom:0;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px))}
+.pvh{display:block;margin-bottom:10px}.pvh .flp{width:100%}
+.pvbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.pvc video{max-height:70vh!important}
 </style>
 </head>
 <body>
@@ -420,13 +465,13 @@ async function hlv(){let a=[],cl=[];try{a=await vAll()}catch(e){}
  const items=[...a.map(v=>({t:v.ts,v})),...cl.filter(p=>!have.has(String(p.id))).map(p=>{HC[p.id]=p;return{t:new Date(p.created_at).getTime(),c:p}})].sort((x,y)=>y.t-x.t);
  const me=S.me,who=me.handle?"@"+esc(me.handle):esc(me.name||"You");
  const hd=(t,pub)=>`<div class="row" style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="ring"><div class="ini" style="width:34px;height:34px;font-size:12px;overflow:hidden">${me.photo?`<img src="${me.photo}" alt="" style="width:100%;height:100%;object-fit:cover">`:ini2(me.name||"You")}</div></div><div><b>${who}</b><div class="mut" style="font-size:12px">${fd(t)}</div></div></div><span class="pill">${pub?"🌐 Public":"🔒 Private"}</span></div>`;
- $("hlist").innerHTML=items.length?items.map(it=>{
-  if(it.v){const v=it.v;return`<div class="card hl" style="padding:12px">${hd(v.ts,v.pub)}${vid(v)}${v.cap?`<div style="margin-top:8px">${cap(v.cap)}</div>`:""}<div class="acts" style="margin-top:10px"><button data-ve="${v.id}">Edit post</button><button class="del" data-vd="${v.id}">Delete</button></div></div>`}
-  const p=it.c;return`<div class="card hl" style="padding:12px">${hd(p.created_at,true)}<video src="${esc(pubUrl(p.media_path))}" controls playsinline preload="metadata" style="width:100%;border-radius:10px;margin-top:8px;max-height:60vh;background:#000"></video>${p.caption?`<div style="margin-top:8px">${cap(p.caption)}</div>`:""}<div class="acts" style="margin-top:10px"><button data-ce="${p.id}">Edit caption</button><button class="del" data-cdl="${p.id}">Delete</button></div></div>`}).join(""):'<div class="card mut">No posts yet. Tap “New post” above to share your first highlight.</div>'}
+ const me0={id:user?user.id:"me",name:S.me.name||"You",handle:S.me.handle||"",pos:S.me.pos};
+  $("hlist").innerHTML=items.length?'<div class="tgrid">'+items.map(it=>{if(it.v){const v=it.v;if(v.postId&&v.path){const q={id:v.postId,kind:"video",caption:v.cap||"",media_path:v.path,created_at:new Date(v.ts).toISOString()};pvReg([q],me0);return pvTile(q)}return pvTileLocal(v)}
+   const q=it.c;pvReg([q],me0);return pvTile(q)}).join("")+'</div>':'<div class="card mut">No posts yet. Tap “New post” above to share your first highlight.</div>'}
 let PC=null;
 function pcUi(){if(!PC)return;const big=PC.file&&PC.file.size>52428800;$("pcn").textContent=$("pcc").value.length+"/300";
  document.querySelectorAll("#postov [data-pa]").forEach(b=>b.classList.toggle("on",(b.dataset.pa==="1")===PC.pub));
- $("pcm").textContent=PC.cloud?"This post is online. Only the caption can be changed here.":!PC.pub?"Only you can see this post.":big?"This video is over 50 MB, so it will stay on this device.":user?"Visible in the feed and on your profile.":"Sign in to share it online. Without an account it stays on this device."}
+ $("pcm").textContent=PC.cloud?"This post is online. Only the caption can be changed here.":!PC.pub?"Only you can see this post.":big?"This video is over 50 MB. It will be shrunk automatically when you share it (keep the tab open).":user?"Visible in the feed and on your profile.":"Sign in to share it online. Without an account it stays on this device."}
 function openPost(f,v){
  if(!v&&(!f||!f.type.startsWith("video/"))){toast("Please choose a video file.");return}
  const cl=!!(v&&v.cloud);
@@ -438,7 +483,8 @@ function openPost(f,v){
 function closePost(){if(!PC)return;const p=$("pcv");p.pause();p.removeAttribute("src");p.load();if(!PC.cloud)URL.revokeObjectURL(PC.url);PC=null;$("postov").classList.add("hide")}
 async function sharePost(){if(!PC)return;const cp=$("pcc").value.trim();
  if(PC.cloud){const r=await sb.from("posts").update({caption:cp}).eq("id",PC.id).select("id");if(r.error||!(r.data||[]).length){toast("Couldn’t save the caption.");return}closePost();hlv();toast("Caption updated");return}
- let pub=PC.pub;if(PC.file.size>52428800)pub=false;
+ if(PC.pub&&PC.file.size>52428800){const b=await compressUi(PC.file);if(b)PC.file=b}
+  let pub=PC.pub;if(PC.file.size>52428800)pub=false;
  try{if(PC.id){const v=(await vAll()).find(x=>x.id===PC.id);if(v){v.cap=cp;v.pub=pub;await vPut(v)}}
   else await vPut({id:Date.now()*1000+Math.floor(Math.random()*1000),cap:cp,blob:PC.file,pub,ts:Date.now()})}
  catch(e){alert("Couldn’t save this video.");return}
@@ -463,7 +509,7 @@ function acct(){const m=S.me;
  vAll().then(a=>{$("ac1").textContent=a.length;$("ac2").textContent=a.filter(v=>v.pub).length}).catch(()=>{})}
 function setAv(){const a=$("av"),p=S.me.photo;if(p){a.innerHTML='<img src="'+p+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">'}else{a.textContent=((S.me.name||"TT").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2)||"TT").toUpperCase()}}
 const fd=d=>{const t=new Date(d);return isNaN(t)?esc(d||""):t.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})};
-let pback="feed",pv="",pt="stats",pf="all",pe=false;
+let pback="feed",pv="",pt="hl",pf="all",pe=false;
 const cap=t=>esc(t||"").replace(/#\w+/g,m=>`<span style="color:#79a7f9">${m}</span>`).replace(/\n/g,"<br>");
 const hc=h=>[...h].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
 const sum=(a,b)=>{const o={};for(const k in a)o[k]=a[k]+b[k];return o};
@@ -472,31 +518,29 @@ function fake(h,t){const c=hc(h),r=(i,a,b)=>a+(c*(i+3)+i*17)%(b-a+1),m=t==="matc
 const cell=(t,v,x)=>`<div><span class="mut">${t}</span><b>${v}</b><span class="mut">${x||"&nbsp;"}</span></div>`;
 const stH=a=>`<div class="zones" style="grid-template-columns:repeat(3,1fr)">${cell("Sessions",a.n)}${cell("Points",a.pts)}${cell("Goal kicks",pc(a.km,a.k),a.km+"/"+a.k)}</div><div class="zones" style="grid-template-columns:repeat(4,1fr)">${cell("Tackles",pc(a.tk,a.tkn))}${cell("Passes",pc(a.ps,a.psn))}${cell("Tries",a.tr)}${cell("Breaks",a.br)}</div>`;
 const ini2=n=>esc((n||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase());
-function pfH(o){return`<div class="card hl" style="padding:16px"><div style="display:flex;gap:16px;align-items:center"><div class="ring"><div class="ini" style="width:76px;height:76px;font-size:22px;overflow:hidden">${o.photo?`<img src="${o.photo}" alt="" style="width:100%;height:100%;object-fit:cover">`:ini2(o.name)}</div></div><div class="zones" style="grid-template-columns:repeat(3,1fr);flex:1;margin:0"><div><b>${o.posts}</b><span class="mut">Posts</span></div><div><b>${o.fr}</b><span class="mut">Followers</span></div><div><b>${o.fg}</b><span class="mut">Following</span></div></div></div><div style="margin-top:10px"><b>${esc(o.name)}</b>${o.priv?" 🔒":""} <span class="pill">${esc(o.tag)}</span><div class="mut">@${esc(o.handle)}</div><div style="margin-top:4px">${cap(o.bio)}</div></div><div style="margin-top:10px">${o.btn}</div></div>${o.extra||""}<div class="tabs${o.locked?" hide":""}"><button data-pt="stats" class="${pt==="stats"?"on":""}">Stats</button><button data-pt="hl" class="${pt==="hl"?"on":""}">Highlights</button></div>`
+function pfH(o){return`<div class="card hl" style="padding:16px"><div style="display:flex;gap:16px;align-items:center"><div class="ring"><div class="ini" style="width:76px;height:76px;font-size:22px;overflow:hidden">${o.photo?`<img src="${o.photo}" alt="" style="width:100%;height:100%;object-fit:cover">`:ini2(o.name)}</div></div><div class="zones" style="grid-template-columns:repeat(3,1fr);flex:1;margin:0"><div><b>${fmtN(o.posts)}</b><span class="mut">Posts</span></div>${flCell(o,"followers")}${flCell(o,"following")}</div></div><div style="margin-top:10px"><b>${esc(o.name)}</b>${o.priv?" 🔒":""} <span class="pill">${esc(o.tag)}</span>${o.rel||""}<div class="mut">@${esc(o.handle)}</div><div style="margin-top:4px">${cap(o.bio)}</div>${o.mut||""}</div><div style="margin-top:10px">${o.btn}</div></div>${o.extra||""}<div class="tabs${o.locked?" hide":""}"><button data-pt="hl" class="${pt==="hl"?"on":""}">Posts</button><button data-pt="stats" class="${pt==="stats"?"on":""}">Stats</button></div>`
  +(o.locked?'<div class="card" style="text-align:center;padding:24px">🔒<br><b>This account is private</b><div class="mut">Follow this player to see their stats and highlights.</div></div>':pt==="stats"?`<div class="chips">${["all","match","training"].map(x=>`<button class="chip ${pf===x?"on":""}" data-pf="${x}">${x==="all"?"All":x==="match"?"Matches":"Training"}</button>`).join("")}</div><div class="card">${stH(o.st[pf])}</div>${o.list||""}`
- :`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">${o.tiles.join("")||'<div class="card mut" style="grid-column:1/4">No highlights yet.</div>'}</div>`)}
-function openProf(h){if(nv!=="prof")pback=nv;if(h==="me"){nv="acct"}else{pv=h;nv="prof"}pt="stats";pf="all";show();window.scrollTo(0,0)}
+ :`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">${o.tiles.join("")||'<div class="card mut" style="grid-column:1/4">No posts yet.</div>'}</div>`)}
+function openProf(h){if(nv==="prof"){if(h!=="me"&&pv&&h!==pv)PS.push(pv)}else{pback=nv;PS=[]}if(h==="me"){nv="acct"}else{pv=h;nv="prof"}pt="hl";pf="all";show();window.scrollTo(0,0)}
 const RL={player:"Player",coach:"Coach",fan:"Rugby fan"};
 async function acct(){let vs=[];try{vs=(await vAll()).sort((a,b)=>b.ts-a.ts)}catch(e){}
  let cp=null,fc=null;
  if(sb&&user){try{const[a,b,c]=await Promise.all([sb.from("posts").select("id,kind,caption,media_path,session,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(100),sb.from("follows").select("follower_id",{count:"exact",head:true}).eq("followee_id",user.id).eq("status","accepted"),sb.from("follows").select("followee_id",{count:"exact",head:true}).eq("follower_id",user.id).eq("status","accepted")]);if(!a.error)cp=a.data||[];fc={fr:b.error?"–":(b.count||0),fg:c.error?"–":(c.count||0)}}catch(e){}}
  const tw=(src,del,lock)=>`<div style="position:relative;aspect-ratio:1;overflow:hidden;border-radius:4px;background:#000"><video src="${src}" controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>${lock?'<span style="position:absolute;top:4px;left:6px">🔒</span>':""}<button class="tdel" ${del} aria-label="Delete post">✕</button></div>`;
  const cl2=cp||[],posted=new Set(cl2.map(p=>String(p.id)));
- const tl=[...cl2.filter(p=>p.kind==="video").map(p=>tw(esc(pubUrl(p.media_path)),`data-pdel="${p.id}" data-pp="${esc(p.media_path||"")}"`,false)),
-  ...vs.filter(v=>!(v.postId&&posted.has(String(v.postId)))).map(v=>tw(URL.createObjectURL(v.blob),`data-vdel="${v.id}"`,!v.pub)),
-  ...cl2.filter(p=>p.kind==="session").map(p=>{const q=p.session||{};return`<div class="card" style="grid-column:1/4;margin:0;padding:10px 12px;display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:0"><b>${esc(q.name||"Session")}</b> <span class="pill">Session</span><div class="mut" style="font-size:12px">${+q.pts||0} pts · ${fd(q.date||p.created_at)}</div></div><button class="fb on" data-pdel="${p.id}" style="margin:0;padding:5px 12px">Delete</button></div>`})];
+ pvReg(cl2,{id:user?user.id:"me",name:S.me.name||"You",handle:S.me.handle||"",pos:S.me.pos});const tl=[...cl2.map(pvTile),...vs.filter(v=>!(v.postId&&posted.has(String(v.postId)))).map(pvTileLocal)];
  const m=S.me,ss=S.sessions,mk=t=>agg(ss.filter(x=>t==="all"||x.type===t)),st={all:mk("all"),match:mk("match"),training:mk("training")};
  const pen='<svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/></svg>',bin='<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>';
  const list=weekCard(ss)+'<div class="card" style="padding:14px"><div class="row" style="margin-bottom:4px"><b>Sessions</b><button class="ib" data-add="1" aria-label="New session" style="color:var(--tx)"><svg viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M12 4v16M4 12h16"/></svg></button></div>'+(ss.filter(x=>pf==="all"||x.type===pf).map(x=>'<div class="srow"><b>'+esc(x.name)+'</b><span class="mut">'+fd(x.date)+'</span><span class="mut">'+(x.min?esc(x.min)+" min":"– min")+'</span><button class="ib" data-vs="'+x.id+'">'+(x.vis==="public"?"🌐":"🔒")+'</button><button class="ib" data-ed="'+x.id+'">'+pen+'</button><button class="ib" data-rm="'+x.id+'">'+bin+'</button></div>').join("")||'<div class="mut" style="padding:8px 0">No sessions yet.</div>')+'</div>';
  const inp='width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:#0a1839;color:var(--tx);font:inherit';
  const ed=pe?`<div class="card hl"><label class="ph"><div class="av2">${m.photo?'<img src="'+m.photo+'" alt="">':""}</div>Change photo<input type="file" id="ap" accept="image/*" hidden></label><label class="lab" for="an">Name</label><input id="an" value="${esc(m.name)}" maxlength="40"><label class="lab" for="ah">Username</label><input id="ah" value="${esc(m.handle)}" maxlength="20"><label class="lab" for="ar">Role</label><select id="ar" style="${inp}">${[["player","Player"],["coach","Coach"],["fan","Rugby fan"]].map(r=>`<option value="${r[0]}"${m.role===r[0]?" selected":""}>${r[1]}</option>`).join("")}</select><label class="lab" for="ab">Bio</label><textarea id="ab" maxlength="150" placeholder="Position, club, goals… #rugby">${esc(m.bio)}</textarea><label class="lab">Account privacy</label><div class="segs" style="grid-template-columns:1fr 1fr;margin:0"><button data-ap="0" class="${m.priv?"":"on"}">🌐 Public</button><button data-ap="1" class="${m.priv?"on":""}">🔒 Private</button></div><div class="mut" style="font-size:12px;margin-top:4px">Private: only approved followers see your stats and highlights.</div>${user?`<div class="mut" style="margin-top:8px">${esc(user.email||"")}</div><button class="link" data-lo="1">Log out</button>`:""}</div>`:"";
- $("acct").innerHTML=stBtn()+pfH({name:m.name||"Your name",handle:m.handle||"username",tag:({player:"Player",coach:"Coach",fan:"Rugby fan"}[m.role]||"Player")+(m.pos?" · "+m.pos:""),bio:m.bio||"",photo:m.photo,posts:cp?cp.length:vs.filter(v=>v.pub).length+S.sessions.filter(x=>x.vis==="public").length,fr:fc?fc.fr:"–",fg:fc?fc.fg:(S.follow||[]).length,st,list,extra:ed,priv:m.priv,btn:`<button class="fb on" data-pe="1">${pe?"Done":"Edit profile"}</button>`,tiles:tl});
+ $("acct").innerHTML=stBtn()+pfH({name:m.name||"Your name",handle:m.handle||"username",tag:({player:"Player",coach:"Coach",fan:"Rugby fan"}[m.role]||"Player")+(m.pos?" · "+m.pos:""),bio:m.bio||"",photo:m.photo,posts:cp?cp.length:vs.filter(v=>v.pub).length+S.sessions.filter(x=>x.vis==="public").length,fr:fc?fc.fr:"–",fg:fc?fc.fg:(S.follow||[]).length,st,list,extra:ed,uid:user?user.id:null,priv:m.priv,btn:`<button class="fb on" data-pe="1">${pe?"Done":"Edit profile"}</button>`,tiles:tl});
  setAv();if(!pe)return;
  [["an","name"],["ah","handle"],["ab","bio"]].forEach(([i,k])=>{$(i).oninput=()=>{S.me[k]=k==="handle"?$(i).value.replace(/[^\w.]/g,""):$(i).value;save();setAv();push()}});
  $("ar").onchange=e=>{S.me.role=e.target.value;save();applyRole();push()};
  $("ap").onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const g=c.getContext("2d"),z=Math.min(im.width,im.height);g.drawImage(im,(im.width-z)/2,(im.height-z)/2,z,z,0,0,160,160);S.me.photo=c.toDataURL("image/jpeg",.8);URL.revokeObjectURL(u);save();acct()};im.src=u}}
 document.body.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!b.closest("#prof,#acct"))return;const d=b.dataset,rr=()=>nv==="prof"?prof():acct();
- if(d.back){nv=pback;show()}else if(d.pt){pt=d.pt;rr()}else if(d.pf){pf=d.pf;rr()}else if(d.pe){pe=!pe;rr()}else if(d.ap!==undefined){S.me.priv=d.ap==="1";save();push();rr()}else if(d.lo){logout()}
+ if(d.back){if(PS.length){pv=PS.pop();pt="hl";pf="all";show()}else{nv=pback;show()}}else if(d.pt){pt=d.pt;rr()}else if(d.pf){pf=d.pf;rr()}else if(d.pe){pe=!pe;rr()}else if(d.ap!==undefined){S.me.priv=d.ap==="1";save();push();rr()}else if(d.lo){logout()}
  else if(d.f){const f=S.follow=S.follow||[],i=f.indexOf(d.f);i<0?f.push(d.f):f.splice(i,1);save();rr()}});
 (()=>{let el=null,sx=0,sl=0;document.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse")return;el=e.target.closest(".chips,.strip");if(el){sx=e.clientX;sl=el.scrollLeft}});window.addEventListener("pointermove",e=>{if(el)el.scrollLeft=sl-(e.clientX-sx)});window.addEventListener("pointerup",()=>el=null)})();
 $("acct").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
@@ -533,7 +577,7 @@ $("obg").onclick=()=>{const n=$("obn").value.trim();if(!obr||!n){alert("Choose a
 async function pushProfile(){if(!sb||!user||!S.me.handle||!S.me.role)return;try{const{error}=await sb.from("profiles").upsert({id:user.id,name:S.me.name||"",handle:S.me.handle,role:S.me.role,pos:S.me.pos||"",bio:S.me.bio||"",private:!!S.me.priv});if(error&&error.code==="23505")alert("This username is already taken. Pick another one in Edit profile.")}catch(e){}}
 $("vis").value=S.meta.vis||"private";$("vis").onchange=()=>{S.meta.vis=$("vis").value;save()};
 let pT,sT,sq0=0;const push=()=>{clearTimeout(pT);pT=setTimeout(pushProfile,800)};
-const srR=p=>`<button class="card srow" data-u="${esc(p.handle)}" style="width:100%;text-align:left;margin:0 0 8px;padding:10px 12px;color:var(--tx);display:flex"><div class="ring"><div class="ini">${ini2(p.name)}</div></div><div style="flex:1;min-width:0"><b>${esc(p.name)}${p.priv?" 🔒":""}</b><div class="mut">@${esc(p.handle)} · ${esc(p.tag)}</div></div></button>`;
+const srR=p=>{const s=FD.fol[p.id],me=user&&p.id===user.id;return`<div class="card srow" style="margin:0 0 8px;padding:10px 12px"><button class="flp" data-u="${esc(p.handle)}"><div class="ring"><div class="ini">${ini2(p.name)}</div></div><div style="min-width:0"><b>${esc(p.name)}${p.priv?" 🔒":""}</b><span class="mut">@${esc(p.handle)} · ${esc(p.tag)}</span></div></button>${user&&p.id&&!me?`<button class="fb ${s?"on":""}" data-sfo="${p.id}" data-pv="${p.priv?1:0}" style="margin:0;padding:6px 12px;font-size:13px">${s==="accepted"?"Following":s==="pending"?"Requested":p.priv?"Request":"Follow"}</button>`:""}</div>`};
 async function srch(q){const n=++sq0;q=(q===undefined?$("sq").value:q).trim().replace(/^@/,"").replace(/[,()%*]/g,"");
  let rows=[],lbl=q?"Results":"Suggested accounts",msg="";
  if(sb&&user){try{let r=sb.from("profiles").select("name,handle,role,pos,private").neq("id",user.id).neq("handle","").neq("settings->>discoverable","false").limit(20);r=q?r.or(`name.ilike.%${q}%,handle.ilike.%${q}%`):r.order("created_at",{ascending:false});const{data,error}=await r;if(error)throw error;rows=(data||[]).map(p=>({name:p.name,handle:p.handle,pos:p.pos,priv:p.private,tag:(RL[p.role]||"Player")+(p.pos?" · "+p.pos:"")}));if(!q)rows.sort((a,b)=>(b.pos===S.me.pos)-(a.pos===S.me.pos))}catch(e){msg="Couldn’t load accounts. Check your Supabase setup (profiles table)."}}
@@ -640,7 +684,7 @@ const nsu=document.createElement("button");nsu.id="nsu";nsu.innerHTML='<svg view
 /* ===== SOCIAL: follow, post, feed, likes, comments, block, report ===== */
 const FD={pos:[],pr:{},lk:{},cc:{},cm:{},open:{},fol:{},req:[],sug:[],blocked:[],err:""};
 const pubUrl=p=>sb.storage.from("highlights").getPublicUrl(p).data.publicUrl;
-function toast(t){const d=document.createElement("div");d.textContent=t;d.setAttribute("role","status");d.style.cssText="position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#10234e;border:1px solid #294a83;color:#edf4ff;padding:10px 16px;border-radius:12px;z-index:90;font-size:14px;max-width:90%;text-align:center";document.body.appendChild(d);setTimeout(()=>d.remove(),3200)}
+function toast(t){const d=document.createElement("div");d.textContent=t;d.setAttribute("role","status");d.style.cssText="position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#10234e;border:1px solid #294a83;color:#edf4ff;padding:10px 16px;border-radius:12px;z-index:90;font-size:14px;max-width:90%;text-align:center";document.body.appendChild(d);setTimeout(()=>d.remove(),Math.max(3200,t.length*60))}
 const cj=o=>JSON.stringify(Object.keys(o).sort().map(k=>[k,o[k]]));
 async function unpost(id,path){if(!sb||!user)return;try{await sb.from("posts").delete().eq("id",id);if(path)await sb.storage.from("highlights").remove([path])}catch(e){}}
 async function delPost(id,path){if(!sb||!user)return false;
@@ -660,9 +704,9 @@ async function syncAll(){if(!sb||!user||syBusy)return;syBusy=true;try{
   if(v.pub&&!p){if(v.blob.size>52428800){toast("A video is over 50 MB and wasn’t posted.");v.pub=false;await vPut(v);continue}
    toast("Posting video…");const ext=((v.blob.type||"video/mp4").split("/")[1]||"mp4").replace("quicktime","mov"),path=`${user.id}/${v.id}-${Date.now()}.${ext}`;
    const up=await sb.storage.from("highlights").upload(path,v.blob,{contentType:v.blob.type||"video/mp4"});
-   if(up.error){toast("Upload failed: "+up.error.message);continue}
+   if(up.error){toast(upMsg(up.error));continue}
    const ins=await sb.from("posts").insert({user_id:user.id,kind:"video",caption:v.cap||"",media_path:path}).select("id").single();
-   if(ins.error){toast("Couldn’t post: "+ins.error.message);continue}v.postId=ins.data.id;v.path=path;await vPut(v);toast("Video posted ✓")}
+   if(ins.error){toast(upMsg(ins.error));continue}v.postId=ins.data.id;v.path=path;await vPut(v);toast("Video posted ✓")}
   else if(!v.pub&&p){await unpost(p.id,p.media_path);v.postId=null;v.path=null;await vPut(v)}
   else if(v.pub&&p&&(p.caption||"")!==(v.cap||"")){await sb.from("posts").update({caption:v.cap||""}).eq("id",p.id)}}
  for(const x of S.sessions){const p=x.postId&&by[x.postId],pub=x.vis==="public",j=()=>({...agg([x]),name:x.name,type:x.type,date:x.date,min:+x.min||0,kk:(x.kicks||[]).map(k=>[k.x,k.y,{made:"m",left:"l",right:"r",short:"s"}[rk(k)]||"l",kt(k)==="drop"?"d":kt(k)==="conv"?"c":"p"])});if(x.postId&&!p){x.postId=null;x.vis="private";save();continue}
@@ -743,10 +787,11 @@ async function prof(){if(!sb||!user){nv="feed";return show()}
  const c=Array.isArray(cn.data)?cn.data[0]:cn.data,showC=!(R.settings&&R.settings.show_follow_counts===false)&&c&&!cn.error,z={n:0,k:0,km:0,pts:0,tk:0,tkn:0,ps:0,psn:0,tr:0,br:0};
  const mk=t=>ses.filter(x=>t==="all"||x.type===t).reduce((a,x)=>sum(a,{...z,...Object.fromEntries(Object.keys(z).map(k=>[k,+x[k]||0]))}),z);
  const st={all:mk("all"),match:mk("match"),training:mk("training")};
- const list=ses.length?`<div class="mut nh">Public sessions</div>${ses.filter(x=>pf==="all"||x.type===pf).slice(0,20).map(x=>`<div class="card hl" style="padding:14px">${sessCard(x)}</div>`).join("")}`:"";
- $("prof").innerHTML='<button class="link" data-back="1">← Back</button>'+pfH({name:R.name,handle:R.handle,tag:(RL[R.role]||"Player")+(R.pos?" · "+R.pos:""),bio:R.bio||"",posts:locked?"–":rows.length,fr:showC?c.followers:"–",fg:showC?c.following:"–",st,priv:!!R.private,locked,list:locked?"":list,
-  tiles:vids.map(v=>`<div style="position:relative;aspect-ratio:1;overflow:hidden;border-radius:4px;background:#000"><video src="${esc(pubUrl(v.media_path))}" controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover"></video></div>`),
-  btn:`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="fb ${s?"on":""}" data-fo="${R.id}" data-pv="${R.private?1:0}">${s==="accepted"?"✓ Following":s==="pending"?"Requested":R.private?"＋ Request":"＋ Follow"}</button><button class="fb" data-bl="${R.id}">Block</button><button class="fb" data-rp="u:${R.id}">Report</button></div>`})}
+ const list="";
+ pvReg(rows,R);const hidC=!!(R.settings&&R.settings.show_follow_counts===false),rl=await flRel(R.id,!locked&&!hidC);
+  $("prof").innerHTML='<button class="link" data-back="1">← Back</button>'+pfH({name:R.name,handle:R.handle,tag:(RL[R.role]||"Player")+(R.pos?" · "+R.pos:""),bio:R.bio||"",posts:locked?"–":rows.length,fr:showC?c.followers:"–",fg:showC?c.following:"–",st,priv:!!R.private,locked,uid:R.id,flk:hidC?"hidden":(locked?"private":""),rel:rl.fm?'<span class="pill" style="margin-left:4px">Follows you</span>':"",mut:flMutLine(rl.mu,R.id),list:locked?"":list,
+  tiles:rows.map(pvTile),
+  btn:`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="fb ${s?"on":""}" data-fo="${R.id}" data-pv="${R.private?1:0}">${s==="accepted"?"✓ Following":s==="pending"?"Requested":R.private?"＋ Request":rl.fm?"＋ Follow back":"＋ Follow"}</button><button class="fb" data-bl="${R.id}">Block</button><button class="fb" data-rp="u:${R.id}">Report</button></div>`})}
 $("prof").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!user)return;const d=b.dataset;
  if(d.fo)followToggle(d.fo,d.pv==="1");
  else if(d.bl)ask("Block this player?","They won’t see your posts or be able to follow you, and you won’t see theirs.","Block",async()=>{const{error}=await sb.rpc("block_user",{target:d.bl});if(error)return toast("Couldn’t block: "+error.message);delete FD.fol[d.bl];toast("Player blocked");nv="feed";show()});
@@ -761,7 +806,7 @@ function kmap(kk){if(!Array.isArray(kk)||!kk.length)return"";
  kk.forEach(k=>{if(k[2]==="m")cnt.m++;else if(k[2]==="s")cnt.s++;else cnt.x++});
  const dots=Object.values(G).map(g=>{const x=+g[0][0],y=+g[0][1],same=g.every(k=>k[2]===g[0][2]),c=same?col[g[0][2]]||"#ff5a4a":"#4d91ff";
   return`<circle cx="${x}" cy="${y}" r="6" fill="${c}" stroke="#fff" stroke-width="1.6"/>`+(g.length>1?`<text x="${x}" y="${y+3}" text-anchor="middle" font-size="8" font-weight="800" fill="#fff">${g.length}</text>`:"")}).join("");
- return`<svg viewBox="0 0 300 ${h}" role="img" aria-label="Kick map" style="width:100%;border-radius:10px;display:block;margin-top:10px"><rect width="300" height="300" fill="var(--fl)"/><rect width="300" height="30" fill="#000" opacity=".13"/><g stroke="var(--ln)" stroke-width="1.6" fill="none" opacity=".9"><line x1="0" y1="30" x2="300" y2="30" stroke-width="2.4"/><line x1="1" y1="30" x2="1" y2="300" stroke-width="2.4"/><line x1="299" y1="30" x2="299" y2="300" stroke-width="2.4"/><line x1="0" y1="51.4" x2="300" y2="51.4" stroke-dasharray="6 5"/><line x1="0" y1="124.3" x2="300" y2="124.3"/><line x1="0" y1="201.4" x2="300" y2="201.4" stroke-dasharray="6 5"/><line x1="0" y1="244.3" x2="300" y2="244.3"/><line x1="21.4" y1="30" x2="21.4" y2="300" stroke-dasharray="6 5"/><line x1="278.6" y1="30" x2="278.6" y2="300" stroke-dasharray="6 5"/><line x1="64.3" y1="30" x2="64.3" y2="300" stroke-dasharray="6 5"/><line x1="235.7" y1="30" x2="235.7" y2="300" stroke-dasharray="6 5"/></g><g stroke="#fff" stroke-width="3"><line x1="140" y1="30" x2="140" y2="12"/><line x1="160" y1="30" x2="160" y2="12"/><line x1="140" y1="21" x2="160" y2="21"/></g>${dots}</svg><div class="mut" style="font-size:12px;margin-top:4px">🟢 ${cnt.m} made · 🔴 ${cnt.x} missed${cnt.s?` · 🟠 ${cnt.s} short`:""}</div>`}
+ const trj=ktraj(kk,1.8);return`<svg viewBox="0 0 300 ${h}" role="img" aria-label="Kick map" style="width:100%;border-radius:10px;display:block;margin-top:10px"><rect width="300" height="300" fill="var(--fl)"/><rect width="300" height="30" fill="#000" opacity=".13"/><g stroke="var(--ln)" stroke-width="1.6" fill="none" opacity=".9"><line x1="0" y1="30" x2="300" y2="30" stroke-width="2.4"/><line x1="1" y1="30" x2="1" y2="300" stroke-width="2.4"/><line x1="299" y1="30" x2="299" y2="300" stroke-width="2.4"/><line x1="0" y1="51.4" x2="300" y2="51.4" stroke-dasharray="6 5"/><line x1="0" y1="124.3" x2="300" y2="124.3"/><line x1="0" y1="201.4" x2="300" y2="201.4" stroke-dasharray="6 5"/><line x1="0" y1="244.3" x2="300" y2="244.3"/><line x1="21.4" y1="30" x2="21.4" y2="300" stroke-dasharray="6 5"/><line x1="278.6" y1="30" x2="278.6" y2="300" stroke-dasharray="6 5"/><line x1="64.3" y1="30" x2="64.3" y2="300" stroke-dasharray="6 5"/><line x1="235.7" y1="30" x2="235.7" y2="300" stroke-dasharray="6 5"/></g><g stroke="#fff" stroke-width="3"><line x1="140" y1="30" x2="140" y2="12"/><line x1="160" y1="30" x2="160" y2="12"/><line x1="140" y1="21" x2="160" y2="21"/></g>${trj}${dots}</svg><div class="mut" style="font-size:12px;margin-top:4px">🟢 ${cnt.m} made · 🔴 ${cnt.x} missed${cnt.s?` · 🟠 ${cnt.s} short`:""}</div>`}
 function sessCard(s){s=s||{};const k=+s.k||0,km=+s.km||0,kk=Array.isArray(s.kk)?s.kk:[];
  const meta=[s.type==="match"?"🏉 Match":"🏋️ Training",s.min?(+s.min)+" min":"",s.date?fd(s.date):""].filter(Boolean).join(" · ");
  const bd=[];if(k>=3&&km===k)bd.push("🎯 100% goal kicks");if(+s.tr>0)bd.push("🏉 "+s.tr+(+s.tr>1?" tries":" try"));if(+s.br>0)bd.push("💨 "+s.br+(+s.br>1?" breaks":" break"));
@@ -786,7 +831,7 @@ function ntRender(){const el=$("notif");
  NT.list.forEach(n=>{if(n.type==="like"&&n.post_id){const key="l"+n.post_id;if(seen[key]){seen[key].more.push(n);return}const g={...n,more:[]};seen[key]=g;grp.push(g)}else grp.push({...n,more:[]})});
  const thumb=n=>{const p=NT.posts&&NT.posts[String(n.post_id)];if(!p)return"";
   const t=p.kind==="video"?`<video src="${esc(pubUrl(p.media_path))}#t=0.1" preload="metadata" muted playsinline style="width:100%;height:100%;object-fit:cover"></video>`:`<div><b>${+(p.session||{}).pts||0}</b>pts</div>`;
-  return`<button class="thumb" data-gop="1" aria-label="Open your post" style="border:0;padding:0;color:var(--tx)">${t}</button>`};
+  return`<button class="thumb" data-gop="${n.post_id}" aria-label="Open your post" style="border:0;padding:0;color:var(--tx)">${t}</button>`};
  const row=n=>{const a=FD.pr[n.actor_id]||{name:"Someone",handle:""},fresh=NT.fresh.has(n.id)||n.more.some(m=>NT.fresh.has(m.id));let act="";
   if(n.type==="follow_request")act=NT.req.has(n.actor_id)?`<span style="display:flex;gap:6px"><button class="fb" data-nac="${n.actor_id}" style="margin:0;padding:5px 12px">Accept</button><button class="fb on" data-ndc="${n.actor_id}" style="margin:0;padding:5px 12px">Decline</button></span>`:`<span class="mut" style="font-size:12px">Done</span>`;
   else if(n.type==="follow"||n.type==="follow_accept"){const st=FD.fol[n.actor_id];act=`<button class="fb ${st?"on":""}" data-nfo="${n.actor_id}" data-pv="${a.private?1:0}" style="margin:0;padding:5px 12px">${st==="accepted"?"Following":st==="pending"?"Requested":"Follow back"}</button>`}
@@ -815,7 +860,7 @@ async function notifs(quiet){const el=$("notif");
 $("notif").addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
  if(d.su){openAu("s");return}if(!user)return;
  if(d.nrf){notifs();return}
- if(d.gop){nv="acct";pt="hl";show();return}
+ if(d.gop){pvOpenId(d.gop);return}
  if(d.u){openProf(d.u);return}
  if(d.nfo){await followToggle(d.nfo,d.pv==="1");return}
  if(d.nac){const r=await sb.from("follows").update({status:"accepted"}).eq("follower_id",d.nac).eq("followee_id",user.id).select("follower_id");if(r.error||!(r.data||[]).length)toast("Couldn’t accept the request.");notifs(true);return}
@@ -824,6 +869,218 @@ $("notif").addEventListener("click",async e=>{const b=e.target.closest("button")
 document.addEventListener("visibilitychange",()=>{if(document.hidden||!user)return;ntCount();if(nv==="feed")feed();else if(nv==="notif")notifs(true)});
 
 const _s3=show;show=function(){_s3();nsu.classList.toggle("hide",!!user);if(user)ntStart()};
+
+/* ===== FOLLOWERS / FOLLOWING LISTS (Instagram-style) ===== */
+const FLC={};let FL={open:false,ctx:{},tab:"followers",q:"",lim:40,data:{},fm:new Set(),reqs:[]},PS=[];
+const fmtN=n=>{n=typeof n==="number"?n:parseFloat(n);if(isNaN(n))return"–";const f=(v,s)=>v.toFixed(1).replace(/\.0$/,"")+s;return n>=1e6?f(n/1e6,"M"):n>=1e4?f(n/1e3,"K"):String(n)};
+function flCell(o,k){const n=k==="followers"?o.fr:o.fg,l=k==="followers"?"Followers":"Following";
+ if(!o.uid||!sb||!user||o.flk==="hidden")return`<div><b>${fmtN(n)}</b><span class="mut">${l}</span></div>`;
+ FLC[o.uid]={handle:o.handle,name:o.name,flk:o.flk||"",fr:o.fr,fg:o.fg};
+ return`<button class="fc" data-fl="${k}" data-fu="${o.uid}" aria-label="${l}: ${fmtN(n)}"><b>${fmtN(n)}</b><span class="mut">${l}</span></button>`}
+const flMutLine=(m,id)=>{if(!m)return"";const x=m.first.map(u=>"<b>@"+esc(u.handle)+"</b>").join(", "),r=m.n-m.first.length;
+ return`<button class="link" data-fl="followers" data-fu="${id}" data-ftab="mutual" style="text-decoration:none;color:var(--mut);font-size:13px;padding:6px 0 0;text-align:left;display:block">Followed by ${x}${r>0?" and "+r+" more":""}</button>`};
+const flNorm=u=>{const o={id:u.id,name:u.name||"Player",handle:u.handle||"",role:u.role,pos:u.pos||"",private:!!u.private};FD.pr[u.id]=Object.assign(FD.pr[u.id]||{},o);return o};
+/* relationship with another profile: do they follow me + who I follow follows them */
+async function flRel(uid,wantMu){const out={fm:false,mu:null};try{
+ const[a,b]=await Promise.all([sb.from("follows").select("followee_id,status").eq("follower_id",user.id),sb.from("follows").select("status").eq("follower_id",uid).eq("followee_id",user.id).maybeSingle()]);
+ out.fm=!!(b.data&&b.data.status==="accepted");
+ if(!a.error){FD.fol={};(a.data||[]).forEach(x=>FD.fol[x.followee_id]=x.status);
+  if(wantMu){const r=await sb.rpc("follow_list",{uid,kind:"followers"});
+   if(!r.error){const m=(r.data||[]).filter(u=>FD.fol[u.id]==="accepted"&&u.id!==user.id);if(m.length)out.mu={n:m.length,first:m.slice(0,2).map(flNorm)}}}}
+}catch(e){}return out}
+async function flMine(F){const[a,b]=await Promise.all([sb.from("follows").select("followee_id,status").eq("follower_id",user.id),sb.from("follows").select("follower_id").eq("followee_id",user.id).eq("status","accepted")]);
+ if(!a.error){FD.fol={};(a.data||[]).forEach(x=>FD.fol[x.followee_id]=x.status)}F.fm=new Set((b.data||[]).map(x=>x.follower_id))}
+async function flReqs(){const q=await sb.from("follows").select("follower_id").eq("followee_id",user.id).eq("status","pending");if(q.error)return[];const ids=(q.data||[]).map(x=>x.follower_id);if(!ids.length)return[];
+ return((await sb.from("profiles").select("id,name,handle,role,pos,private").in("id",ids)).data||[]).map(flNorm)}
+async function flFetch(uid,kind,mine){const r=await sb.rpc("follow_list",{uid,kind});if(!r.error)return(r.data||[]).map(flNorm);
+ if(!mine){const e=new Error(r.error.message);e.setup=true;throw e}
+ const col=kind==="followers"?"followee_id":"follower_id",oth=kind==="followers"?"follower_id":"followee_id";
+ const q=await sb.from("follows").select(oth).eq(col,uid).eq("status","accepted").limit(1000);if(q.error)throw q.error;
+ const ids=(q.data||[]).map(x=>x[oth]),out=[];if(!ids.length)return[];
+ for(let i=0;i<ids.length;i+=80){const p=await sb.from("profiles").select("id,name,handle,role,pos,private").in("id",ids.slice(i,i+80));if(p.error)throw p.error;out.push(...(p.data||[]))}
+ const m=Object.fromEntries(out.map(x=>[x.id,x]));return ids.map(i=>m[i]).filter(x=>x&&x.handle).map(flNorm)}
+const flMut=()=>(FL.data.followers||[]).filter(u=>FD.fol[u.id]==="accepted"&&u.id!==user.id);
+const flRows=()=>FL.tab==="mutual"?flMut():(FL.data[FL.tab]||[]);
+const flCnt=k=>{const D=FL.data,c=FL.ctx;if(k==="mutual")return flMut().length;if(!D[k])return k==="followers"?c.fr:c.fg;return c.mine&&k==="following"?D[k].filter(u=>FD.fol[u.id]==="accepted").length:D[k].length};
+function flTabs(){const c=FL.ctx,t=[["followers","Followers"],["following","Following"]];
+ if(!c.mine&&((FL.tab==="mutual"&&!FL.data.followers)||(FL.data.followers&&flCnt("mutual")>0)))t.push(["mutual","Mutual"]);
+ if(!t.some(x=>x[0]===FL.tab))FL.tab="followers";
+ $("flt").textContent=c.mine?(S.me.handle?"@"+S.me.handle:"Your account"):"@"+c.handle;
+ $("fltabs").innerHTML=t.map(([k,l])=>`<button role="tab" aria-selected="${FL.tab===k}" class="${FL.tab===k?"on":""}" data-ftb="${k}">${fmtN(flCnt(k))} ${l}</button>`).join("")}
+function flRow(u){const s=FD.fol[u.id],c=FL.ctx;let a="";
+ if(u.id===user.id)a='<span class="pill">You</span>';
+ else{const l=s==="accepted"?"Following":s==="pending"?"Requested":FL.fm.has(u.id)?"Follow back":u.private?"Request":"Follow";
+  a=`<button class="fb ${s?"on":""}" data-ffo="${u.id}" data-pv="${u.private?1:0}">${l}</button>`;
+  if(c.mine&&FL.tab==="followers")a+=`<button class="fx" data-frm="${u.id}" aria-label="Remove @${esc(u.handle)}">✕</button>`}
+ return`<div class="flr"><button class="flp" data-fp="${u.id===user.id?"me":esc(u.handle)}"><div class="ring"><div class="ini">${ini2(u.name)}</div></div><div style="min-width:0"><b>${esc(u.name)}${u.private?" 🔒":""}</b><span class="mut">@${esc(u.handle)}${u.pos?" · "+esc(u.pos):""}</span></div></button><span class="fla">${a}</span></div>`}
+function flList(){const el=$("flb"),F=FL,y=el.scrollTop,c=F.ctx;let h="";
+ if(F.state==="load")h=Array(6).fill('<div class="flr"><i class="fsk" style="width:46px;height:46px;border-radius:50%"></i><div style="flex:1"><i class="fsk" style="width:55%;height:12px"></i><i class="fsk" style="width:34%;height:10px;margin-top:8px"></i></div></div>').join("");
+ else if(F.msg)h=`<div class="mut" style="text-align:center;padding:40px 12px;line-height:1.6">${F.msg}</div>`;
+ else{const q=F.q.trim().toLowerCase().replace(/^@/,""),all=flRows(),rows=q?all.filter(u=>(u.name+" "+u.handle).toLowerCase().includes(q)):all,sh=rows.slice(0,F.lim),rq=c.mine&&F.tab==="followers"&&!q&&F.reqs.length;
+  if(rq)h+=`<div class="nh mut">Follow requests · ${F.reqs.length}</div>`+F.reqs.map(u=>`<div class="flr"><button class="flp" data-fp="${esc(u.handle)}"><div class="ring"><div class="ini">${ini2(u.name)}</div></div><div style="min-width:0"><b>${esc(u.name)}</b><span class="mut">@${esc(u.handle)}</span></div></button><span class="fla"><button class="fb" data-far="${u.id}">Accept</button><button class="fb on" data-fdr="${u.id}">Decline</button></span></div>`).join("")+(all.length?'<div class="nh mut">Followers</div>':"");
+  h+=sh.length?sh.map(flRow).join("")+(rows.length>sh.length?'<button class="link" data-fmore="1" style="width:100%;padding:12px">Show more</button>':""):(rq?"":`<div class="mut" style="text-align:center;padding:40px 12px">${q?"No results for “"+esc(F.q.trim())+"”":F.tab==="following"?"Not following anyone yet.":F.tab==="mutual"?"No mutual followers.":"No followers yet."}</div>`)}
+ el.innerHTML=h;el.scrollTop=y}
+async function flOpen(uid,tab){const c=FLC[uid]||{handle:"",name:"",flk:"",fr:"–",fg:"–"},
+ F=FL={open:true,ctx:{...c,uid,mine:uid===user.id},tab:tab||"followers",q:"",lim:40,data:{},fm:new Set(),reqs:[],state:"load",msg:"",prev:document.activeElement,dirty:false};
+ $("flq").value="";$("fl").classList.remove("hide");document.body.style.overflow="hidden";flTabs();flList();$("fl").querySelector("[data-fx]").focus();
+ if(!F.ctx.mine&&F.ctx.flk){F.state="";F.msg=F.ctx.flk==="private"?`🔒<br><b>This account is private</b><br>Follow @${esc(c.handle)} to see who they follow and who follows them.`:"This player keeps their follower lists hidden.";flList();return}
+ try{const[,A,B,R]=await Promise.all([flMine(F),flFetch(uid,"followers",F.ctx.mine),flFetch(uid,"following",F.ctx.mine),F.ctx.mine?flReqs():[]]);
+  if(F!==FL)return;F.data={followers:A,following:B};F.reqs=R;F.state=""}
+ catch(e){if(F!==FL)return;F.state="";F.msg=e&&e.setup?"Lists aren’t set up yet. Run <b>supabase-followlists.sql</b> once in your Supabase SQL Editor, then reload.":'Couldn’t load this list.<br><button class="fb on" data-fretry="1" style="margin-top:10px">Try again</button>'}
+ flTabs();flList()}
+function flClose(skip){const F=FL;if(!F.open)return;F.open=false;$("fl").classList.add("hide");document.body.style.overflow="";
+ if(F.prev&&document.contains(F.prev))try{F.prev.focus()}catch(e){}
+ if(F.dirty&&!skip){if(nv==="acct")acct();else if(nv==="prof")prof()}}
+async function flToggle(id,priv){const F=FL,cur=FD.fol[id];
+ if(cur){const{error}=await sb.from("follows").delete().eq("follower_id",user.id).eq("followee_id",id);if(error){toast("Couldn’t update: "+error.message);return flList()}delete FD.fol[id]}
+ else{const st=priv?"pending":"accepted",{error}=await sb.from("follows").insert({follower_id:user.id,followee_id:id,status:st});if(error){toast("Couldn’t follow: "+error.message);return flList()}FD.fol[id]=st;if(st==="pending")toast("Request sent")}
+ F.dirty=true;if(F===FL){flTabs();flList()}}
+document.body.insertAdjacentHTML("beforeend",'<div class="ov hide" id="fl" role="dialog" aria-modal="true" aria-labelledby="flt"><div class="card flc"><div class="flh"><button class="link" data-fx="1" aria-label="Close">‹</button><b id="flt"></b><span style="width:32px"></span></div><div class="fltabs" id="fltabs" role="tablist"></div><input id="flq" class="flq" placeholder="Search" aria-label="Search this list" autocomplete="off"><div class="flb" id="flb" aria-live="polite"></div></div></div>');
+$("flq").oninput=e=>{FL.q=e.target.value;FL.lim=40;flList()};
+$("fl").addEventListener("click",async e=>{if(e.target.id==="fl")return flClose();const b=e.target.closest("button");if(!b)return;const d=b.dataset,F=FL;
+ if(d.fx)return flClose();
+ if(d.fretry)return flOpen(F.ctx.uid,F.tab);
+ if(d.ftb){F.tab=d.ftb;F.lim=40;flTabs();flList();$("flb").scrollTop=0;return}
+ if(d.fmore){F.lim+=40;return flList()}
+ if(d.fp){flClose(true);return openProf(d.fp)}
+ if(d.ffo){const id=d.ffo,u=FD.pr[id]||{};
+  if(FD.fol[id]==="accepted")return ask("Unfollow @"+(u.handle||"player")+"?",u.private?"If you change your mind, you’ll need to send a new request.":"You can follow them again at any time.","Unfollow",()=>flToggle(id,false));
+  b.disabled=true;return flToggle(id,d.pv==="1")}
+ if(d.frm){const id=d.frm,u=FD.pr[id]||{};
+  return ask("Remove @"+(u.handle||"player")+"?","They won’t be notified. They’ll stop following you and can follow you again.","Remove",async()=>{
+   const r=await sb.from("follows").delete().eq("follower_id",id).eq("followee_id",user.id).select("follower_id");
+   if(r.error||!(r.data||[]).length)return toast("Couldn’t remove this follower.");
+   F.data.followers=F.data.followers.filter(x=>x.id!==id);F.fm.delete(id);F.dirty=true;if(F===FL){flTabs();flList()}toast("Follower removed")})}
+ if(d.far||d.fdr){const id=d.far||d.fdr,acc=!!d.far;b.disabled=true;
+  const q=sb.from("follows"),r=acc?await q.update({status:"accepted"}).eq("follower_id",id).eq("followee_id",user.id).select("follower_id"):await q.delete().eq("follower_id",id).eq("followee_id",user.id).select("follower_id");
+  if(r.error||!(r.data||[]).length){b.disabled=false;return toast("Couldn’t update this request.")}
+  const u=F.reqs.find(x=>x.id===id);F.reqs=F.reqs.filter(x=>x.id!==id);if(acc&&u){F.data.followers.unshift(u);F.fm.add(id)}F.dirty=true;if(F===FL){flTabs();flList()}}});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-fl]");if(!b||!user||!sb)return;e.preventDefault();flOpen(b.dataset.fu,b.dataset.ftab||b.dataset.fl)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&FL.open){e.stopPropagation();flClose()}},true);
+
+/* ===== POST GRID + VIEWER (Instagram-style) ===== */
+const PVD={};let PV={open:false,k:"",list:[],prev:null};
+const pvReg=(arr,u)=>arr.forEach(p=>PVD["p:"+p.id]={...p,u:{id:u.id,name:u.name,handle:u.handle,pos:u.pos}});
+function pvTile(p){const s=p.session||{};
+ const inner=p.kind==="video"?`<video src="${esc(pubUrl(p.media_path))}#t=0.1" preload="metadata" muted playsinline tabindex="-1"></video><span class="tbd">▶</span>`
+  :(Array.isArray(s.kk)&&s.kk.length?`${kmini(s.kk)}<span class="tpt">${+s.pts||0} pts</span><span class="tbd">🏉</span>`:`<div class="tses"><b>${+s.pts||0}</b><span>pts</span><em>${esc(s.name||"Session")}</em></div><span class="tbd">🏉</span>`);
+ return`<button class="tile" data-po="p:${p.id}" aria-label="Open ${p.kind==="video"?"video":"session"}">${inner}</button>`}
+function pvTileLocal(v){const k="l:"+v.id,url=URL.createObjectURL(v.blob);PVD[k]={local:true,id:v.id,url,pub:v.pub,cap:v.cap,ts:v.ts};
+ return`<button class="tile" data-po="${k}" aria-label="Open video"><video src="${url}#t=0.1" preload="metadata" muted playsinline tabindex="-1"></video><span class="tbd">${v.pub?"▶":"🔒"}</span></button>`}
+const pvHeart=on=>`<svg viewBox="0 0 24 24" style="width:26px;height:26px;fill:${on?"#ff5c7a":"none"};stroke:${on?"#ff5c7a":"currentColor"};stroke-width:1.8"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>`;
+const pvRefresh=()=>{if(nv==="acct")acct();else if(nv==="prof")prof()};
+function pvHead(){const p=PVD[PV.k],u=p.local?{name:S.me.name||"You",handle:S.me.handle||""}:p.u,i=PV.list.indexOf(PV.k);
+ $("pvh").innerHTML=`<div class="pvbar"><button class="link" data-pcx="1" style="text-decoration:none;color:var(--tx);font-size:16px;font-weight:700;padding:6px 4px">‹ Back</button><b>${p.local||p.kind==="video"?"Video":"Session"}</b><span class="fla"><button class="fx" data-pnv="-1" aria-label="Previous post" ${i<1?"disabled":""}>‹</button><button class="fx" data-pnv="1" aria-label="Next post" ${i>=PV.list.length-1?"disabled":""}>›</button></span></div><button class="flp" data-pup="${p.local?"me":esc(u.handle)}"><div class="ring"><div class="ini" style="width:34px;height:34px;font-size:12px">${ini2(u.name)}</div></div><div style="min-width:0"><b>${esc(u.name)}</b><span class="mut">@${esc(u.handle)} · ${fd(p.created_at||p.ts)}</span></div></button>`}
+function pvMedia(){const p=PVD[PV.k],vs="width:100%;border-radius:10px;max-height:62vh;background:#000";
+ $("pvm").innerHTML=p.local?`<video src="${p.url}" controls playsinline style="${vs}"></video>`:p.kind==="video"?`<video src="${esc(pubUrl(p.media_path))}" controls playsinline preload="metadata" style="${vs}"></video>`:sessCard(p.session)}
+function pvActs(){const p=PVD[PV.k];
+ if(p.local){$("pva").innerHTML=`<div class="mut" style="margin:8px 0">${p.pub?"Waiting to be posted online.":"Private · only on this device."}</div>${p.cap?`<div>${cap(p.cap)}</div>`:""}<div class="acts" style="margin-top:10px"><button data-ped="1">Edit</button><button class="del" data-pdl="1">Delete</button></div>`;return}
+ const id=p.id,l=FD.lk[id]||{n:0,me:false},mine=p.u.id===user.id;
+ $("pva").innerHTML=`<div class="act" style="margin-top:8px"><button data-plk="1" aria-label="${l.me?"Unlike":"Like"}" aria-pressed="${l.me}">${pvHeart(l.me)}</button><span class="mut">${l.n}</span><span class="mut" style="margin-left:8px">💬 ${FD.cc[id]!=null?FD.cc[id]:"–"}</span><span style="flex:1"></span>${mine?(p.kind==="video"?'<button class="link" data-ped="1">Edit</button>':"")+'<button class="link" data-pdp="1">Delete</button>':'<button class="link" data-prp="1">Report</button>'}</div>${p.caption?`<div><b>@${esc(p.u.handle)}</b> ${cap(p.caption)}</div>`:""}`}
+function pvComs(){const p=PVD[PV.k];$("pvi").classList.toggle("hide",!!p.local);if(p.local){$("pvc").innerHTML="";return}
+ const id=p.id,mine=p.u.id===user.id,cm=FD.cm[id];
+ $("pvc").innerHTML=!cm?'<div class="mut" style="padding:8px 0">Loading…</div>':cm.length?cm.map(c=>{const a=c.user_id===user.id?{handle:S.me.handle||"you"}:(FD.pr[c.user_id]||{});
+  return`<div class="sr2" style="padding:6px 0"><span><b>@${esc(a.handle||"player")}</b> ${cap(c.body)}<span class="mut" style="font-size:12px"> · ${ago(c.created_at)}</span></span>${c.user_id===user.id||mine?`<button class="link" data-pcd="${c.id}" aria-label="Delete comment">✕</button>`:""}</div>`}).join(""):'<div class="mut" style="padding:8px 0">No comments yet. Be the first.</div>'}
+async function pvLoad(k){const p=PVD[k];if(p.local)return;const id=p.id;
+ const[l,c]=await Promise.all([sb.from("likes").select("user_id").eq("post_id",id),sb.from("comments").select("id,user_id,body,created_at").eq("post_id",id).order("created_at")]);
+ if(PV.k!==k)return;
+ if(!l.error)FD.lk[id]={n:(l.data||[]).length,me:(l.data||[]).some(x=>x.user_id===user.id)};
+ if(!c.error){FD.cm[id]=c.data||[];FD.cc[id]=FD.cm[id].length;const miss=[...new Set(FD.cm[id].map(x=>x.user_id))].filter(u=>u!==user.id&&!FD.pr[u]);
+  if(miss.length)((await sb.from("profiles").select("id,name,handle,role,pos,private").in("id",miss)).data||[]).forEach(x=>FD.pr[x.id]=x)}
+ if(PV.k===k){pvActs();pvComs()}}
+function pvShow(k){PV.k=k;pvHead();pvMedia();pvActs();pvComs();$("pvci").value="";$("pv").querySelector(".pvc").scrollTop=0;pvLoad(k)}
+function pvOpen(k,list){if(!PVD[k])return;PV={open:true,k,list:list&&list.length?list:[k],prev:document.activeElement};$("pv").classList.remove("hide");document.body.style.overflow="hidden";pvShow(k);$("pv").querySelector("[data-pcx]").focus()}
+function pvClose(){if(!PV.open)return;PV.open=false;const v=$("pvm").querySelector("video");if(v)v.pause();$("pvm").innerHTML="";$("pv").classList.add("hide");document.body.style.overflow="";if(PV.prev&&document.contains(PV.prev))try{PV.prev.focus()}catch(e){}}
+function pvGo(d){const i=PV.list.indexOf(PV.k)+d;if(i<0||i>=PV.list.length)return;const v=$("pvm").querySelector("video");if(v)v.pause();pvShow(PV.list[i])}
+async function pvOpenId(id){const r=await sb.from("posts").select("id,kind,caption,media_path,session,created_at").eq("id",id).maybeSingle();
+ if(r.error||!r.data)return toast("This post isn’t available anymore.");pvReg([r.data],{id:user.id,name:S.me.name||"You",handle:S.me.handle||"",pos:S.me.pos});pvOpen("p:"+r.data.id,["p:"+r.data.id])}
+async function pvLike(){const p=PVD[PV.k],id=p.id,l=FD.lk[id]=FD.lk[id]||{n:0,me:false},on=!l.me;l.me=on;l.n+=on?1:-1;pvActs();
+ const r=on?await sb.from("likes").insert({post_id:id,user_id:user.id}):await sb.from("likes").delete().eq("post_id",id).eq("user_id",user.id);
+ if(r.error){l.me=!on;l.n+=on?-1:1;pvActs();toast("Couldn’t update your like: "+r.error.message)}}
+async function pvComment(){const p=PVD[PV.k],i=$("pvci"),t=i.value.trim();if(!t||p.local)return;
+ const{data,error}=await sb.from("comments").insert({post_id:p.id,user_id:user.id,body:t}).select("id,user_id,body,created_at").single();
+ if(error)return toast("You can’t comment on this post (the author limited comments).");
+ (FD.cm[p.id]=FD.cm[p.id]||[]).push(data);FD.cc[p.id]=FD.cm[p.id].length;i.value="";pvActs();pvComs()}
+document.body.insertAdjacentHTML("beforeend",'<div class="ov hide" id="pv" role="dialog" aria-modal="true" aria-label="Post"><div class="card pvc"><div class="pvh" id="pvh"></div><div id="pvm"></div><div id="pva"></div><div id="pvc" aria-live="polite"></div><div class="pvi" id="pvi"><input id="pvci" placeholder="Add a comment…" maxlength="300" autocomplete="off" aria-label="Add a comment"><button class="fb on" data-pcs="1">Post</button></div></div></div>');
+$("pvci").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();pvComment()}});
+$("pv").addEventListener("click",async e=>{if(e.target.id==="pv")return pvClose();const b=e.target.closest("button");if(!b)return;const d=b.dataset,p=PVD[PV.k];
+ if(d.pcx)return pvClose();if(d.pnv)return pvGo(+d.pnv);
+ if(d.pup){pvClose();return openProf(d.pup)}
+ if(d.plk)return pvLike();if(d.pcs)return pvComment();
+ if(d.pcd){const id=d.pcd,pid=p.id,{error}=await sb.from("comments").delete().eq("id",id);if(error)return toast("Couldn’t delete the comment.");FD.cm[pid]=(FD.cm[pid]||[]).filter(c=>String(c.id)!==String(id));FD.cc[pid]=FD.cm[pid].length;pvActs();pvComs();return}
+ if(d.ped){const all=await vAll().catch(()=>[]),v=p.local?all.find(x=>x.id===p.id):all.find(x=>String(x.postId)===String(p.id));pvClose();if(v)openPost(null,v);else if(!p.local)openPost(null,{cloud:true,id:p.id,cap:p.caption||"",url:pubUrl(p.media_path)});return}
+ if(d.prp)return reportDlg(p.u.id,p.id);
+ if(d.pdp)return ask("Delete this post?","It will be removed from your account and from the feed for everyone. This can’t be undone.","Delete",async()=>{if(await delPost(p.id,p.media_path)){toast("Post deleted");pvClose();pvRefresh()}});
+ if(d.pdl)return ask("Delete this video?","It will be permanently deleted from this device.","Delete",async()=>{try{await vDel(p.id)}catch(x){}pvClose();pvRefresh()})});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-po]");if(!b)return;const k=b.dataset.po;if(!k.startsWith("l:")&&(!user||!sb))return;
+ pvOpen(k,[...b.parentElement.querySelectorAll("[data-po]")].map(x=>x.dataset.po))});
+document.addEventListener("keydown",e=>{if(!PV.open)return;if(e.key==="Escape"){e.stopPropagation();pvClose()}
+ else if((e.key==="ArrowLeft"||e.key==="ArrowRight")&&!/INPUT|TEXTAREA/.test((e.target||{}).tagName||"")){pvGo(e.key==="ArrowLeft"?-1:1)}},true);
+
+/* ===== SEARCH: find people by name or @username ===== */
+async function srch(q){const n=++sq0;q=(q===undefined?$("sq").value:q).trim().replace(/^@/,"").replace(/[,()%*]/g,"");
+ let rows=[],lbl=q?"Results":"Suggested accounts",msg="";
+ const map=p=>({id:p.id,name:p.name||"Player",handle:p.handle,pos:p.pos,priv:p.private,tag:(RL[p.role]||"Player")+(p.pos?" · "+p.pos:"")});
+ if(sb&&user){try{
+   let r=await sb.rpc("search_profiles",{q});
+   if(r.error){let t=sb.from("profiles").select("id,name,handle,role,pos,private,settings").neq("id",user.id).limit(60);
+    t=q?t.or(`name.ilike.%${q}%,handle.ilike.%${q}%`):t.order("created_at",{ascending:false});
+    r=await t;if(r.error)throw r.error;
+    r.data=(r.data||[]).filter(p=>p.handle&&!(p.settings&&p.settings.discoverable===false)&&!FD.blocked.includes(p.id))}
+   rows=(r.data||[]).map(map);if(!q)rows.sort((a,b)=>(b.pos===S.me.pos)-(a.pos===S.me.pos));
+   const f=await sb.from("follows").select("followee_id,status").eq("follower_id",user.id);if(!f.error){FD.fol={};(f.data||[]).forEach(x=>FD.fol[x.followee_id]=x.status)}
+  }catch(e){msg="Couldn’t load accounts."}}
+ else if(sb)msg="Log in to search players.";else msg="Online accounts are not connected.";
+ if(n!==sq0)return;
+ $("sr").innerHTML=msg?`<div class="card mut">${msg}</div>`:`<b>${lbl}</b><div style="margin-top:8px">${rows.map(srR).join("")||'<div class="card mut">No players found.</div>'}</div>`}
+$("sr").addEventListener("click",async e=>{const b=e.target.closest("[data-sfo]");if(!b||!user)return;const id=b.dataset.sfo,priv=b.dataset.pv==="1";
+ const go=async()=>{b.disabled=true;const cur=FD.fol[id];let r;
+  if(cur)r=await sb.from("follows").delete().eq("follower_id",user.id).eq("followee_id",id);
+  else r=await sb.from("follows").insert({follower_id:user.id,followee_id:id,status:priv?"pending":"accepted"});
+  b.disabled=false;if(r.error)return toast("Couldn’t update: "+r.error.message);
+  if(cur)delete FD.fol[id];else{FD.fol[id]=priv?"pending":"accepted";if(priv)toast("Request sent")}
+  const s=FD.fol[id];b.textContent=s==="accepted"?"Following":s==="pending"?"Requested":priv?"Request":"Follow";b.classList.toggle("on",!!s)};
+ if(FD.fol[id]==="accepted")ask("Unfollow this player?","You can follow them again at any time.","Unfollow",go);else go()});
+
+/* ===== TRAJECTORIES (feed, post page, grid tiles) ===== */
+function ktraj(kk,w){const col={m:"#2ecc71",l:"#ff5a4a",r:"#ff5a4a",s:"#f0a030"};
+ return kk.map(k=>{const x=+k[0],y=+k[1],r=k[2],e=r==="m"?[150,16]:r==="l"?[118,14]:r==="r"?[182,14]:r==="s"?[x+(150-x)*.62,y+(21-y)*.62]:null;if(!e)return"";const c=col[r];
+  return`<line x1="${x}" y1="${y}" x2="${e[0]}" y2="${e[1]}" stroke="${c}" stroke-width="${w}" stroke-dasharray="${w*2.8} ${w*2.2}" stroke-linecap="round" opacity=".9"/>`+(r==="s"?`<circle cx="${e[0]}" cy="${e[1]}" r="${w*1.8}" fill="${c}"/>`:"")}).join("")}
+function kmini(kk){const col={m:"#2ecc71",l:"#ff5a4a",r:"#ff5a4a",s:"#f0a030"},dots=kk.map(k=>`<circle cx="${+k[0]}" cy="${+k[1]}" r="7" fill="${col[k[2]]||"#ff5a4a"}" stroke="#fff" stroke-width="2"/>`).join("");
+ return`<svg viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;border-radius:0"><rect width="300" height="300" fill="var(--fl)"/><rect width="300" height="30" fill="#000" opacity=".13"/><g stroke="var(--ln)" stroke-width="3" fill="none" opacity=".8"><line x1="0" y1="30" x2="300" y2="30"/><line x1="0" y1="124" x2="300" y2="124"/></g><g stroke="#fff" stroke-width="5"><line x1="140" y1="30" x2="140" y2="8"/><line x1="160" y1="30" x2="160" y2="8"/><line x1="140" y1="19" x2="160" y2="19"/></g>${ktraj(kk,4)}${dots}</svg>`}
+
+/* ===== VIDEO UPLOAD: readable errors + automatic shrinking of big videos ===== */
+const upMsg=e=>{const m=String((e&&e.message)||e||"");
+ if(/bucket not found/i.test(m))return"Video storage isn’t set up yet. Run supabase-storage.sql in Supabase, then try again.";
+ if(/row-level security|policy|not authorized|permission/i.test(m))return"Supabase is blocking this upload. Run supabase-storage.sql in Supabase, then try again.";
+ if(/exceed|too large|payload|maximum/i.test(m))return"This video is too large for the server (50 MB max).";
+ return"Upload failed: "+m};
+async function compressVideo(file,onp){
+ const AC=window.AudioContext||window.webkitAudioContext,ac=new AC();try{ac.resume()}catch(e){}
+ const url=URL.createObjectURL(file),v=document.createElement("video");v.src=url;v.playsInline=true;v.preload="auto";
+ try{
+  await new Promise((ok,ko)=>{v.onloadedmetadata=ok;v.onerror=()=>ko(new Error("This video format can’t be read here."))});
+  const dur=v.duration;if(!isFinite(dur)||dur<=0||!v.videoWidth)throw new Error("Unreadable video");
+  const sc=Math.min(1,1280/Math.max(v.videoWidth,v.videoHeight)),w=Math.round(v.videoWidth*sc/2)*2,h=Math.round(v.videoHeight*sc/2)*2;
+  const cv=document.createElement("canvas");cv.width=w;cv.height=h;const g=cv.getContext("2d");
+  const bits=Math.max(5e5,Math.min(2.5e6,44*8*1048576/dur-128e3));
+  const dst=ac.createMediaStreamDestination();ac.createMediaElementSource(v).connect(dst);
+  const st=new MediaStream([...cv.captureStream(30).getVideoTracks(),...dst.stream.getAudioTracks()]);
+  const mt=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t));
+  if(!mt)throw new Error("Recording isn’t supported by this browser.");
+  const rec=new MediaRecorder(st,{mimeType:mt,videoBitsPerSecond:bits,audioBitsPerSecond:96e3}),ch=[];
+  rec.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
+  const stopped=new Promise(r=>rec.onstop=r),ended=new Promise(r=>v.onended=r);
+  let raf;const draw=()=>{g.drawImage(v,0,0,w,h);onp(Math.min(1,v.currentTime/dur));raf=requestAnimationFrame(draw)};
+  rec.start(1000);await v.play();draw();await ended;cancelAnimationFrame(raf);rec.stop();await stopped;
+  return new Blob(ch,{type:mt.split(";")[0]})
+ }finally{URL.revokeObjectURL(url);try{ac.close()}catch(e){}}}
+async function compressUi(f){const o=document.createElement("div");o.className="ov";o.style.zIndex=95;
+ o.innerHTML='<div class="card" style="width:min(100%,340px);padding:18px;text-align:center" role="alertdialog" aria-live="polite"><b>Optimising your video…</b><p class="mut" id="cpt" style="font-size:22px;margin:10px 0">0%</p><div class="mut" style="font-size:12px">This video is over 50 MB, so it is being shrunk to be shared. Keep this tab open and in front until it’s done.</div></div>';
+ document.body.appendChild(o);
+ try{const b=await compressVideo(f,p=>{$("cpt").textContent=Math.round(p*100)+"%"});return b&&b.size>0?b:null}
+ catch(e){toast("Couldn’t shrink this video: "+((e&&e.message)||"unknown error")+" It stays on this device.");return null}
+ finally{o.remove()}}
 
 setAv();render();show();
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;const lg=$("lg");if(lg&&!lg.classList.contains("hide"))return;
