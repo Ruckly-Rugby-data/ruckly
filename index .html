@@ -151,7 +151,7 @@ div[style*="gap:4px"]{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))!
 .kc .ctr .u{background:var(--mut);color:#07132f}
 .sheet .lab{margin:6px 0}
 .sheet .save:disabled{opacity:.4}
-#pc .card{width:min(100%,460px);max-height:92vh;overflow:auto;padding:16px}
+#postov .card{width:min(100%,460px);max-height:92vh;overflow:auto;padding:16px}
 #st{max-width:none!important}
 @media(min-width:900px){
 #st{padding:28px 56px 56px}
@@ -161,6 +161,22 @@ div[style*="gap:4px"]{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))!
 #st .card{margin:0;padding:18px}
 #st h3{font-size:17px;margin-bottom:10px}
 }
+
+/* ---- notifications + cloud posts ---- */
+.nav button{position:relative}
+.bdg{position:absolute;top:0;left:calc(50% + 6px);min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:#ff4d6a;color:#fff;font-size:10px!important;font-weight:800;display:grid;place-items:center;line-height:1}
+@media(min-width:900px){.bdg{position:static;margin-left:auto;font-size:11px!important}}
+.nrow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;margin-bottom:6px;background:var(--card);border:1px solid var(--bd)}
+.nrow.new{background:rgba(75,145,255,.14);border-color:#3b7df0}
+.nh{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin:12px 2px 6px}
+.tdel{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;border:0;font-size:14px;display:grid;place-items:center;z-index:2;padding:0}
+
+/* ---- strava-style sessions, heart badge ---- */
+.bdg2{position:absolute;top:-4px;right:-7px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:#ff4d6a;color:#fff;font-size:10px;font-weight:800;display:grid;place-items:center;line-height:1}
+.thumb{width:44px;height:44px;border-radius:8px;background:var(--bg);display:grid;place-items:center;text-align:center;font-size:11px;line-height:1.1;overflow:hidden;flex:0 0 auto}
+.thumb b{display:block;font-size:15px}
+.sess .pill{font-size:12px}
+@media(max-width:600px){#nsu{display:none}}
 </style>
 </head>
 <body>
@@ -220,8 +236,8 @@ document.getElementById("spi").src=LOGO_F</script>
 <section id="feed" class="hide"></section>
 <section id="search" class="hide"><div class="card hl"><input id="sq" placeholder="Search players by name or @username…" autocomplete="off" style="margin:0"></div><div id="sr"></div></section>
 <section id="hl" class="hide"><label class="drop" id="drop">＋ New post: choose a video, or drag &amp; drop it here<input type="file" id="fi" accept="video/*" hidden></label><div id="hlist"></div></section>
-<section id="acct" class="hide"></section><section id="prof" class="hide"></section>
-<nav class="nav"><button data-n="feed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Feed</button><button data-n="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button><button data-n="rec" class="on"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Record</button><button data-n="hl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/></svg>Highlights</button><button data-n="acct"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg>Account</button></nav>
+<section id="notif" class="hide"></section><section id="acct" class="hide"></section><section id="prof" class="hide"></section>
+<nav class="nav"><button data-n="feed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Feed</button><button data-n="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button><button data-n="rec" class="on"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Record</button><button data-n="hl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/></svg>Highlights</button><button data-n="notif" id="nnt"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Activity<span class="bdg nbd hide">0</span></button><button data-n="acct"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg>Account</button></nav>
 <div id="foot"><button class="save" id="save">Save session</button>
 <div style="text-align:center"><button class="link" id="reset">Reset current session</button></div></div>
 
@@ -241,7 +257,7 @@ document.getElementById("spi").src=LOGO_F</script>
   </div>
   <button class="save hide" id="sh-mc">Cancel move</button>
 </div>
-<div class="ov hide" id="pc"><div class="card">
+<div class="ov hide" id="postov"><div class="card">
   <div class="row"><button class="link" id="pcx">Cancel</button><b id="pch">New post</b><button class="link" id="pcs" style="font-weight:700;color:var(--ac)">Share</button></div>
   <video id="pcv" controls playsinline preload="metadata" style="width:100%;border-radius:10px;margin-top:10px;max-height:48vh;background:#000"></video>
   <textarea id="pcc" placeholder="Write a caption… #rugby #kicking" maxlength="300" style="margin-top:10px"></textarea>
@@ -365,9 +381,9 @@ function show(){closeSheet();setAv();const r=nv==="rec";
  $("meta").classList.toggle("hide",!r||cur===3);$("foot").classList.toggle("hide",!r||cur===3);
  document.querySelector(".tabs").classList.toggle("hide",!r);
  [1,2,3].forEach(i=>{$("v"+i).classList.toggle("hide",!r||cur!==i);$("t"+i).classList.toggle("on",cur===i)});
- ["feed","search","hl","acct","prof"].forEach(k=>$(k).classList.toggle("hide",nv!==k));
+ ["feed","search","hl","acct","prof","notif"].forEach(k=>$(k).classList.toggle("hide",nv!==k));
  document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.n===nv));
- if(r&&cur===3)hist();if(nv==="feed")feed();if(nv==="hl")hlv();if(nv==="acct")acct();if(nv==="prof")prof();if(nv==="search")srch()}
+ if(r&&cur===3)hist();if(nv==="feed")feed();if(nv==="hl")hlv();if(nv==="acct")acct();if(nv==="prof")prof();if(nv==="search")srch();if(nv==="notif")notifs()}
 function tab(n){cur=n;show()}
 $("t3").onclick=()=>tab(3);document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{nv=b.dataset.n;show()});$("t1").onclick=()=>tab(1);$("t2").onclick=()=>tab(2);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -397,30 +413,43 @@ function vdb(){return DBP||(DBP=new Promise((res,rej)=>{try{const q=indexedDB.op
 async function vtx(m,f){const d=await vdb();return new Promise((res,rej)=>{const t=d.transaction("v",m),r=f(t.objectStore("v"));t.oncomplete=()=>res(r.result);t.onerror=()=>rej(t.error)})}
 const vAll=()=>vtx("readonly",o=>o.getAll()),vPut=v=>vtx("readwrite",o=>o.put(v)),vDel=i=>vtx("readwrite",o=>o.delete(i));
 const vid=v=>`<video src="${URL.createObjectURL(v.blob)}" controls playsinline preload="metadata" style="width:100%;border-radius:10px;margin-top:8px;max-height:60vh;background:#000"></video>`;
-async function hlv(){let a=[];try{a=(await vAll()).sort((x,y)=>y.ts-x.ts)}catch(e){}
+let HC={};
+async function hlv(){let a=[],cl=[];try{a=await vAll()}catch(e){}
+ if(sb&&user){try{const r=await sb.from("posts").select("id,caption,media_path,created_at").eq("user_id",user.id).eq("kind","video").order("created_at",{ascending:false});if(!r.error)cl=r.data||[]}catch(e){}}
+ const have=new Set(a.map(v=>v.postId).filter(Boolean).map(String));HC={};
+ const items=[...a.map(v=>({t:v.ts,v})),...cl.filter(p=>!have.has(String(p.id))).map(p=>{HC[p.id]=p;return{t:new Date(p.created_at).getTime(),c:p}})].sort((x,y)=>y.t-x.t);
  const me=S.me,who=me.handle?"@"+esc(me.handle):esc(me.name||"You");
- $("hlist").innerHTML=a.length?a.map(v=>`<div class="card hl" style="padding:12px"><div class="row" style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="ring"><div class="ini" style="width:34px;height:34px;font-size:12px;overflow:hidden">${me.photo?`<img src="${me.photo}" alt="" style="width:100%;height:100%;object-fit:cover">`:ini2(me.name||"You")}</div></div><div><b>${who}</b><div class="mut" style="font-size:12px">${fd(v.ts)}</div></div></div><span class="pill">${v.pub?"🌐 Public":"🔒 Private"}</span></div>${vid(v)}${v.cap?`<div style="margin-top:8px">${cap(v.cap)}</div>`:""}<div class="acts" style="margin-top:10px"><button data-ve="${v.id}">Edit post</button><button class="del" data-vd="${v.id}">Delete</button></div></div>`).join(""):'<div class="card mut">No posts yet. Tap “New post” above to share your first highlight.</div>'}
+ const hd=(t,pub)=>`<div class="row" style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="ring"><div class="ini" style="width:34px;height:34px;font-size:12px;overflow:hidden">${me.photo?`<img src="${me.photo}" alt="" style="width:100%;height:100%;object-fit:cover">`:ini2(me.name||"You")}</div></div><div><b>${who}</b><div class="mut" style="font-size:12px">${fd(t)}</div></div></div><span class="pill">${pub?"🌐 Public":"🔒 Private"}</span></div>`;
+ $("hlist").innerHTML=items.length?items.map(it=>{
+  if(it.v){const v=it.v;return`<div class="card hl" style="padding:12px">${hd(v.ts,v.pub)}${vid(v)}${v.cap?`<div style="margin-top:8px">${cap(v.cap)}</div>`:""}<div class="acts" style="margin-top:10px"><button data-ve="${v.id}">Edit post</button><button class="del" data-vd="${v.id}">Delete</button></div></div>`}
+  const p=it.c;return`<div class="card hl" style="padding:12px">${hd(p.created_at,true)}<video src="${esc(pubUrl(p.media_path))}" controls playsinline preload="metadata" style="width:100%;border-radius:10px;margin-top:8px;max-height:60vh;background:#000"></video>${p.caption?`<div style="margin-top:8px">${cap(p.caption)}</div>`:""}<div class="acts" style="margin-top:10px"><button data-ce="${p.id}">Edit caption</button><button class="del" data-cdl="${p.id}">Delete</button></div></div>`}).join(""):'<div class="card mut">No posts yet. Tap “New post” above to share your first highlight.</div>'}
 let PC=null;
-function pcUi(){if(!PC)return;const big=PC.file.size>52428800;$("pcn").textContent=$("pcc").value.length+"/300";
- document.querySelectorAll("#pc [data-pa]").forEach(b=>b.classList.toggle("on",(b.dataset.pa==="1")===PC.pub));
- $("pcm").textContent=!PC.pub?"Only you can see this post.":big?"This video is over 50 MB, so it will stay on this device.":user?"Visible in the feed and on your profile.":"Sign in to share it online. Without an account it stays on this device."}
+function pcUi(){if(!PC)return;const big=PC.file&&PC.file.size>52428800;$("pcn").textContent=$("pcc").value.length+"/300";
+ document.querySelectorAll("#postov [data-pa]").forEach(b=>b.classList.toggle("on",(b.dataset.pa==="1")===PC.pub));
+ $("pcm").textContent=PC.cloud?"This post is online. Only the caption can be changed here.":!PC.pub?"Only you can see this post.":big?"This video is over 50 MB, so it will stay on this device.":user?"Visible in the feed and on your profile.":"Sign in to share it online. Without an account it stays on this device."}
 function openPost(f,v){
  if(!v&&(!f||!f.type.startsWith("video/"))){toast("Please choose a video file.");return}
- PC={file:v?v.blob:f,id:v?v.id:null,pub:v?!!v.pub:!!user};
- PC.url=URL.createObjectURL(PC.file);$("pcv").src=PC.url;$("pcc").value=v?(v.cap||""):"";
+ const cl=!!(v&&v.cloud);
+ PC={file:cl?null:(v?v.blob:f),id:v?v.id:null,cloud:cl,pub:cl?true:(v?!!v.pub:!!user)};
+ PC.url=cl?v.url:URL.createObjectURL(PC.file);$("pcv").src=PC.url;$("pcc").value=v?(v.cap||""):"";
+ document.querySelector("#postov .segs").classList.toggle("hide",cl);
  $("pch").textContent=v?"Edit post":"New post";$("pcg").textContent=v?"Save":"Share";$("pcs").textContent=v?"Save":"Share";
- $("pc").classList.remove("hide");pcUi()}
-function closePost(){if(!PC)return;const p=$("pcv");p.pause();p.removeAttribute("src");p.load();URL.revokeObjectURL(PC.url);PC=null;$("pc").classList.add("hide")}
-async function sharePost(){if(!PC)return;const cp=$("pcc").value.trim();let pub=PC.pub;if(PC.file.size>52428800)pub=false;
+ $("postov").classList.remove("hide");pcUi()}
+function closePost(){if(!PC)return;const p=$("pcv");p.pause();p.removeAttribute("src");p.load();if(!PC.cloud)URL.revokeObjectURL(PC.url);PC=null;$("postov").classList.add("hide")}
+async function sharePost(){if(!PC)return;const cp=$("pcc").value.trim();
+ if(PC.cloud){const r=await sb.from("posts").update({caption:cp}).eq("id",PC.id).select("id");if(r.error||!(r.data||[]).length){toast("Couldn’t save the caption.");return}closePost();hlv();toast("Caption updated");return}
+ let pub=PC.pub;if(PC.file.size>52428800)pub=false;
  try{if(PC.id){const v=(await vAll()).find(x=>x.id===PC.id);if(v){v.cap=cp;v.pub=pub;await vPut(v)}}
   else await vPut({id:Date.now()*1000+Math.floor(Math.random()*1000),cap:cp,blob:PC.file,pub,ts:Date.now()})}
  catch(e){alert("Couldn’t save this video.");return}
  const edit=!!PC.id;closePost();hlv();if(pub||edit)schedSync();else toast("Post saved on this device")}
 $("pcx").onclick=closePost;$("pcs").onclick=sharePost;$("pcg").onclick=sharePost;$("pcc").oninput=pcUi;
-document.querySelectorAll("#pc [data-pa]").forEach(b=>b.onclick=()=>{if(PC){PC.pub=b.dataset.pa==="1";pcUi()}});
-$("hlist").addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;
- if(b.dataset.ve){const v=(await vAll()).find(x=>x.id===+b.dataset.ve);if(v)openPost(null,v);return}
- if(b.dataset.vd){const id=+b.dataset.vd;ask("Delete this post?","The video and its caption will be permanently deleted.","Delete",async()=>{try{const v0=(await vAll()).find(x=>x.id===id);if(v0&&v0.postId)await unpost(v0.postId,v0.path);await vDel(id)}catch(x){}hlv();schedSync()})}});
+document.querySelectorAll("#postov [data-pa]").forEach(b=>b.onclick=()=>{if(PC){PC.pub=b.dataset.pa==="1";pcUi()}});
+$("hlist").addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+ if(d.ve){const v=(await vAll()).find(x=>x.id===+d.ve);if(v)openPost(null,v);return}
+ if(d.ce){const p=HC[d.ce];if(p)openPost(null,{cloud:true,id:p.id,cap:p.caption||"",url:pubUrl(p.media_path)});return}
+ if(d.cdl){const id=d.cdl,p=HC[id];ask("Delete this post?","The video and its caption will be permanently deleted.","Delete",async()=>{if(await delPost(id,p&&p.media_path)){toast("Post deleted");hlv()}});return}
+ if(d.vd){const id=+d.vd;ask("Delete this post?","The video and its caption will be permanently deleted.","Delete",async()=>{try{const v0=(await vAll()).find(x=>x.id===id);if(v0&&v0.postId&&sb&&user){if(!(await delPost(v0.postId,v0.path)))return}await vDel(id)}catch(x){}hlv()})}});
 const dz=$("drop");$("fi").onchange=e=>{const f=e.target.files[0];e.target.value="";if(f)openPost(f)};
 ["dragover","dragenter"].forEach(n=>dz.addEventListener(n,e=>{e.preventDefault();dz.classList.add("over")}));
 ["dragleave","drop"].forEach(n=>dz.addEventListener(n,e=>{e.preventDefault();dz.classList.remove("over")}));
@@ -449,12 +478,19 @@ function pfH(o){return`<div class="card hl" style="padding:16px"><div style="dis
 function openProf(h){if(nv!=="prof")pback=nv;if(h==="me"){nv="acct"}else{pv=h;nv="prof"}pt="stats";pf="all";show();window.scrollTo(0,0)}
 const RL={player:"Player",coach:"Coach",fan:"Rugby fan"};
 async function acct(){let vs=[];try{vs=(await vAll()).sort((a,b)=>b.ts-a.ts)}catch(e){}
+ let cp=null,fc=null;
+ if(sb&&user){try{const[a,b,c]=await Promise.all([sb.from("posts").select("id,kind,caption,media_path,session,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(100),sb.from("follows").select("follower_id",{count:"exact",head:true}).eq("followee_id",user.id).eq("status","accepted"),sb.from("follows").select("followee_id",{count:"exact",head:true}).eq("follower_id",user.id).eq("status","accepted")]);if(!a.error)cp=a.data||[];fc={fr:b.error?"–":(b.count||0),fg:c.error?"–":(c.count||0)}}catch(e){}}
+ const tw=(src,del,lock)=>`<div style="position:relative;aspect-ratio:1;overflow:hidden;border-radius:4px;background:#000"><video src="${src}" controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>${lock?'<span style="position:absolute;top:4px;left:6px">🔒</span>':""}<button class="tdel" ${del} aria-label="Delete post">✕</button></div>`;
+ const cl2=cp||[],posted=new Set(cl2.map(p=>String(p.id)));
+ const tl=[...cl2.filter(p=>p.kind==="video").map(p=>tw(esc(pubUrl(p.media_path)),`data-pdel="${p.id}" data-pp="${esc(p.media_path||"")}"`,false)),
+  ...vs.filter(v=>!(v.postId&&posted.has(String(v.postId)))).map(v=>tw(URL.createObjectURL(v.blob),`data-vdel="${v.id}"`,!v.pub)),
+  ...cl2.filter(p=>p.kind==="session").map(p=>{const q=p.session||{};return`<div class="card" style="grid-column:1/4;margin:0;padding:10px 12px;display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:0"><b>${esc(q.name||"Session")}</b> <span class="pill">Session</span><div class="mut" style="font-size:12px">${+q.pts||0} pts · ${fd(q.date||p.created_at)}</div></div><button class="fb on" data-pdel="${p.id}" style="margin:0;padding:5px 12px">Delete</button></div>`})];
  const m=S.me,ss=S.sessions,mk=t=>agg(ss.filter(x=>t==="all"||x.type===t)),st={all:mk("all"),match:mk("match"),training:mk("training")};
  const pen='<svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/></svg>',bin='<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>';
- const list='<div class="card" style="padding:14px"><div class="row" style="margin-bottom:4px"><b>Sessions</b><button class="ib" data-add="1" aria-label="New session" style="color:var(--tx)"><svg viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M12 4v16M4 12h16"/></svg></button></div>'+(ss.filter(x=>pf==="all"||x.type===pf).map(x=>'<div class="srow"><b>'+esc(x.name)+'</b><span class="mut">'+fd(x.date)+'</span><span class="mut">'+(x.min?esc(x.min)+" min":"– min")+'</span><button class="ib" data-vs="'+x.id+'">'+(x.vis==="public"?"🌐":"🔒")+'</button><button class="ib" data-ed="'+x.id+'">'+pen+'</button><button class="ib" data-rm="'+x.id+'">'+bin+'</button></div>').join("")||'<div class="mut" style="padding:8px 0">No sessions yet.</div>')+'</div>';
+ const list=weekCard(ss)+'<div class="card" style="padding:14px"><div class="row" style="margin-bottom:4px"><b>Sessions</b><button class="ib" data-add="1" aria-label="New session" style="color:var(--tx)"><svg viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M12 4v16M4 12h16"/></svg></button></div>'+(ss.filter(x=>pf==="all"||x.type===pf).map(x=>'<div class="srow"><b>'+esc(x.name)+'</b><span class="mut">'+fd(x.date)+'</span><span class="mut">'+(x.min?esc(x.min)+" min":"– min")+'</span><button class="ib" data-vs="'+x.id+'">'+(x.vis==="public"?"🌐":"🔒")+'</button><button class="ib" data-ed="'+x.id+'">'+pen+'</button><button class="ib" data-rm="'+x.id+'">'+bin+'</button></div>').join("")||'<div class="mut" style="padding:8px 0">No sessions yet.</div>')+'</div>';
  const inp='width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:#0a1839;color:var(--tx);font:inherit';
  const ed=pe?`<div class="card hl"><label class="ph"><div class="av2">${m.photo?'<img src="'+m.photo+'" alt="">':""}</div>Change photo<input type="file" id="ap" accept="image/*" hidden></label><label class="lab" for="an">Name</label><input id="an" value="${esc(m.name)}" maxlength="40"><label class="lab" for="ah">Username</label><input id="ah" value="${esc(m.handle)}" maxlength="20"><label class="lab" for="ar">Role</label><select id="ar" style="${inp}">${[["player","Player"],["coach","Coach"],["fan","Rugby fan"]].map(r=>`<option value="${r[0]}"${m.role===r[0]?" selected":""}>${r[1]}</option>`).join("")}</select><label class="lab" for="ab">Bio</label><textarea id="ab" maxlength="150" placeholder="Position, club, goals… #rugby">${esc(m.bio)}</textarea><label class="lab">Account privacy</label><div class="segs" style="grid-template-columns:1fr 1fr;margin:0"><button data-ap="0" class="${m.priv?"":"on"}">🌐 Public</button><button data-ap="1" class="${m.priv?"on":""}">🔒 Private</button></div><div class="mut" style="font-size:12px;margin-top:4px">Private: only approved followers see your stats and highlights.</div>${user?`<div class="mut" style="margin-top:8px">${esc(user.email||"")}</div><button class="link" data-lo="1">Log out</button>`:""}</div>`:"";
- $("acct").innerHTML=stBtn()+pfH({name:m.name||"Your name",handle:m.handle||"username",tag:({player:"Player",coach:"Coach",fan:"Rugby fan"}[m.role]||"Player")+(m.pos?" · "+m.pos:""),bio:m.bio||"",photo:m.photo,posts:vs.filter(v=>v.pub).length+S.sessions.filter(x=>x.vis==="public").length,fr:0,fg:(S.follow||[]).length,st,list,extra:ed,priv:m.priv,btn:`<button class="fb on" data-pe="1">${pe?"Done":"Edit profile"}</button>`,tiles:vs.map(v=>`<div style="position:relative;aspect-ratio:1;overflow:hidden;border-radius:4px;background:#000"><video src="${URL.createObjectURL(v.blob)}" controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>${v.pub?"":'<span style="position:absolute;top:4px;right:6px">🔒</span>'}</div>`)});
+ $("acct").innerHTML=stBtn()+pfH({name:m.name||"Your name",handle:m.handle||"username",tag:({player:"Player",coach:"Coach",fan:"Rugby fan"}[m.role]||"Player")+(m.pos?" · "+m.pos:""),bio:m.bio||"",photo:m.photo,posts:cp?cp.length:vs.filter(v=>v.pub).length+S.sessions.filter(x=>x.vis==="public").length,fr:fc?fc.fr:"–",fg:fc?fc.fg:(S.follow||[]).length,st,list,extra:ed,priv:m.priv,btn:`<button class="fb on" data-pe="1">${pe?"Done":"Edit profile"}</button>`,tiles:tl});
  setAv();if(!pe)return;
  [["an","name"],["ah","handle"],["ab","bio"]].forEach(([i,k])=>{$(i).oninput=()=>{S.me[k]=k==="handle"?$(i).value.replace(/[^\w.]/g,""):$(i).value;save();setAv();push()}});
  $("ar").onchange=e=>{S.me.role=e.target.value;save();applyRole();push()};
@@ -464,6 +500,8 @@ document.body.addEventListener("click",e=>{const b=e.target.closest("button");if
  else if(d.f){const f=S.follow=S.follow||[],i=f.indexOf(d.f);i<0?f.push(d.f):f.splice(i,1);save();rr()}});
 (()=>{let el=null,sx=0,sl=0;document.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse")return;el=e.target.closest(".chips,.strip");if(el){sx=e.clientX;sl=el.scrollLeft}});window.addEventListener("pointermove",e=>{if(el)el.scrollLeft=sl-(e.clientX-sx)});window.addEventListener("pointerup",()=>el=null)})();
 $("acct").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.pdel){const id=b.dataset.pdel,path=b.dataset.pp||"";ask("Delete this post?","It will be removed from your account and from the feed for everyone. This can’t be undone.","Delete",async()=>{if(await delPost(id,path)){toast("Post deleted");acct()}});return}
+ if(b.dataset.vdel){const id=+b.dataset.vdel;ask("Delete this video?","It will be permanently deleted from this device.","Delete",async()=>{try{const v=(await vAll()).find(x=>x.id===id);if(v&&v.postId&&sb&&user){if(!(await delPost(v.postId,v.path)))return}await vDel(id)}catch(e){}acct()});return}
  if(b.dataset.vs){const x=S.sessions.find(y=>y.id==b.dataset.vs);if(x){x.vis=x.vis==="public"?"private":"public";save();acct();schedSync()}return}
  if(b.dataset.add){nv="rec";cur=1;show();return}
  if(b.dataset.rm){delAsk(b.dataset.rm,acct);return}
@@ -510,17 +548,25 @@ $("obs").onclick=()=>{S.obSkip=true;save();$("ob").classList.add("hide");applyRo
 /* ===== ONLINE ACCOUNTS: paste your Supabase values here ===== */
 const SB_URL="https://mskrrxlcyujolnkeeqxf.supabase.co",SB_KEY="sb_publishable_Y-6LqjajluQ56z1e0MosKQ_jHjPMV5p";
 let sb=null,user=null,aum="s";
-function loadSb(){return new Promise(r=>{if(!SB_URL||!SB_KEY)return r();const c=document.createElement("script");c.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js";c.onload=()=>{sb=supabase.createClient(SB_URL,SB_KEY);r()};c.onerror=()=>r();document.head.appendChild(c)})}
+function loadSb(){return new Promise(r=>{if(!SB_URL||!SB_KEY)return r();const c=document.createElement("script");c.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js";c.onload=()=>{sb=supabase.createClient(SB_URL,SB_KEY);sb.auth.onAuthStateChange(ev=>{if(ev==="PASSWORD_RECOVERY")setTimeout(pwNew,700)});r()};c.onerror=()=>r();document.head.appendChild(c)})}
 function auUi(){$("aus").classList.toggle("on",aum==="s");$("aul").classList.toggle("on",aum==="l");$("aukr").classList.toggle("hide",aum==="l");$("aug").textContent=aum==="s"?"Create account":"Log in";$("aud").classList.remove("hide");$("auw").autocomplete=aum==="s"?"new-password":"current-password"}
 async function postAuth(){if(await mfaNeeded())await mfaAsk();$("au").classList.add("hide");applyRole();pushProfile();if(!S.me.role&&!S.obSkip){$("obn").value=S.me.name||"";$("obh").value=S.me.handle||"";$("ob").classList.remove("hide")}show()}
 async function logout(){if(sb)await sb.auth.signOut();S.me={name:"",handle:"",bio:""};S.guest=false;S.obSkip=false;save();location.reload()}
+const APP_URL=location.href.split(/[?#]/)[0];
+const AUH=(()=>{const q=new URLSearchParams((location.hash||"").replace(/^#/,"")+"&"+(location.search||"").replace(/^\?/,""));return{type:q.get("type")||"",err:q.get("error_description")||"",code:q.get("error_code")||""}})();
+function pwNew(){if($("pwm"))return;const o=document.createElement("div");o.className="ov";o.id="pwm";
+ o.innerHTML=`<div class="card" style="width:min(100%,360px);padding:18px"><b style="font-size:17px">Choose a new password</b><input id="pwn" type="password" autocomplete="new-password" placeholder="New password (8+ characters)" style="margin-top:10px"><div class="mut" id="pwe" style="min-height:18px;font-size:13px;margin:6px 0"></div><div class="acts"><button id="pwc">Cancel</button><button class="save" id="pws" style="margin:0">Save</button></div></div>`;
+ document.body.appendChild(o);o.querySelector("#pwc").onclick=()=>o.remove();
+ o.querySelector("#pws").onclick=async()=>{const p=o.querySelector("#pwn").value;if(p.length<8){o.querySelector("#pwe").textContent="Use 8 characters or more.";return}const{error}=await sb.auth.updateUser({password:p});if(error){o.querySelector("#pwe").textContent=error.message;return}o.remove();toast("Password updated ✓")}}
 async function initAuth(){await loadSb();if(sb){const{data}=await sb.auth.getSession();user=data.session&&data.session.user;if(user){const md=user.user_metadata||{};if(md.role&&!S.me.role)Object.assign(S.me,md);save()}}
- if(!user&&!S.guest){auUi();$("au").classList.remove("hide");return}postAuth()}
+ if(AUH.type||AUH.err){try{history.replaceState(null,"",APP_URL)}catch(e){}}
+ if(user&&(AUH.type==="signup"||AUH.type==="email"||AUH.type==="invite"))setTimeout(()=>toast("Email confirmed ✓ Welcome to Ruckly!"),900);
+ if(!user&&!S.guest){auUi();$("au").classList.remove("hide");if(AUH.err)$("aum").textContent=AUH.code==="otp_expired"?"This confirmation link has expired. Log in, or create your account again to get a new email.":AUH.err;return}postAuth()}
 $("aus").onclick=()=>{aum="s";auUi()};$("aul").onclick=()=>{aum="l";auUi()};$("aud").onclick=()=>{S.guest=true;save();postAuth()};
 $("aug").onclick=async()=>{const m=$("aum");if(!sb){m.textContent="Online accounts aren’t connected yet. You can continue without an account.";return}
  const e=$("aue").value.trim(),p=$("auw").value;if(aum==="s"&&!$("auk").checked){m.textContent="Please confirm you are 15 or older and accept the Terms and Privacy Policy.";return}if(!e||p.length<8){m.textContent="Enter your email and a password of 8+ characters.";return}
- m.textContent="…";const r=aum==="s"?await sb.auth.signUp({email:e,password:p,options:{data:{terms_accepted_at:new Date().toISOString(),age_confirmed:true}}}):await sb.auth.signInWithPassword({email:e,password:p});
- if(r.error){m.textContent=r.error.message;return}if(!r.data.session){m.textContent="Check your inbox to confirm your email, then log in.";return}
+ m.textContent="…";const r=aum==="s"?await sb.auth.signUp({email:e,password:p,options:{emailRedirectTo:APP_URL,data:{terms_accepted_at:new Date().toISOString(),age_confirmed:true}}}):await sb.auth.signInWithPassword({email:e,password:p});
+ if(r.error){m.textContent=r.error.message;return}if(!r.data.session){m.textContent="We sent you a confirmation email. Click the link in it and you’ll come straight back here.";return}
  user=r.data.user;S.guest=false;const md=user.user_metadata||{};if(md.role)Object.assign(S.me,md);save();postAuth()};
 initAuth();
 /* ===== SETTINGS, LEGAL, SIGN-UP TAB ===== */
@@ -575,7 +621,7 @@ stEl.addEventListener("click",async e=>{const b=e.target.closest("button");if(!b
  if(d.o){const[k,v]=d.o.split(":");S.me.set=Object.assign(set(),{[k==="cw"?"comment_who":"stats_who"]:v});save();pushSet();stRe();return}
  if(d.ub){await sb.from("blocks").delete().eq("blocked_id",d.ub);blRender();return}
  if(d.sx==="pw"){const v=$("stpw").value;if(v.length<8)return stm("Password must be 8+ characters.");const{error}=await sb.auth.updateUser({password:v});$("stpw").value="";return stm(error?error.message:"Password updated.")}
- if(d.sx==="rs"){const{error}=await sb.auth.resetPasswordForEmail(user.email,{redirectTo:location.origin+location.pathname});return stm(error?error.message:"Reset link sent. Check your inbox.")}
+ if(d.sx==="rs"){const{error}=await sb.auth.resetPasswordForEmail(user.email,{redirectTo:APP_URL});return stm(error?error.message:"Reset link sent. Check your inbox.")}
  if(d.sx==="lga"){await sb.auth.signOut({scope:"global"});logout();return}
  if(d.sx==="dl"){await exportData();return stm("Your data was downloaded.")}
  if(d.sx==="wipe"){ask("Delete data on this device?","Sessions, videos and settings stored in this browser will be erased. Your online account is not deleted.","Delete",()=>{localStorage.clear();if(indexedDB.databases)indexedDB.databases().then(l=>l.forEach(x=>indexedDB.deleteDatabase(x.name)));setTimeout(()=>location.reload(),400)});return}
@@ -597,12 +643,20 @@ const pubUrl=p=>sb.storage.from("highlights").getPublicUrl(p).data.publicUrl;
 function toast(t){const d=document.createElement("div");d.textContent=t;d.setAttribute("role","status");d.style.cssText="position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#10234e;border:1px solid #294a83;color:#edf4ff;padding:10px 16px;border-radius:12px;z-index:90;font-size:14px;max-width:90%;text-align:center";document.body.appendChild(d);setTimeout(()=>d.remove(),3200)}
 const cj=o=>JSON.stringify(Object.keys(o).sort().map(k=>[k,o[k]]));
 async function unpost(id,path){if(!sb||!user)return;try{await sb.from("posts").delete().eq("id",id);if(path)await sb.storage.from("highlights").remove([path])}catch(e){}}
+async function delPost(id,path){if(!sb||!user)return false;
+ const r=await sb.from("posts").delete().eq("id",id).select("id");
+ if(r.error){toast("Couldn’t delete: "+r.error.message);return false}
+ if(!(r.data||[]).length){toast("Couldn’t delete this post (not allowed, or already deleted).");return false}
+ if(path){try{await sb.storage.from("highlights").remove([path])}catch(e){}}
+ try{for(const v of await vAll())if(v.postId&&String(v.postId)===String(id))await vDel(v.id)}catch(e){}
+ (S.sessions||[]).forEach(x=>{if(x.postId&&String(x.postId)===String(id)){x.postId=null;x.vis="private"}});save();
+ FD.pos=FD.pos.filter(p=>String(p.id)!==String(id));return true}
 let syT,syBusy=false;
 function schedSync(){if(!sb||!user){if(!window._gt){window._gt=1;toast("Posts are only shared online with an account.")}return}clearTimeout(syT);syT=setTimeout(syncAll,1200)}
 async function syncAll(){if(!sb||!user||syBusy)return;syBusy=true;try{
- const mine=(await sb.from("posts").select("id,kind,caption,media_path,session").eq("user_id",user.id)).data||[],by=Object.fromEntries(mine.map(p=>[p.id,p]));
+ const mr=await sb.from("posts").select("id,kind,caption,media_path,session").eq("user_id",user.id);if(mr.error){syBusy=false;return}const mine=mr.data||[],by=Object.fromEntries(mine.map(p=>[p.id,p]));
  let vs=[];try{vs=await vAll()}catch(e){}
- for(const v of vs){const p=v.postId&&by[v.postId];
+ for(const v of vs){const p=v.postId&&by[v.postId];if(v.postId&&!p){await vDel(v.id);continue}
   if(v.pub&&!p){if(v.blob.size>52428800){toast("A video is over 50 MB and wasn’t posted.");v.pub=false;await vPut(v);continue}
    toast("Posting video…");const ext=((v.blob.type||"video/mp4").split("/")[1]||"mp4").replace("quicktime","mov"),path=`${user.id}/${v.id}-${Date.now()}.${ext}`;
    const up=await sb.storage.from("highlights").upload(path,v.blob,{contentType:v.blob.type||"video/mp4"});
@@ -611,16 +665,16 @@ async function syncAll(){if(!sb||!user||syBusy)return;syBusy=true;try{
    if(ins.error){toast("Couldn’t post: "+ins.error.message);continue}v.postId=ins.data.id;v.path=path;await vPut(v);toast("Video posted ✓")}
   else if(!v.pub&&p){await unpost(p.id,p.media_path);v.postId=null;v.path=null;await vPut(v)}
   else if(v.pub&&p&&(p.caption||"")!==(v.cap||"")){await sb.from("posts").update({caption:v.cap||""}).eq("id",p.id)}}
- for(const x of S.sessions){const p=x.postId&&by[x.postId],pub=x.vis==="public",j=()=>({...agg([x]),name:x.name,type:x.type,date:x.date});
-  if(pub&&!p){const ins=await sb.from("posts").insert({user_id:user.id,kind:"session",caption:x.notes||"",session:j()}).select("id").single();if(!ins.error){x.postId=ins.data.id;save()}}
+ for(const x of S.sessions){const p=x.postId&&by[x.postId],pub=x.vis==="public",j=()=>({...agg([x]),name:x.name,type:x.type,date:x.date,min:+x.min||0,kk:(x.kicks||[]).map(k=>[k.x,k.y,{made:"m",left:"l",right:"r",short:"s"}[rk(k)]||"l",kt(k)==="drop"?"d":kt(k)==="conv"?"c":"p"])});if(x.postId&&!p){x.postId=null;x.vis="private";save();continue}
+  if(pub&&!p){const ins=await sb.from("posts").insert({user_id:user.id,kind:"session",caption:x.notes||"",session:j()}).select("id").single();if(!ins.error){x.postId=ins.data.id;save();toast("Session shared to your feed ✓")}else toast("Couldn’t share the session: "+ins.error.message)}
   else if(!pub&&p){await sb.from("posts").delete().eq("id",p.id);x.postId=null;save()}
   else if(pub&&p){const q=j();if(cj(q)!==cj(p.session||{})||(p.caption||"")!==(x.notes||""))await sb.from("posts").update({session:q,caption:x.notes||""}).eq("id",p.id)}}
  }catch(e){}syBusy=false}
 async function loadFeed(){try{await syncAll();const me=user.id,fp=S.fpos||"";
  const[f,r,bl]=await Promise.all([sb.from("follows").select("followee_id,status").eq("follower_id",me),sb.from("follows").select("follower_id").eq("followee_id",me).eq("status","pending"),sb.from("blocks").select("blocked_id")]);
- FD.fol={};(f.data||[]).forEach(x=>FD.fol[x.followee_id]=x.status);FD.blocked=(bl.data||[]).map(x=>x.blocked_id);FD.req=(r.data||[]).map(x=>x.follower_id);
+ if(f.error||bl.error)throw (f.error||bl.error);FD.fol={};(f.data||[]).forEach(x=>FD.fol[x.followee_id]=x.status);FD.blocked=(bl.data||[]).map(x=>x.blocked_id);FD.req=(r.data||[]).map(x=>x.follower_id);
  const ids=[me,...Object.keys(FD.fol).filter(k=>FD.fol[k]==="accepted")];
- FD.pos=(await sb.from("posts").select("id,user_id,kind,caption,media_path,session,created_at").in("user_id",ids).order("created_at",{ascending:false}).limit(40)).data||[];
+ const pq=await sb.from("posts").select("id,user_id,kind,caption,media_path,session,created_at").in("user_id",ids).order("created_at",{ascending:false}).limit(40);if(pq.error)throw pq.error;FD.pos=pq.data||[];
  let q=sb.from("profiles").select("id,name,handle,role,pos,private").neq("id",me).neq("handle","").neq("settings->>discoverable","false").order("created_at",{ascending:false}).limit(30);if(fp)q=q.eq("pos",fp);
  const sg=(await q).data||[];FD.sug=sg.filter(x=>!FD.fol[x.id]&&!FD.blocked.includes(x.id)).sort((a,b)=>(b.pos===S.me.pos)-(a.pos===S.me.pos)).slice(0,10);
  sg.forEach(x=>FD.pr[x.id]=x);
@@ -629,18 +683,18 @@ async function loadFeed(){try{await syncAll();const me=user.id,fp=S.fpos||"";
  const pids=FD.pos.map(x=>x.id);FD.lk={};FD.cc={};
  if(pids.length){((await sb.from("likes").select("post_id,user_id").in("post_id",pids)).data||[]).forEach(x=>{const l=FD.lk[x.post_id]=FD.lk[x.post_id]||{n:0,me:false};l.n++;if(x.user_id===me)l.me=true});
   ((await sb.from("comments").select("post_id").in("post_id",pids)).data||[]).forEach(x=>FD.cc[x.post_id]=(FD.cc[x.post_id]||0)+1)}
- FD.err=""}catch(e){FD.err="Couldn’t load the feed. Check your connection."}}
+ FD.err=""}catch(e){FD.err="Couldn’t load the feed"+(e&&e.message?": "+e.message:". Check your connection.")}}
 async function feed(){if(!sb||!user){$("feed").innerHTML=fHead()+`<div class="card" style="text-align:center;padding:20px"><b>Join the Ruckly community</b><p class="mut">Create an account to follow players, post your highlights and see theirs.</p><button class="fb on" data-su="1">Create account / Log in</button></div>`;return}
  renderFeed();await loadFeed();renderFeed()}
-const fHead=()=>`<div style="text-align:center;margin:0 0 12px"><img src="${LOGO_H}" alt="Ruckly" style="height:34px;max-width:80%"></div>`;
+const fHead=()=>`<div style="text-align:center;margin:0 0 12px;position:relative"><img src="${LOGO_H}" alt="Ruckly" style="height:34px;max-width:80%">${user?`<button class="ib" data-gn="1" aria-label="Activity" style="position:absolute;left:2px;top:2px;color:var(--tx)"><svg viewBox="0 0 24 24" style="width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="bdg2 nbd${NT.unread?"":" hide"}">${NT.unread>99?"99+":NT.unread}</span></button><button class="ib" data-rf="1" aria-label="Refresh" style="position:absolute;right:0;top:2px;color:var(--tx);font-size:20px">⟳</button>`:""}</div>`;
 function renderFeed(){if(nv!=="feed")return;const fp=S.fpos||"",me=user.id;
  const pr=id=>id===me?{id:me,name:S.me.name||"You",handle:S.me.handle||"",pos:S.me.pos}:(FD.pr[id]||{name:"Player",handle:"",pos:""});
  const heart=on=>`<svg viewBox="0 0 24 24" style="width:26px;height:26px;fill:${on?"#ff5c7a":"none"};stroke:${on?"#ff5c7a":"currentColor"};stroke-width:1.8"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>`;
  const fb=(u)=>{const s=FD.fol[u.id];return`<button class="fb ${s?"on":""}" data-fo="${u.id}" data-pv="${u.private?1:0}" style="margin:0;padding:5px 12px">${s==="accepted"?"✓ Following":s==="pending"?"Requested":u.private?"＋ Request":"＋ Follow"}</button>`};
  const card=p=>{const u=pr(p.user_id),mine=p.user_id===me,l=FD.lk[p.id]||{n:0,me:false},n=FD.cc[p.id]||0,s=p.session||{};
-  const media=p.kind==="video"?`<video src="${esc(pubUrl(p.media_path))}" controls playsinline preload="metadata" style="width:100%;border-radius:10px;max-height:60vh;background:#000"></video>`:`<div class="media"><div><b>${+s.pts||0}</b><span class="mut">points · ${esc(s.name||"")}</span></div></div><div style="margin-top:8px">${stH(s)}</div>`;
+  const media=p.kind==="video"?`<video src="${esc(pubUrl(p.media_path))}" controls playsinline preload="metadata" style="width:100%;border-radius:10px;max-height:60vh;background:#000"></video>`:sessCard(s);
   const cm=FD.open[p.id]?`<div style="margin-top:8px">${(FD.cm[p.id]||[]).map(c=>{const a=pr(c.user_id);return`<div class="sr2" style="padding:6px 0"><span><b>@${esc(a.handle||"player")}</b> ${cap(c.body)}</span>${c.user_id===me||mine?`<button class="link" data-cd="${p.id}:${c.id}" aria-label="Delete comment">✕</button>`:""}</div>`}).join("")}<div style="display:flex;gap:6px;margin-top:6px"><input data-ci="${p.id}" placeholder="Add a comment…" maxlength="300" style="margin:0"><button class="fb on" data-cs="${p.id}" style="margin:0">Post</button></div></div>`:"";
-  return`<div class="card hl"><div class="row" style="margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><button class="ring av" data-u="${mine?"me":esc(u.handle)}"><div class="ini" style="width:34px;height:34px;font-size:12px">${ini2(u.name)}</div></button><div><b>${esc(u.name)}</b><div class="mut" style="font-size:12px">@${esc(u.handle)}${u.pos?" · "+esc(u.pos):""} · ${fd(p.created_at)}</div></div></div>${mine?"":`<button class="link" data-rp="p:${p.id}:${p.user_id}">Report</button>`}</div>${media}<div class="act" style="margin-top:8px"><button data-lk="${p.id}" aria-label="Like">${heart(l.me)}</button><span class="mut">${l.n}</span><button class="link" data-cm="${p.id}" style="text-decoration:none">💬 ${n}</button></div>${p.caption?`<div><b>@${esc(u.handle)}</b> ${cap(p.caption)}</div>`:""}${cm}</div>`};
+  return`<div class="card hl"><div class="row" style="margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><button class="ring av" data-u="${mine?"me":esc(u.handle)}"><div class="ini" style="width:34px;height:34px;font-size:12px">${ini2(u.name)}</div></button><div><b>${esc(u.name)}</b><div class="mut" style="font-size:12px">@${esc(u.handle)}${u.pos?" · "+esc(u.pos):""} · ${fd(p.created_at)}</div></div></div>${mine?`<button class="link" data-dp="${p.id}" data-pp="${esc(p.media_path||"")}">Delete</button>`:`<button class="link" data-rp="p:${p.id}:${p.user_id}">Report</button>`}</div>${media}<div class="act" style="margin-top:8px"><button data-lk="${p.id}" aria-label="Like">${heart(l.me)}</button><span class="mut">${l.n}</span><button class="link" data-cm="${p.id}" style="text-decoration:none">💬 ${n}</button></div>${p.caption?`<div><b>@${esc(u.handle)}</b> ${cap(p.caption)}</div>`:""}${cm}</div>`};
  const posts=FD.pos.filter(p=>!fp||pr(p.user_id).pos===fp);
  $("feed").innerHTML=fHead()+`<div class="chips"><button class="chip ${fp?"":"on"}" data-pos="">All</button>${POS.map(p=>`<button class="chip ${fp===p?"on":""}" data-pos="${p}">${p}</button>`).join("")}</div>`
  +(FD.err?`<div class="card mut">${FD.err}</div>`:"")
@@ -651,10 +705,10 @@ function renderFeed(){if(nv!=="feed")return;const fp=S.fpos||"",me=user.id;
 async function followToggle(id,priv){const cur=FD.fol[id];
  if(cur){const{error}=await sb.from("follows").delete().eq("follower_id",user.id).eq("followee_id",id);if(error)return toast("Couldn’t update: "+error.message);delete FD.fol[id]}
  else{const st=priv?"pending":"accepted",{error}=await sb.from("follows").insert({follower_id:user.id,followee_id:id,status:st});if(error)return toast("Couldn’t follow: "+error.message);FD.fol[id]=st;if(st==="pending")toast("Request sent")}
- if(nv==="prof")prof();else feed()}
+ if(nv==="prof")prof();else if(nv==="notif")notifs(true);else feed()}
 async function toggleLike(id){const l=FD.lk[id]=FD.lk[id]||{n:0,me:false},on=!l.me;l.me=on;l.n+=on?1:-1;renderFeed();
  const r=on?await sb.from("likes").insert({post_id:id,user_id:user.id}):await sb.from("likes").delete().eq("post_id",id).eq("user_id",user.id);
- if(r.error){l.me=!on;l.n+=on?-1:1;renderFeed()}}
+ if(r.error){l.me=!on;l.n+=on?-1:1;renderFeed();toast("Couldn’t update your like: "+r.error.message)}}
 async function loadComments(id){const{data}=await sb.from("comments").select("id,user_id,body,created_at").eq("post_id",id).order("created_at");FD.cm[id]=data||[];FD.cc[id]=FD.cm[id].length;
  const miss=[...new Set(FD.cm[id].map(c=>c.user_id))].filter(u=>u!==user.id&&!FD.pr[u]);if(miss.length)((await sb.from("profiles").select("id,name,handle,role,pos,private").in("id",miss)).data||[]).forEach(x=>FD.pr[x.id]=x);renderFeed()}
 async function addComment(id){const i=document.querySelector(`[data-ci="${id}"]`),t=i&&i.value.trim();if(!t)return;
@@ -666,6 +720,10 @@ function reportDlg(uid,pid){const o=document.createElement("div");o.className="o
  o.querySelector("#rps").onclick=async()=>{const t=(rs+": "+o.querySelector("#rpt").value.trim()).slice(0,500),{error}=await sb.from("reports").insert({reporter_id:user.id,target_user:uid||null,target_post:pid||null,reason:t});o.remove();toast(error?"Couldn’t send the report.":"Thanks, your report was sent.")}}
 $("feed").addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
  if(d.su){openAu("s");return}if(!user)return;
+ if(d.rf){feed();return}
+ if(d.gn){nv="notif";show();return}
+ if(d.u){openProf(d.u);return}
+ if(d.dp){const id=d.dp,path=d.pp;ask("Delete this post?","It will be removed from your account and from the feed for everyone.","Delete",async()=>{if(await delPost(id,path)){toast("Post deleted");renderFeed()}});return}
  if(d.pos!==undefined){S.fpos=d.pos;save();feed();return}
  if(d.fo){followToggle(d.fo,d.pv==="1");return}
  if(d.lk){toggleLike(d.lk);return}
@@ -685,7 +743,7 @@ async function prof(){if(!sb||!user){nv="feed";return show()}
  const c=Array.isArray(cn.data)?cn.data[0]:cn.data,showC=!(R.settings&&R.settings.show_follow_counts===false)&&c&&!cn.error,z={n:0,k:0,km:0,pts:0,tk:0,tkn:0,ps:0,psn:0,tr:0,br:0};
  const mk=t=>ses.filter(x=>t==="all"||x.type===t).reduce((a,x)=>sum(a,{...z,...Object.fromEntries(Object.keys(z).map(k=>[k,+x[k]||0]))}),z);
  const st={all:mk("all"),match:mk("match"),training:mk("training")};
- const list=ses.length?`<div class="card" style="padding:14px"><b>Public sessions</b>${ses.filter(x=>pf==="all"||x.type===pf).map(x=>`<div class="srow"><b>${esc(x.name||"Session")}</b><span class="mut">${fd(x.date)}</span><span class="mut">${+x.pts||0} pts</span></div>`).join("")}</div>`:"";
+ const list=ses.length?`<div class="mut nh">Public sessions</div>${ses.filter(x=>pf==="all"||x.type===pf).slice(0,20).map(x=>`<div class="card hl" style="padding:14px">${sessCard(x)}</div>`).join("")}`:"";
  $("prof").innerHTML='<button class="link" data-back="1">← Back</button>'+pfH({name:R.name,handle:R.handle,tag:(RL[R.role]||"Player")+(R.pos?" · "+R.pos:""),bio:R.bio||"",posts:locked?"–":rows.length,fr:showC?c.followers:"–",fg:showC?c.following:"–",st,priv:!!R.private,locked,list:locked?"":list,
   tiles:vids.map(v=>`<div style="position:relative;aspect-ratio:1;overflow:hidden;border-radius:4px;background:#000"><video src="${esc(pubUrl(v.media_path))}" controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover"></video></div>`),
   btn:`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="fb ${s?"on":""}" data-fo="${R.id}" data-pv="${R.private?1:0}">${s==="accepted"?"✓ Following":s==="pending"?"Requested":R.private?"＋ Request":"＋ Follow"}</button><button class="fb" data-bl="${R.id}">Block</button><button class="fb" data-rp="u:${R.id}">Report</button></div>`})}
@@ -695,7 +753,77 @@ $("prof").addEventListener("click",e=>{const b=e.target.closest("button");if(!b|
  else if(d.rp)reportDlg(d.rp.slice(2),null)});
 {const _sv=$("save").onclick;$("save").onclick=function(){const r=_sv.apply(this,arguments);schedSync();return r}}
 
-const _s3=show;show=function(){_s3();nsu.classList.toggle("hide",!!user)};
+/* ===== Strava-style sessions ===== */
+function kmap(kk){if(!Array.isArray(kk)||!kk.length)return"";
+ const G={};kk.forEach(k=>{const key=k[0]+","+k[1];(G[key]=G[key]||[]).push(k)});
+ const mx=Math.max(...kk.map(k=>+k[1]||0)),h=Math.round(Math.min(300,Math.max(130,mx+34)));
+ const col={m:"#2ecc71",l:"#ff5a4a",r:"#ff5a4a",s:"#f0a030"},cnt={m:0,x:0,s:0};
+ kk.forEach(k=>{if(k[2]==="m")cnt.m++;else if(k[2]==="s")cnt.s++;else cnt.x++});
+ const dots=Object.values(G).map(g=>{const x=+g[0][0],y=+g[0][1],same=g.every(k=>k[2]===g[0][2]),c=same?col[g[0][2]]||"#ff5a4a":"#4d91ff";
+  return`<circle cx="${x}" cy="${y}" r="6" fill="${c}" stroke="#fff" stroke-width="1.6"/>`+(g.length>1?`<text x="${x}" y="${y+3}" text-anchor="middle" font-size="8" font-weight="800" fill="#fff">${g.length}</text>`:"")}).join("");
+ return`<svg viewBox="0 0 300 ${h}" role="img" aria-label="Kick map" style="width:100%;border-radius:10px;display:block;margin-top:10px"><rect width="300" height="300" fill="var(--fl)"/><rect width="300" height="30" fill="#000" opacity=".13"/><g stroke="var(--ln)" stroke-width="1.6" fill="none" opacity=".9"><line x1="0" y1="30" x2="300" y2="30" stroke-width="2.4"/><line x1="1" y1="30" x2="1" y2="300" stroke-width="2.4"/><line x1="299" y1="30" x2="299" y2="300" stroke-width="2.4"/><line x1="0" y1="51.4" x2="300" y2="51.4" stroke-dasharray="6 5"/><line x1="0" y1="124.3" x2="300" y2="124.3"/><line x1="0" y1="201.4" x2="300" y2="201.4" stroke-dasharray="6 5"/><line x1="0" y1="244.3" x2="300" y2="244.3"/><line x1="21.4" y1="30" x2="21.4" y2="300" stroke-dasharray="6 5"/><line x1="278.6" y1="30" x2="278.6" y2="300" stroke-dasharray="6 5"/><line x1="64.3" y1="30" x2="64.3" y2="300" stroke-dasharray="6 5"/><line x1="235.7" y1="30" x2="235.7" y2="300" stroke-dasharray="6 5"/></g><g stroke="#fff" stroke-width="3"><line x1="140" y1="30" x2="140" y2="12"/><line x1="160" y1="30" x2="160" y2="12"/><line x1="140" y1="21" x2="160" y2="21"/></g>${dots}</svg><div class="mut" style="font-size:12px;margin-top:4px">🟢 ${cnt.m} made · 🔴 ${cnt.x} missed${cnt.s?` · 🟠 ${cnt.s} short`:""}</div>`}
+function sessCard(s){s=s||{};const k=+s.k||0,km=+s.km||0,kk=Array.isArray(s.kk)?s.kk:[];
+ const meta=[s.type==="match"?"🏉 Match":"🏋️ Training",s.min?(+s.min)+" min":"",s.date?fd(s.date):""].filter(Boolean).join(" · ");
+ const bd=[];if(k>=3&&km===k)bd.push("🎯 100% goal kicks");if(+s.tr>0)bd.push("🏉 "+s.tr+(+s.tr>1?" tries":" try"));if(+s.br>0)bd.push("💨 "+s.br+(+s.br>1?" breaks":" break"));
+ return`<div class="sess"><div style="font-size:19px;font-weight:800;line-height:1.2">${esc(s.name||"Session")}</div><div class="mut" style="font-size:13px;margin-top:2px">${esc(meta)}</div><div class="zones" style="grid-template-columns:repeat(4,1fr);margin:10px 0 0">${cell("Points",+s.pts||0)}${cell("Kicks",pc(km,k),km+"/"+k)}${cell("Tackles",pc(+s.tk||0,+s.tkn||0))}${cell("Passes",pc(+s.ps||0,+s.psn||0))}</div>${bd.length?`<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${bd.map(x=>`<span class="pill">${x}</span>`).join("")}</div>`:""}${kmap(kk)}</div>`}
+function weekCard(ss){const t0=Date.now()-7*864e5,w=ss.filter(x=>{const d=new Date(x.date).getTime();return(isNaN(d)?x.id:d)>=t0});if(!w.length)return"";
+ const a=agg(w),mn=w.reduce((q,x)=>q+(+x.min||0),0);
+ return`<div class="card" style="padding:14px"><b>This week</b><div class="zones" style="grid-template-columns:repeat(4,1fr);margin-top:8px">${cell("Sessions",a.n)}${cell("Minutes",mn||"–")}${cell("Points",a.pts)}${cell("Kicks",pc(a.km,a.k),a.km+"/"+a.k)}</div></div>`}
+
+/* ===== Notifications ===== */
+const NT={on:false,unread:0,list:[],fresh:new Set(),req:new Set()};
+const NTX={like:"liked your post",follow:"started following you",follow_request:"requested to follow you",follow_accept:"accepted your follow request",comment:"commented on your post"};
+const ago=t=>{const s=Math.max(1,Math.round((Date.now()-new Date(t))/1000));if(s<60)return"now";const m=Math.round(s/60);if(m<60)return m+"m";const h=Math.round(m/60);if(h<24)return h+"h";const d=Math.round(h/24);return d<7?d+"d":fd(t)};
+function ntBadge(){document.querySelectorAll(".nbd").forEach(e=>{e.textContent=NT.unread>99?"99+":NT.unread;e.classList.toggle("hide",!NT.unread)})}
+async function ntCount(){if(!sb||!user)return;const r=await sb.from("notifications").select("id",{count:"exact",head:true}).eq("user_id",user.id).eq("read",false);if(r.error)return;NT.unread=r.count||0;ntBadge()}
+async function ntActor(id){if(FD.pr[id])return FD.pr[id];try{const r=await sb.from("profiles").select("id,name,handle,role,pos,private").eq("id",id).maybeSingle();if(r.data)FD.pr[id]=r.data}catch(e){}return FD.pr[id]||{name:"Someone",handle:""}}
+function ntStart(){if(NT.on||!sb||!user)return;NT.on=true;ntCount();
+ try{sb.channel("nt-"+user.id).on("postgres_changes",{event:"INSERT",schema:"public",table:"notifications",filter:"user_id=eq."+user.id},async p=>{const n=p.new,a=await ntActor(n.actor_id);NT.unread++;ntBadge();toast("@"+(a.handle||"someone")+" "+(NTX[n.type]||"sent you a notification"));if(nv==="notif")notifs(true)}).subscribe()}catch(e){}
+ setInterval(()=>{if(!document.hidden)ntCount()},60000)}
+function ntRender(){const el=$("notif");
+ const head=`<div class="row" style="margin-bottom:10px"><b style="font-size:20px">Activity</b><button class="link" data-nrf="1">Refresh</button></div>`;
+ const grp=[],seen={};
+ NT.list.forEach(n=>{if(n.type==="like"&&n.post_id){const key="l"+n.post_id;if(seen[key]){seen[key].more.push(n);return}const g={...n,more:[]};seen[key]=g;grp.push(g)}else grp.push({...n,more:[]})});
+ const thumb=n=>{const p=NT.posts&&NT.posts[String(n.post_id)];if(!p)return"";
+  const t=p.kind==="video"?`<video src="${esc(pubUrl(p.media_path))}#t=0.1" preload="metadata" muted playsinline style="width:100%;height:100%;object-fit:cover"></video>`:`<div><b>${+(p.session||{}).pts||0}</b>pts</div>`;
+  return`<button class="thumb" data-gop="1" aria-label="Open your post" style="border:0;padding:0;color:var(--tx)">${t}</button>`};
+ const row=n=>{const a=FD.pr[n.actor_id]||{name:"Someone",handle:""},fresh=NT.fresh.has(n.id)||n.more.some(m=>NT.fresh.has(m.id));let act="";
+  if(n.type==="follow_request")act=NT.req.has(n.actor_id)?`<span style="display:flex;gap:6px"><button class="fb" data-nac="${n.actor_id}" style="margin:0;padding:5px 12px">Accept</button><button class="fb on" data-ndc="${n.actor_id}" style="margin:0;padding:5px 12px">Decline</button></span>`:`<span class="mut" style="font-size:12px">Done</span>`;
+  else if(n.type==="follow"||n.type==="follow_accept"){const st=FD.fol[n.actor_id];act=`<button class="fb ${st?"on":""}" data-nfo="${n.actor_id}" data-pv="${a.private?1:0}" style="margin:0;padding:5px 12px">${st==="accepted"?"Following":st==="pending"?"Requested":"Follow back"}</button>`}
+  else act=thumb(n);
+  const who="@"+esc(a.handle||"someone"),oth=n.more.length,txt=n.type==="like"&&oth?`<b>${who}</b> and ${oth} other${oth>1?"s":""} liked your post`:`<b>${who}</b> ${NTX[n.type]||"sent you a notification"}`;
+  return`<div class="nrow${fresh?" new":""}"><button class="ring av" data-u="${esc(a.handle||"")}" aria-label="Open profile"><div class="ini" style="width:42px;height:42px;font-size:14px">${ini2(a.name)}</div></button><div style="flex:1;min-width:0"><div>${txt}${n.type==="comment"&&n.body?`: <span class="mut">${esc(n.body)}</span>`:""}</div><div class="mut" style="font-size:12px">${ago(n.created_at)}</div></div>${act}</div>`};
+ const isNew=n=>NT.fresh.has(n.id)||n.more.some(m=>NT.fresh.has(m.id));
+ const nw=grp.filter(isNew),old=grp.filter(n=>!isNew(n));
+ el.innerHTML=head+(grp.length?(nw.length?`<div class="mut nh">New</div>`+nw.map(row).join(""):"")+(old.length?`<div class="mut nh">Earlier</div>`+old.map(row).join(""):""):`<div class="card mut" style="text-align:center;padding:22px">🤍<br>No activity yet.<br><span style="font-size:13px">Likes, comments and new followers will show up here.</span></div>`)}
+async function notifs(quiet){const el=$("notif");
+ if(!sb||!user){el.innerHTML=`<div class="card" style="text-align:center;padding:20px"><b>Activity</b><p class="mut">Log in to see likes, comments and new followers.</p><button class="fb on" data-su="1">Create account / Log in</button></div>`;return}
+ if(!quiet&&!NT.list.length)el.innerHTML='<div class="card mut">Loading…</div>';
+ const r=await sb.from("notifications").select("id,actor_id,type,post_id,body,read,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(60);
+ if(r.error){el.innerHTML=`<div class="card hl"><b>Activity isn’t set up yet</b><p class="mut" style="margin:6px 0 0">Run the file <b>supabase-notifications.sql</b> once in your Supabase project (SQL Editor), then reload this page.</p><p class="mut" style="font-size:12px;margin:8px 0 0">${esc(r.error.message)}</p></div>`;return}
+ NT.list=r.data||[];
+ const ids=[...new Set(NT.list.map(n=>n.actor_id))].filter(u=>!FD.pr[u]);
+ if(ids.length)((await sb.from("profiles").select("id,name,handle,role,pos,private").in("id",ids)).data||[]).forEach(x=>FD.pr[x.id]=x);
+ const pids=[...new Set(NT.list.filter(n=>n.post_id).map(n=>n.post_id))];NT.posts={};
+ if(pids.length){const pr=await sb.from("posts").select("id,kind,media_path,session").in("id",pids);(pr.data||[]).forEach(x=>NT.posts[String(x.id)]=x)}
+ const[f,q]=await Promise.all([sb.from("follows").select("followee_id,status").eq("follower_id",user.id),sb.from("follows").select("follower_id").eq("followee_id",user.id).eq("status","pending")]);
+ if(!f.error){FD.fol={};(f.data||[]).forEach(x=>FD.fol[x.followee_id]=x.status)}
+ NT.req=new Set((q.data||[]).map(x=>x.follower_id));
+ if(!quiet)NT.fresh=new Set();NT.list.filter(n=>!n.read).forEach(n=>NT.fresh.add(n.id));
+ ntRender();
+ if(NT.list.some(n=>!n.read)){await sb.from("notifications").update({read:true}).eq("user_id",user.id).eq("read",false);NT.unread=0;ntBadge()}}
+$("notif").addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+ if(d.su){openAu("s");return}if(!user)return;
+ if(d.nrf){notifs();return}
+ if(d.gop){nv="acct";pt="hl";show();return}
+ if(d.u){openProf(d.u);return}
+ if(d.nfo){await followToggle(d.nfo,d.pv==="1");return}
+ if(d.nac){const r=await sb.from("follows").update({status:"accepted"}).eq("follower_id",d.nac).eq("followee_id",user.id).select("follower_id");if(r.error||!(r.data||[]).length)toast("Couldn’t accept the request.");notifs(true);return}
+ if(d.ndc){await sb.from("follows").delete().eq("follower_id",d.ndc).eq("followee_id",user.id);notifs(true)}});
+{const _ti=setInterval(()=>{if(user){clearInterval(_ti);ntStart()}},800)}
+document.addEventListener("visibilitychange",()=>{if(document.hidden||!user)return;ntCount();if(nv==="feed")feed();else if(nv==="notif")notifs(true)});
+
+const _s3=show;show=function(){_s3();nsu.classList.toggle("hide",!!user);if(user)ntStart()};
 
 setAv();render();show();
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;const lg=$("lg");if(lg&&!lg.classList.contains("hide"))return;
