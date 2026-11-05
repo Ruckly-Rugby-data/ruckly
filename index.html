@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="application-name" content="Ruckly">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ruckly">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Ruckly</title><link rel="icon" href="data:image/png;base64,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"><meta name="theme-color" content="#07132f">
 <style>
 :root{color-scheme:dark;--bg:#07132f;--card:#10234e;--tx:#edf4ff;--mut:#94a7cf;--ok:#4bd3a6;--ko:#ff8292;--sh:#f2a33a;--ac:#3b7df0;--fl:#294994;--ln:#e0edff;--bd:#294a83;
@@ -1179,6 +1186,73 @@ setAv();render();show();
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;const lg=$("lg");if(lg&&!lg.classList.contains("hide"))return;
  if(PC)closePost();else if(D)closeSheet();else if(stEl&&!stEl.classList.contains("hide"))stEl.classList.add("hide")});
 setTimeout(()=>{const p=$("splash");p.classList.add("out");setTimeout(()=>p.remove(),600)},2000);
+</script>
+<style>
+#ik-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));width:min(92%,480px);z-index:16;display:none;align-items:center;gap:10px;padding:10px 10px 10px 14px;border-radius:14px;background:var(--card,#10234e);border:1px solid var(--bd,#294a83);box-shadow:0 10px 30px rgba(1,8,25,.5);color:var(--tx,#edf4ff);font:600 14px/1.25 system-ui,sans-serif}
+#ik-bar.on{display:flex}
+#ik-bar img{width:36px;height:36px;border-radius:9px;flex:none}
+#ik-bar .t{flex:1;min-width:0}#ik-bar .t small{display:block;font-weight:400;color:var(--mut,#94a7cf);font-size:12px}
+#ik-go{border:0;border-radius:10px;padding:10px 14px;background:var(--ac,#3b7df0);color:#fff;font:700 14px system-ui,sans-serif}
+#ik-x{border:0;background:none;color:var(--mut,#94a7cf);font-size:20px;line-height:1;padding:4px 6px}
+#ik-pill{position:fixed;right:10px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:16;display:none;border:0;border-radius:999px;padding:10px 14px;background:var(--ac,#3b7df0);color:#fff;font:700 13px system-ui,sans-serif;box-shadow:0 6px 18px rgba(1,8,25,.5)}
+#ik-pill.on{display:block}
+#ik-ov{position:fixed;inset:0;z-index:90;display:none;place-items:center;padding:18px;background:rgba(1,7,21,.78)}
+#ik-ov.on{display:grid}
+#ik-ov .bx{width:min(100%,380px);background:var(--card,#10234e);border:1px solid var(--bd,#294a83);border-radius:16px;padding:18px;color:var(--tx,#edf4ff);font:15px/1.45 system-ui,sans-serif;text-align:center}
+#ik-ov .bx img{width:72px;height:72px;border-radius:16px;margin-bottom:8px}
+#ik-ov h3{margin:0 0 10px;font-size:18px}#ik-ov ol{margin:0 0 14px;padding-left:20px;text-align:left}#ik-ov li{margin:6px 0}#ik-ov p{margin:0 0 14px;color:var(--mut,#94a7cf)}
+#ik-ov button{width:100%;border:0;border-radius:10px;padding:12px;background:var(--ac,#3b7df0);color:#fff;font:700 15px system-ui,sans-serif;margin-top:6px}
+#ik-ov button.alt{background:none;color:var(--mut,#94a7cf);font-weight:600}
+</style>
+<div id="ik-bar" role="region" aria-label="Download app"><img src="icons/icon-192.png" alt=""><div class="t">Download Ruckly<small>Install the app on your device</small></div><button id="ik-go" type="button">Download</button><button id="ik-x" type="button" aria-label="Close">×</button></div>
+<button id="ik-pill" type="button">⬇ Download app</button>
+<div id="ik-ov"><div class="bx"><img src="icons/icon-192.png" alt=""><h3>Download Ruckly</h3><div id="ik-body"></div></div></div>
+<script>
+(function(){
+var bar=document.getElementById('ik-bar'),pill=document.getElementById('ik-pill'),ov=document.getElementById('ik-ov'),body=document.getElementById('ik-body'),dp=null,K='ruckly_install_hide';
+var standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+var ua=navigator.userAgent;
+var ios=/iphone|ipad|ipod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+var android=/android/i.test(ua);
+function hidden(){try{var t=+localStorage.getItem(K)||0;return Date.now()-t<6048e5}catch(e){return false}}
+function refresh(){
+ bar.classList.remove('on');pill.classList.remove('on');
+ if(standalone)return;
+ if(hidden())pill.classList.add('on');else bar.classList.add('on');
+}
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;if(ov.classList.contains('on'))panel()});
+window.addEventListener('appinstalled',function(){dp=null;standalone=true;refresh();ov.classList.remove('on')});
+function close(){ov.classList.remove('on')}
+function panel(){
+ var h='';
+ if(dp){
+  h='<p>Install Ruckly on this device in one tap.</p><button id="ik-now" type="button">Install now</button>';
+ }else if(ios){
+  h='<ol><li>Tap the <b>Share</b> button in Safari (square with an arrow).</li><li>Choose <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>.</li></ol>';
+ }else if(android){
+  h='<ol><li>Open the browser menu (<b>⋮</b>).</li><li>Choose <b>Install app</b> or <b>Add to Home screen</b>.</li></ol><p>Tip: use Chrome for the best result.</p>';
+ }else{
+  h='<ol><li>Use <b>Chrome</b> or <b>Edge</b> on your computer.</li><li>Click the install icon at the right of the address bar, or the menu <b>⋮</b> then <b>Install Ruckly</b>.</li></ol>';
+ }
+ h+='<button class="alt" id="ik-close" type="button">Close</button>';
+ body.innerHTML=h;
+ var n=document.getElementById('ik-now');
+ if(n)n.onclick=function(){var d=dp;dp=null;d.prompt();d.userChoice.finally(function(){close();refresh()})};
+ document.getElementById('ik-close').onclick=close;
+ ov.classList.add('on');
+}
+function open(){if(standalone){return}panel()}
+document.getElementById('ik-go').onclick=open;
+pill.onclick=open;
+document.getElementById('ik-x').onclick=function(){try{localStorage.setItem(K,String(Date.now()))}catch(e){}refresh()};
+ov.addEventListener('click',function(e){if(e.target===ov)close()});
+window.rucklyInstall=open;
+refresh();
+if(/[?&]install\b/.test(location.search)&&!standalone)setTimeout(panel,900);
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
 </script>
 </body>
 </html>
