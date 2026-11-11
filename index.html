@@ -231,6 +231,7 @@ div[style*="gap:4px"]{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))!
 .pvc video{max-height:70vh!important}
 .inp{width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:#0a1839;color:var(--tx);font:inherit;margin:0}
 #au .card{max-height:92vh;overflow:auto}#agd{flex-wrap:wrap;overflow:visible}
+.ini{overflow:hidden}.ini img{width:100%;height:100%;object-fit:cover;display:block}.dr{padding:12px}.bar{height:8px;border-radius:9px;background:var(--bg);overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#3b7df0,#4bd3a6)}.cf{display:grid;grid-template-columns:1fr 1fr;gap:6px}.cf label{font-size:11px;font-weight:700;color:var(--mut);display:block}.cf input,.cf select,.cf textarea{width:100%;padding:9px;border:1px solid var(--bd);border-radius:10px;background:#0a1839;color:var(--tx);font:inherit;min-width:0}.nav button{min-width:0}
 </style>
 </head>
 <body>
@@ -245,7 +246,7 @@ document.getElementById("spi").src=LOGO_F</script>
   <input type="date" id="dt">
   <input type="number" id="mn" min="0" placeholder="Minutes played" inputmode="numeric"><input id="nm" placeholder="Name (e.g. Match vs Lyon)" maxlength="40"><textarea class="full" id="no" placeholder="Coaching notes for this session"></textarea><select class="full" id="vis"><option value="private">🔒 Private session</option><option value="public">🌐 Public: share to the feed</option></select>
 </div>
-<div class="tabs"><button id="t1" class="on">Goal kicks</button><button id="t2">Stats</button><button id="t3">Past sessions</button></div>
+<div class="tabs"><button id="t2" class="on">Stats</button><button id="t1">Goal kicks</button><button id="t3">Past sessions</button></div>
 
 <section id="v1">
   <div class="card">
@@ -290,8 +291,8 @@ document.getElementById("spi").src=LOGO_F</script>
 <section id="feed" class="hide"></section>
 <section id="search" class="hide"><div class="card hl"><input id="sq" placeholder="Search players, coaches, fans, clubs or @username…" autocomplete="off" style="margin:0"></div><div id="sr"></div></section>
 <section id="hl" class="hide"><label class="drop" id="drop">＋ New post: choose a photo or video, or drag &amp; drop it here<input type="file" id="fi" accept="image/*,video/*" hidden></label><div id="hlist"></div></section>
-<section id="notif" class="hide"></section><section id="acct" class="hide"></section><section id="prof" class="hide"></section>
-<nav class="nav"><button data-n="feed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Feed</button><button data-n="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button><button data-n="rec" class="on"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Record</button><button data-n="hl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/></svg>Posts</button><button data-n="notif" id="nnt"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Activity<span class="bdg nbd hide">0</span></button><button data-n="acct"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg>Account</button></nav>
+<section id="notif" class="hide"></section><section id="train" class="hide"></section><section id="acct" class="hide"></section><section id="prof" class="hide"></section>
+<nav class="nav"><button data-n="feed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Feed</button><button data-n="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button><button data-n="rec" class="on"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Record</button><button data-n="hl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/></svg>Posts</button><button data-n="train"><svg viewBox="0 0 24 24"><path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/></svg>Train</button><button data-n="notif" id="nnt"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Activity<span class="bdg nbd hide">0</span></button><button data-n="acct"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg>Account</button></nav>
 <div id="foot"><button class="save" id="save">Save session</button>
 <div style="text-align:center"><button class="link" id="reset">Reset current session</button></div></div>
 
@@ -433,16 +434,16 @@ $("sh-del").onclick=()=>{if(!D||!D.ix)return;const cur=D.ix.map(i=>S.kicks[i]);a
 $("undo").onclick=()=>{closeSheet();S.kicks.pop();save();render()};
 $("stats").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.k,d=b.dataset.d;if(typeof S[k]==="number")S[k]=Math.max(0,S[k]+(d?-1:1));else{const o=S[k],f=b.dataset.f;o[f]=d?Math.max(0,o[f]-1):o[f]+1}save();render()});
 $("reset").onclick=()=>{if(confirm("Reset the current session?")){S.kicks=[];S.tk={ok:0,ko:0};S.ps={ok:0,ko:0};S.kg={ok:0,ko:0};S.br=0;S.tr=0;save();render()}};
-let nv="feed",cur=1;
+let nv="feed",cur=2;
 function show(){closeSheet();setAv();const r=nv==="rec";
  $("meta").classList.toggle("hide",!r||cur===3);$("foot").classList.toggle("hide",!r||cur===3);
  document.querySelector(".tabs").classList.toggle("hide",!r);
  [1,2,3].forEach(i=>{$("v"+i).classList.toggle("hide",!r||cur!==i);$("t"+i).classList.toggle("on",cur===i)});
- ["feed","search","hl","acct","prof","notif"].forEach(k=>$(k).classList.toggle("hide",nv!==k));
+ ["feed","search","hl","acct","prof","notif","train"].forEach(k=>$(k).classList.toggle("hide",nv!==k));
  document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.n===nv));
- if(r&&cur===3)hist();if(nv==="feed")feed();if(nv==="hl")hlv();if(nv==="acct")acct();if(nv==="prof")prof();if(nv==="search")srch();if(nv==="notif")notifs()}
+ if(r&&cur===3)hist();if(nv==="feed")feed();if(nv==="hl")hlv();if(nv==="acct")acct();if(nv==="prof")prof();if(nv==="search")srch();if(nv==="notif")notifs();if(nv==="train")trn()}
 function tab(n){cur=n;show()}
-$("t3").onclick=()=>tab(3);document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{nv=b.dataset.n;show()});$("t1").onclick=()=>tab(1);$("t2").onclick=()=>tab(2);
+$("t3").onclick=()=>tab(3);document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{if(b.dataset.n==="rec"&&nv!=="rec")cur=2;nv=b.dataset.n;show()});$("t1").onclick=()=>tab(1);$("t2").onclick=()=>tab(2);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 $("ty").value=S.meta.type;$("dt").value=S.meta.date;$("nm").value=S.meta.name;$("mn").value=S.meta.min||"";$("no").value=S.meta.notes||"";
 $("ty").onchange=()=>{S.meta.type=$("ty").value;save()};
@@ -519,7 +520,7 @@ function acct(){const m=S.me;
  $("acct").innerHTML=`<div class="card hl"><svg viewBox="0 0 24 24" style="width:56px;height:56px;margin:0 auto 8px;fill:none;stroke:var(--ac);stroke-width:1.6;stroke-linecap:round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg><input id="an" placeholder="Name" value="${esc(m.name)}" maxlength="40"><input id="ah" placeholder="username" value="${esc(m.handle)}" maxlength="20"><input id="ab" placeholder="Bio (position, club…)" value="${esc(m.bio)}" maxlength="120"><div class="zones" style="grid-template-columns:repeat(3,1fr)"><div><b>${S.sessions.length}</b><span class="mut">Sessions</span></div><div><b id="ac1">–</b><span class="mut">Videos</span></div><div><b id="ac2">–</b><span class="mut">Posts</span></div></div></div><div class="card"><b>Past sessions</b>${S.sessions.slice(0,6).map(x=>`<div class="stat row"><b>${esc(x.name)}</b><span class="mut">${esc(x.date||"")}</span></div>`).join("")||'<div class="mut">No sessions yet</div>'}</div>`;
  [["an","name"],["ah","handle"],["ab","bio"]].forEach(([i,k])=>{$(i).oninput=()=>{S.me[k]=k==="handle"?$(i).value.replace(/[^\w.]/g,""):$(i).value.trim();save()}});
  vAll().then(a=>{$("ac1").textContent=a.length;$("ac2").textContent=a.filter(v=>v.pub).length}).catch(()=>{})}
-function setAv(){const a=$("av"),p=S.me.photo;if(p){a.innerHTML='<img src="'+p+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">'}else{a.textContent=((S.me.name||"TT").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2)||"TT").toUpperCase()}}
+function setAv(){const a=$("av"),p=avU({me:1});if(p){a.innerHTML='<img src="'+p+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">'}else{a.textContent=((S.me.name||"TT").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2)||"TT").toUpperCase()}}
 const fd=d=>{const t=new Date(d);return isNaN(t)?esc(d||""):t.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})};
 let pback="feed",pv="",pt="hl",pf="all",pe=false;
 const cap=t=>esc(t||"").replace(/#\w+/g,m=>`<span style="color:#79a7f9">${m}</span>`).replace(/\n/g,"<br>");
@@ -546,11 +547,11 @@ async function acct(){let vs=[];try{vs=(await vAll()).sort((a,b)=>b.ts-a.ts)}cat
  const list=weekCard(ss)+'<div class="card" style="padding:14px"><div class="row" style="margin-bottom:4px"><b>Sessions</b><button class="ib" data-add="1" aria-label="New session" style="color:var(--tx)"><svg viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M12 4v16M4 12h16"/></svg></button></div>'+(ss.filter(x=>pf==="all"||x.type===pf).map(x=>'<div class="srow"><b>'+esc(x.name)+'</b><span class="mut">'+fd(x.date)+'</span><span class="mut">'+(x.min?esc(x.min)+" min":"– min")+'</span><button class="ib" data-vs="'+x.id+'">'+(x.vis==="public"?"🌐":"🔒")+'</button><button class="ib" data-ed="'+x.id+'">'+pen+'</button><button class="ib" data-rm="'+x.id+'">'+bin+'</button></div>').join("")||'<div class="mut" style="padding:8px 0">No sessions yet.</div>')+'</div>';
  const inp='width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:#0a1839;color:var(--tx);font:inherit';
  const ed=pe?`<div class="card hl"><label class="ph"><div class="av2">${m.photo?'<img src="'+m.photo+'" alt="">':""}</div>Change photo<input type="file" id="ap" accept="image/*" hidden></label><label class="lab" for="an">Name</label><input id="an" value="${esc(m.name)}" maxlength="40"><label class="lab" for="ah">Username</label><input id="ah" value="${esc(m.handle)}" maxlength="20"><label class="lab" for="ar">Role</label><select id="ar" style="${inp}">${[["player","Player"],["coach","Coach"],["fan","Rugby fan"]].map(r=>`<option value="${r[0]}"${m.role===r[0]?" selected":""}>${r[1]}</option>`).join("")}</select><label class="lab" for="ab">Bio</label><textarea id="ab" maxlength="150" placeholder="Position, club, goals… #rugby">${esc(m.bio)}</textarea><label class="lab">Account privacy</label><div class="segs" style="grid-template-columns:1fr 1fr;margin:0"><button data-ap="0" class="${m.priv?"":"on"}">🌐 Public</button><button data-ap="1" class="${m.priv?"on":""}">🔒 Private</button></div><div class="mut" style="font-size:12px;margin-top:4px">Private: only approved followers see your stats and highlights.</div>${user?`<div class="mut" style="margin-top:8px">${esc(user.email||"")}</div><button class="link" data-lo="1">Log out</button>`:""}</div>`:"";
- $("acct").innerHTML=stBtn()+pfH({name:m.name||"Your name",handle:m.handle||"username",tag:({player:"Player",coach:"Coach",fan:"Rugby fan"}[m.role]||"Player")+(m.pos?" · "+m.pos:""),bio:m.bio||"",photo:m.photo,posts:cp?cp.length:vs.filter(v=>v.pub).length+S.sessions.filter(x=>x.vis==="public").length,fr:fc?fc.fr:"–",fg:fc?fc.fg:(S.follow||[]).length,st,list,extra:ed,uid:user?user.id:null,priv:m.priv,role:m.role||"player",career:pt==="career"?(crs?cHtml(crs,m.role||"player",true):cSetup):"",btn:`<button class="fb on" data-pe="1">${pe?"Done":"Edit profile"}</button>`,tiles:tl});
+ $("acct").innerHTML=stBtn()+pfH({name:m.name||"Your name",handle:m.handle||"username",tag:({player:"Player",coach:"Coach",fan:"Rugby fan"}[m.role]||"Player")+(m.pos?" · "+m.pos:""),bio:m.bio||"",photo:avU({me:1}),posts:cp?cp.length:vs.filter(v=>v.pub).length+S.sessions.filter(x=>x.vis==="public").length,fr:fc?fc.fr:"–",fg:fc?fc.fg:(S.follow||[]).length,st,list,extra:ed,uid:user?user.id:null,priv:m.priv,role:m.role||"player",career:pt==="career"?cStats(S.sessions.map(sj),m.role==="coach")+(crs?cHtml(crs,m.role||"player",true):cSetup):"",btn:`<button class="fb on" data-pe="1">${pe?"Done":"Edit profile"}</button>`,tiles:tl});
  setAv();if(!pe)return;
  [["an","name"],["ah","handle"],["ab","bio"]].forEach(([i,k])=>{$(i).oninput=()=>{S.me[k]=k==="handle"?$(i).value.replace(/[^\w.]/g,""):$(i).value;save();setAv();push()}});
  $("ar").onchange=e=>{S.me.role=e.target.value;save();applyRole();push()};
- $("ap").onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const g=c.getContext("2d"),z=Math.min(im.width,im.height);g.drawImage(im,(im.width-z)/2,(im.height-z)/2,z,z,0,0,160,160);S.me.photo=c.toDataURL("image/jpeg",.8);URL.revokeObjectURL(u);save();acct()};im.src=u}}
+ $("ap").onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;const g=c.getContext("2d"),z=Math.min(im.width,im.height);g.drawImage(im,(im.width-z)/2,(im.height-z)/2,z,z,0,0,160,160);S.me.photo=c.toDataURL("image/jpeg",.8);URL.revokeObjectURL(u);save();acct();upAv(c)};im.src=u}}
 document.body.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!b.closest("#prof,#acct"))return;const d=b.dataset,rr=()=>nv==="prof"?prof():acct();
  if(d.back){if(PS.length){pv=PS.pop();pt="hl";pf="all";show()}else{nv=pback;show()}}else if(d.pt){pt=d.pt;rr()}else if(d.pf){pf=d.pf;rr()}else if(d.pe){pe=!pe;rr()}else if(d.ap!==undefined){S.me.priv=d.ap==="1";save();push();rr()}else if(d.lo){logout()}
  else if(d.f){const f=S.follow=S.follow||[],i=f.indexOf(d.f);i<0?f.push(d.f):f.splice(i,1);save();rr()}});
@@ -559,7 +560,7 @@ $("acct").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)
  if(b.dataset.pdel){const id=b.dataset.pdel,path=b.dataset.pp||"";ask("Delete this post?","It will be removed from your account and from the feed for everyone. This can’t be undone.","Delete",async()=>{if(await delPost(id,path)){toast("Post deleted");acct()}});return}
  if(b.dataset.vdel){const id=+b.dataset.vdel;ask("Delete this video?","It will be permanently deleted from this device.","Delete",async()=>{try{const v=(await vAll()).find(x=>x.id===id);if(v&&v.postId&&sb&&user){if(!(await delPost(v.postId,v.path)))return}await vDel(id)}catch(e){}acct()});return}
  if(b.dataset.vs){const x=S.sessions.find(y=>y.id==b.dataset.vs);if(x){x.vis=x.vis==="public"?"private":"public";save();acct();schedSync()}return}
- if(b.dataset.add){nv="rec";cur=1;show();return}
+ if(b.dataset.add){nv="rec";cur=2;show();return}
  if(b.dataset.rm){delAsk(b.dataset.rm,acct);return}
  if(b.dataset.ed)startEdit(b.dataset.ed)});
 function loadMeta(){const m=S.meta;$("ty").value=m.type||"training";$("dt").value=m.date||"";$("nm").value=m.name||"";$("mn").value=m.min||"";$("no").value=m.notes||"";$("vis").value=m.vis||"private"}
@@ -571,7 +572,7 @@ function startEdit(id){const x=S.sessions.find(y=>y.id==id);if(!x)return;
  const c=JSON.parse(JSON.stringify(x));
  S.kicks=c.kicks||[];S.tk=c.tk||{ok:0,ko:0};S.ps=c.ps||{ok:0,ko:0};S.kg=c.kg||{ok:0,ko:0};S.br=c.br||0;S.tr=c.tr||0;S.hl=c.hl||[];
  S.meta={type:c.type||"training",name:c.name||"",date:c.date||"",min:c.min||"",notes:c.notes||"",vis:c.vis||"private"};
- S.editId=x.id;loadMeta();save();render();nv="rec";cur=1;show();window.scrollTo(0,0)}
+ S.editId=x.id;loadMeta();save();render();nv="rec";cur=2;show();window.scrollTo(0,0)}
 function endEdit(){const d=S.draft||{kicks:[],tk:{ok:0,ko:0},ps:{ok:0,ko:0},kg:{ok:0,ko:0},br:0,tr:0,hl:[],meta:{type:"training",name:"",date:new Date().toLocaleDateString("sv")}};Object.assign(S,d);S.editId=null;S.draft=null;loadMeta();save();render()}
 const baseSave=$("save").onclick;
 $("save").onclick=()=>{if(!S.editId)return baseSave();const x=S.sessions.find(y=>y.id==S.editId);if(x){const m=S.meta;Object.assign(x,{type:m.type,name:m.name||(m.type==="match"?"Match":"Training"),date:m.date,min:m.min,notes:m.notes,vis:m.vis||"private",kicks:S.kicks,tk:S.tk,ps:S.ps,kg:S.kg,br:S.br,tr:S.tr,hl:S.hl})}endEdit();nv="acct";show()};
@@ -582,14 +583,14 @@ let obr="";
 $("obp").innerHTML='<option value="">Your position…</option>'+POS.map(p=>`<option>${p}</option>`).join("");
 function obUi(){document.querySelectorAll("#obr button").forEach(b=>b.classList.toggle("on",b.dataset.r===obr));$("obp").classList.toggle("hide",obr!=="player");$("obt").classList.toggle("hide",obr!=="coach")}
 document.querySelectorAll("#obr button").forEach(b=>b.onclick=()=>{obr=b.dataset.r;obUi()});
-function applyRole(){const fan=S.me.role==="fan";document.querySelectorAll('.nav [data-n="rec"]').forEach(b=>b.classList.toggle("hide",fan));if(fan&&nv==="rec")nv="feed"}
+function applyRole(){const fan=S.me.role==="fan";document.querySelectorAll('.nav [data-n="rec"],.nav [data-n="train"]').forEach(b=>b.classList.toggle("hide",fan));if(fan&&nv==="rec")nv="feed"}
 $("obg").onclick=()=>{const n=$("obn").value.trim();if(!obr||!n){alert("Choose a role and enter your name");return}
  Object.assign(S.me,{role:obr,name:n,handle:$("obh").value.replace(/[^\w.]/g,"")||(n.toLowerCase().replace(/[^\w]/g,"")+Math.floor(Math.random()*900+100)),pos:obr==="player"?$("obp").value:"",bio:obr==="player"?$("obp").value:obr==="coach"?$("obt").value.trim():""});
  if(obr==="fan")nv="feed";save();pushProfile();if(sb&&user)sb.auth.updateUser({data:{role:S.me.role,name:S.me.name,handle:S.me.handle,pos:S.me.pos,bio:S.me.bio}});$("ob").classList.add("hide");applyRole();show()};
 async function pushProfile(){if(!sb||!user||!S.me.handle||!S.me.role)return;try{const{error}=await sb.from("profiles").upsert({id:user.id,name:S.me.name||"",handle:S.me.handle,role:S.me.role,pos:S.me.pos||"",bio:S.me.bio||"",private:!!S.me.priv});if(error&&error.code==="23505")alert("This username is already taken. Pick another one in Edit profile.")}catch(e){}}
 $("vis").value=S.meta.vis||"private";$("vis").onchange=()=>{S.meta.vis=$("vis").value;save()};
 let pT,sT,sq0=0;const push=()=>{clearTimeout(pT);pT=setTimeout(pushProfile,800)};
-const srR=p=>{const s=FD.fol[p.id],me=user&&p.id===user.id;return`<div class="card srow" style="margin:0 0 8px;padding:10px 12px"><button class="flp" data-u="${esc(p.handle)}"><div class="ring"><div class="ini">${ini2(p.name)}</div></div><div style="min-width:0"><b>${esc(p.name)}${p.priv?" 🔒":""}</b><span class="mut">@${esc(p.handle)} · ${esc(p.tag)}</span></div></button>${user&&p.id&&!me?`<button class="fb ${s?"on":""}" data-sfo="${p.id}" data-pv="${p.priv?1:0}" style="margin:0;padding:6px 12px;font-size:13px">${s==="accepted"?"Following":s==="pending"?"Requested":p.priv?"Request":"Follow"}</button>`:""}</div>`};
+const srR=p=>{const s=FD.fol[p.id],me=user&&p.id===user.id;return`<div class="card srow" style="margin:0 0 8px;padding:10px 12px"><button class="flp" data-u="${esc(p.handle)}"><div class="ring"><div class="ini">${avI(FD.pr[p.id]||p)}</div></div><div style="min-width:0"><b>${esc(p.name)}${p.priv?" 🔒":""}</b><span class="mut">@${esc(p.handle)} · ${esc(p.tag)}</span></div></button>${user&&p.id&&!me?`<button class="fb ${s?"on":""}" data-sfo="${p.id}" data-pv="${p.priv?1:0}" style="margin:0;padding:6px 12px;font-size:13px">${s==="accepted"?"Following":s==="pending"?"Requested":p.priv?"Request":"Follow"}</button>`:""}</div>`};
 async function srch(q){const n=++sq0;q=(q===undefined?$("sq").value:q).trim().replace(/^@/,"").replace(/[,()%*]/g,"");
  let rows=[],lbl=q?"Results":"Suggested accounts",msg="";
  if(sb&&user){try{let r=sb.from("profiles").select("name,handle,role,pos,private").neq("id",user.id).neq("handle","").neq("settings->>discoverable","false").limit(20);r=q?r.or(`name.ilike.%${q}%,handle.ilike.%${q}%`):r.order("created_at",{ascending:false});const{data,error}=await r;if(error)throw error;rows=(data||[]).map(p=>({name:p.name,handle:p.handle,pos:p.pos,priv:p.private,tag:(RL[p.role]||"Player")+(p.pos?" · "+p.pos:"")}));if(!q)rows.sort((a,b)=>(b.pos===S.me.pos)-(a.pos===S.me.pos))}catch(e){msg="Couldn’t load accounts. Check your Supabase setup (profiles table)."}}
@@ -606,7 +607,7 @@ const SB_URL="https://mskrrxlcyujolnkeeqxf.supabase.co",SB_KEY="sb_publishable_Y
 let sb=null,user=null,aum="s";
 function loadSb(){return new Promise(r=>{if(!SB_URL||!SB_KEY)return r();const c=document.createElement("script");c.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js";c.onload=()=>{sb=supabase.createClient(SB_URL,SB_KEY);sb.auth.onAuthStateChange(ev=>{if(ev==="PASSWORD_RECOVERY")setTimeout(pwNew,700)});r()};c.onerror=()=>r();document.head.appendChild(c)})}
 function auUi(){$("aus").classList.toggle("on",aum==="s");$("aul").classList.toggle("on",aum==="l");$("aukr").classList.toggle("hide",aum==="l");$("aug").textContent=aum==="s"?"Create account":"Log in";$("aud").classList.remove("hide");$("auw").autocomplete=aum==="s"?"new-password":"current-password"}
-async function postAuth(){if(await mfaNeeded())await mfaAsk();$("au").classList.add("hide");applyRole();pushProfile();syncPrivate();if(!S.me.role&&!S.obSkip){$("obn").value=S.me.name||[(user.user_metadata||{}).first_name,(user.user_metadata||{}).last_name].filter(Boolean).join(" ");$("obh").value=S.me.handle||"";$("ob").classList.remove("hide")}show()}
+async function postAuth(){if(await mfaNeeded())await mfaAsk();$("au").classList.add("hide");applyRole();pushProfile();syncPrivate();loadMe();if(!S.me.role&&!S.obSkip){$("obn").value=S.me.name||[(user.user_metadata||{}).first_name,(user.user_metadata||{}).last_name].filter(Boolean).join(" ");$("obh").value=S.me.handle||"";$("ob").classList.remove("hide")}show()}
 async function logout(){if(sb)await sb.auth.signOut();S.me={name:"",handle:"",bio:""};S.guest=false;S.obSkip=false;save();location.reload()}
 const APP_URL=location.href.split(/[?#]/)[0];
 const AUH=(()=>{const q=new URLSearchParams((location.hash||"").replace(/^#/,"")+"&"+(location.search||"").replace(/^\?/,""));return{type:q.get("type")||"",err:q.get("error_description")||"",code:q.get("error_code")||""}})();
@@ -694,10 +695,10 @@ $("auc").onclick=()=>{if(S.guest||user)$("au").classList.add("hide");else $("aud
 const nsu=document.createElement("button");nsu.id="nsu";nsu.innerHTML='<svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M2 21c0-4 3.5-6 8-6M18 8v8M14 12h8"/></svg>Sign up';nsu.onclick=()=>openAu("s");document.querySelector(".nav").appendChild(nsu);
 
 /* ===== SOCIAL: follow, post, feed, likes, comments, block, report ===== */
-const FD={pos:[],pr:{},lk:{},cc:{},cm:{},open:{},fol:{},req:[],sug:[],blocked:[],err:""};
+const FD={pos:[],pr:{},lk:{},cc:{},cm:{},cl:{},open:{},fol:{},req:[],sug:[],blocked:[],err:""};
 const pubUrl=p=>sb.storage.from("highlights").getPublicUrl(p).data.publicUrl;
 function toast(t){const d=document.createElement("div");d.textContent=t;d.setAttribute("role","status");d.style.cssText="position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#10234e;border:1px solid #294a83;color:#edf4ff;padding:10px 16px;border-radius:12px;z-index:90;font-size:14px;max-width:90%;text-align:center";document.body.appendChild(d);setTimeout(()=>d.remove(),Math.max(3200,t.length*60))}
-const cj=o=>JSON.stringify(Object.keys(o).sort().map(k=>[k,o[k]]));
+const cj=o=>JSON.stringify(o,(k,v)=>v&&typeof v==="object"&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(q=>[q,v[q]])):v);
 async function unpost(id,path){if(!sb||!user)return;try{await sb.from("posts").delete().eq("id",id);if(path)await sb.storage.from("highlights").remove([path])}catch(e){}}
 async function delPost(id,path){if(!sb||!user)return false;
  const r=await sb.from("posts").delete().eq("id",id).select("id");
@@ -709,7 +710,7 @@ async function delPost(id,path){if(!sb||!user)return false;
  FD.pos=FD.pos.filter(p=>String(p.id)!==String(id));return true}
 let syT,syBusy=false;
 function schedSync(){if(!sb||!user){if(!window._gt){window._gt=1;toast("Posts are only shared online with an account.")}return}clearTimeout(syT);syT=setTimeout(syncAll,1200)}
-async function syncAll(){if(!sb||!user||syBusy)return;syBusy=true;try{
+async function syncAll(){if(!sb||!user)return;if(syBusy){window.syAg=1;return}syBusy=true;try{
  const mr=await sb.from("posts").select("id,kind,caption,media_path,session").eq("user_id",user.id);if(mr.error){syBusy=false;return}const mine=mr.data||[],by=Object.fromEntries(mine.map(p=>[p.id,p]));
  let vs=[];try{vs=await vAll()}catch(e){}
  for(const v of vs){const p=v.postId&&by[v.postId];if(v.postId&&!p){await vDel(v.id);continue}
@@ -721,21 +722,21 @@ async function syncAll(){if(!sb||!user||syBusy)return;syBusy=true;try{
    if(ins.error){toast(upMsg(ins.error));continue}v.postId=ins.data.id;v.path=path;await vPut(v);toast("Video posted ✓")}
   else if(!v.pub&&p){await unpost(p.id,p.media_path);v.postId=null;v.path=null;await vPut(v)}
   else if(v.pub&&p&&(p.caption||"")!==(v.cap||"")){await sb.from("posts").update({caption:v.cap||""}).eq("id",p.id)}}
- for(const x of S.sessions){const p=x.postId&&by[x.postId],pub=x.vis==="public",j=()=>({...agg([x]),name:x.name,type:x.type,date:x.date,min:+x.min||0,kk:(x.kicks||[]).map(k=>[k.x,k.y,{made:"m",left:"l",right:"r",short:"s"}[rk(k)]||"l",kt(k)==="drop"?"d":kt(k)==="conv"?"c":"p"])});if(x.postId&&!p){x.postId=null;x.vis="private";save();continue}
+ for(const x of S.sessions){const p=x.postId&&by[x.postId],pub=x.vis==="public",j=()=>sj(x);if(x.postId&&!p){x.postId=null;x.vis="private";save();continue}
   if(pub&&!p){const ins=await sb.from("posts").insert({user_id:user.id,kind:"session",caption:x.notes||"",session:j()}).select("id").single();if(!ins.error){x.postId=ins.data.id;save();toast("Session shared to your feed ✓")}else toast("Couldn’t share the session: "+ins.error.message)}
   else if(!pub&&p){await sb.from("posts").delete().eq("id",p.id);x.postId=null;save()}
-  else if(pub&&p){const q=j();if(cj(q)!==cj(p.session||{})||(p.caption||"")!==(x.notes||""))await sb.from("posts").update({session:q,caption:x.notes||""}).eq("id",p.id)}}
- }catch(e){}syBusy=false}
-async function loadFeed(){try{await syncAll();const me=user.id,fp=S.fpos||"";
+  else if(pub&&p){const q=j();if(cj(q)!==cj(p.session||{})||(p.caption||"")!==(x.notes||"")){const u=await sb.from("posts").update({session:q,caption:x.notes||""}).eq("id",p.id).select("id");if(u.error||!(u.data||[]).length)toast("Couldn’t update the online session"+(u.error?": "+u.error.message:" (run supabase-v3.sql)"));else FD.pos.forEach(f=>{if(f.id===p.id){f.session=q;f.caption=x.notes||""}})}}}
+ }catch(e){}syBusy=false;if(window.syAg){window.syAg=0;schedSync()}}
+async function loadFeed(q){try{if(!q)await syncAll();const me=user.id,fp=S.fpos||"";
  const[f,r,bl]=await Promise.all([sb.from("follows").select("followee_id,status").eq("follower_id",me),sb.from("follows").select("follower_id").eq("followee_id",me).eq("status","pending"),sb.from("blocks").select("blocked_id")]);
  if(f.error||bl.error)throw (f.error||bl.error);FD.fol={};(f.data||[]).forEach(x=>FD.fol[x.followee_id]=x.status);FD.blocked=(bl.data||[]).map(x=>x.blocked_id);FD.req=(r.data||[]).map(x=>x.follower_id);
  const ids=[me,...Object.keys(FD.fol).filter(k=>FD.fol[k]==="accepted")];
  const pq=await qPosts(c=>sb.from("posts").select(c).in("user_id",ids).order("created_at",{ascending:false}).limit(40));if(pq.error)throw pq.error;FD.pos=pq.data||[];
- let q=sb.from("profiles").select("id,name,handle,role,pos,private").neq("id",me).neq("handle","").neq("settings->>discoverable","false").order("created_at",{ascending:false}).limit(30);if(fp)q=q.eq("pos",fp);
+ let q=sb.from("profiles").select(PRC).neq("id",me).neq("handle","").neq("settings->>discoverable","false").order("created_at",{ascending:false}).limit(30);if(fp)q=q.eq("pos",fp);
  const sg=(await q).data||[];FD.sug=sg.filter(x=>!FD.fol[x.id]&&!FD.blocked.includes(x.id)).sort((a,b)=>(b.pos===S.me.pos)-(a.pos===S.me.pos)).slice(0,10);
  sg.forEach(x=>FD.pr[x.id]=x);
  const need=[...new Set([...FD.pos.map(x=>x.user_id),...FD.req])].filter(u=>u!==me&&!FD.pr[u]);
- if(need.length)((await sb.from("profiles").select("id,name,handle,role,pos,private").in("id",need)).data||[]).forEach(x=>FD.pr[x.id]=x);
+ if(need.length)((await sb.from("profiles").select(PRC).in("id",need)).data||[]).forEach(x=>FD.pr[x.id]=x);
  const pids=FD.pos.map(x=>x.id);FD.lk={};FD.cc={};
  if(pids.length){((await sb.from("likes").select("post_id,user_id").in("post_id",pids)).data||[]).forEach(x=>{const l=FD.lk[x.post_id]=FD.lk[x.post_id]||{n:0,me:false};l.n++;if(x.user_id===me)l.me=true});
   ((await sb.from("comments").select("post_id").in("post_id",pids)).data||[]).forEach(x=>FD.cc[x.post_id]=(FD.cc[x.post_id]||0)+1)}
@@ -749,13 +750,13 @@ function renderFeed(){if(nv!=="feed")return;const fp=S.fpos||"",me=user.id;
  const fb=(u)=>{const s=FD.fol[u.id];return`<button class="fb ${s?"on":""}" data-fo="${u.id}" data-pv="${u.private?1:0}" style="margin:0;padding:5px 12px">${s==="accepted"?"✓ Following":s==="pending"?"Requested":u.private?"＋ Request":"＋ Follow"}</button>`};
  const card=p=>{const u=pr(p.user_id),mine=p.user_id===me,l=FD.lk[p.id]||{n:0,me:false},n=FD.cc[p.id]||0,s=p.session||{};
   const media=pMedia(p);
-  const cm=FD.open[p.id]?`<div style="margin-top:8px">${(FD.cm[p.id]||[]).map(c=>{const a=pr(c.user_id);return`<div class="sr2" style="padding:6px 0"><span><b>@${esc(a.handle||"player")}</b> ${cap(c.body)}</span>${c.user_id===me||mine?`<button class="link" data-cd="${p.id}:${c.id}" aria-label="Delete comment">✕</button>`:""}</div>`}).join("")}<div style="display:flex;gap:6px;margin-top:6px"><input data-ci="${p.id}" placeholder="Add a comment…" maxlength="300" style="margin:0"><button class="fb on" data-cs="${p.id}" style="margin:0">Post</button></div></div>`:"";
-  return`<div class="card hl"><div class="row" style="margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><button class="ring av" data-u="${mine?"me":esc(u.handle)}"><div class="ini" style="width:34px;height:34px;font-size:12px">${ini2(u.name)}</div></button><div><b>${esc(u.name)}</b><div class="mut" style="font-size:12px">@${esc(u.handle)}${u.pos?" · "+esc(u.pos):""} · ${fd(p.created_at)}</div></div></div>${mine?`<button class="link" data-dp="${p.id}" data-pp="${esc(p.media_path||"")}">Delete</button>`:`<button class="link" data-rp="p:${p.id}:${p.user_id}">Report</button>`}</div>${media}<div class="act" style="margin-top:8px"><button data-lk="${p.id}" aria-label="Like">${heart(l.me)}</button><span class="mut">${l.n}</span><button class="link" data-cm="${p.id}" style="text-decoration:none">💬 ${n}</button></div>${p.caption?`<div><b>@${esc(u.handle)}</b> ${cap(p.caption)}</div>`:""}${tagLine(p.tags,"u")}${cm}</div>`};
+  const cm=FD.open[p.id]?`<div style="margin-top:8px">${(FD.cm[p.id]||[]).map(c=>cRow(c,pr(c.user_id),mine)).join("")}<div style="display:flex;gap:6px;margin-top:6px"><input data-ci="${p.id}" placeholder="Add a comment…" maxlength="300" style="margin:0"><button class="fb on" data-cs="${p.id}" style="margin:0">Post</button></div></div>`:"";
+  return`<div class="card hl"><div class="row" style="margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><button class="ring av" data-u="${mine?"me":esc(u.handle)}"><div class="ini" style="width:34px;height:34px;font-size:12px">${avI(u)}</div></button><div><b>${esc(u.name)}</b><div class="mut" style="font-size:12px">@${esc(u.handle)}${u.pos?" · "+esc(u.pos):""} · ${fd(p.created_at)}</div></div></div>${mine?`<button class="link" data-dp="${p.id}" data-pp="${esc(p.media_path||"")}">Delete</button>`:`<button class="link" data-rp="p:${p.id}:${p.user_id}">Report</button>`}</div>${media}<div class="act" style="margin-top:8px"><button data-lk="${p.id}" aria-label="Like">${heart(l.me)}</button><span class="mut">${l.n}</span><button class="link" data-cm="${p.id}" style="text-decoration:none">💬 ${n}</button></div>${p.caption?`<div><b>@${esc(u.handle)}</b> ${cap(p.caption)}</div>`:""}${tagLine(p.tags,"u")}${cm}</div>`};
  const posts=FD.pos.filter(p=>!fp||pr(p.user_id).pos===fp);
  $("feed").innerHTML=fHead()+`<div class="chips"><button class="chip ${fp?"":"on"}" data-pos="">All</button>${POS.map(p=>`<button class="chip ${fp===p?"on":""}" data-pos="${p}">${p}</button>`).join("")}</div>`
  +(FD.err?`<div class="card mut">${FD.err}</div>`:"")
  +(FD.req.length?`<div class="card hl"><b>Follow requests</b>${FD.req.map(id=>{const u=pr(id);return`<div class="sr2"><button class="link" data-u="${esc(u.handle)}" style="text-decoration:none;color:var(--tx)">${esc(u.name)} <span class="mut">@${esc(u.handle)}</span></button><span><button class="fb on" data-ac="${id}" style="margin:0 4px 0 0">Accept</button><button class="fb" data-dc="${id}" style="margin:0">Decline</button></span></div>`}).join("")}</div>`:"")
- +(FD.sug.length?`<b>Suggested players${fp?" · "+fp:""}</b><div class="strip" style="margin:8px 0 12px">${FD.sug.map(d=>`<div class="card sg"><button class="ring av" data-u="${esc(d.handle)}"><div class="ini">${ini2(d.name)}</div></button><b>${esc(d.name)}</b><span class="mut" style="font-size:12px">@${esc(d.handle)}</span><div style="margin:6px 0"><span class="pill">${esc(RL[d.role]||"Player")}${d.pos?" · "+esc(d.pos):""}</span></div>${fb(d)}</div>`).join("")}</div>`:"")
+ +(FD.sug.length?`<b>Suggested players${fp?" · "+fp:""}</b><div class="strip" style="margin:8px 0 12px">${FD.sug.map(d=>`<div class="card sg"><button class="ring av" data-u="${esc(d.handle)}"><div class="ini">${avI(d)}</div></button><b>${esc(d.name)}</b><span class="mut" style="font-size:12px">@${esc(d.handle)}</span><div style="margin:6px 0"><span class="pill">${esc(RL[d.role]||"Player")}${d.pos?" · "+esc(d.pos):""}</span></div>${fb(d)}</div>`).join("")}</div>`:"")
  +posts.map(card).join("")
  +(!posts.length&&!FD.err?`<div class="card mut" style="font-size:13px">Nothing here yet. Follow players from the suggestions above or the Search tab, or post a highlight or a public session.</div>`:"")}
 async function followToggle(id,priv){const cur=FD.fol[id];
@@ -765,8 +766,8 @@ async function followToggle(id,priv){const cur=FD.fol[id];
 async function toggleLike(id){const l=FD.lk[id]=FD.lk[id]||{n:0,me:false},on=!l.me;l.me=on;l.n+=on?1:-1;renderFeed();
  const r=on?await sb.from("likes").insert({post_id:id,user_id:user.id}):await sb.from("likes").delete().eq("post_id",id).eq("user_id",user.id);
  if(r.error){l.me=!on;l.n+=on?-1:1;renderFeed();toast("Couldn’t update your like: "+r.error.message)}}
-async function loadComments(id){const{data}=await sb.from("comments").select("id,user_id,body,created_at").eq("post_id",id).order("created_at");FD.cm[id]=data||[];FD.cc[id]=FD.cm[id].length;
- const miss=[...new Set(FD.cm[id].map(c=>c.user_id))].filter(u=>u!==user.id&&!FD.pr[u]);if(miss.length)((await sb.from("profiles").select("id,name,handle,role,pos,private").in("id",miss)).data||[]).forEach(x=>FD.pr[x.id]=x);renderFeed()}
+async function loadComments(id,q){const{data}=await sb.from("comments").select("id,user_id,body,created_at").eq("post_id",id).order("created_at");FD.cm[id]=data||[];FD.cc[id]=FD.cm[id].length;await loadCL(id);
+ const miss=[...new Set(FD.cm[id].map(c=>c.user_id))].filter(u=>u!==user.id&&!FD.pr[u]);if(miss.length)((await sb.from("profiles").select(PRC).in("id",miss)).data||[]).forEach(x=>FD.pr[x.id]=x);if(!q)renderFeed()}
 async function addComment(id){const i=document.querySelector(`[data-ci="${id}"]`),t=i&&i.value.trim();if(!t)return;
  const{data,error}=await sb.from("comments").insert({post_id:id,user_id:user.id,body:t}).select("id,user_id,body,created_at").single();
  if(error)return toast("You can’t comment on this post (the author limited comments).");(FD.cm[id]=FD.cm[id]||[]).push(data);FD.cc[id]=FD.cm[id].length;renderFeed()}
@@ -801,7 +802,7 @@ async function prof(){if(!sb||!user){nv="feed";return show()}
  const st={all:mk("all"),match:mk("match"),training:mk("training")};
  const list="";let crs=null;if(pt==="career"&&!locked)crs=await cFetch(R.id);CRS=crs||[];
  pvReg(rows,R);const hidC=!!(R.settings&&R.settings.show_follow_counts===false),rl=await flRel(R.id,!locked&&!hidC);
-  $("prof").innerHTML='<button class="link" data-back="1">← Back</button>'+pfH({name:R.name,handle:R.handle,tag:(RL[R.role]||"Player")+(R.pos?" · "+R.pos:""),bio:R.bio||"",posts:locked?"–":rows.length,fr:showC?c.followers:"–",fg:showC?c.following:"–",st,priv:!!R.private,locked,uid:R.id,role:R.role||"player",career:pt==="career"?(crs?cHtml(crs,R.role||"player",false):cSetup):"",flk:hidC?"hidden":(locked?"private":""),rel:rl.fm?'<span class="pill" style="margin-left:4px">Follows you</span>':"",mut:flMutLine(rl.mu,R.id),list:locked?"":list,
+  $("prof").innerHTML='<button class="link" data-back="1">← Back</button>'+pfH({photo:avU(R),name:R.name,handle:R.handle,tag:(RL[R.role]||"Player")+(R.pos?" · "+R.pos:""),bio:R.bio||"",posts:locked?"–":rows.length,fr:showC?c.followers:"–",fg:showC?c.following:"–",st,priv:!!R.private,locked,uid:R.id,role:R.role||"player",career:pt==="career"?cStats(ses,R.role==="coach")+(crs?cHtml(crs,R.role||"player",false):cSetup):"",flk:hidC?"hidden":(locked?"private":""),rel:rl.fm?'<span class="pill" style="margin-left:4px">Follows you</span>':"",mut:flMutLine(rl.mu,R.id),list:locked?"":list,
   tiles:rows.map(pvTile),
   btn:`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="fb ${s?"on":""}" data-fo="${R.id}" data-pv="${R.private?1:0}">${s==="accepted"?"✓ Following":s==="pending"?"Requested":R.private?"＋ Request":rl.fm?"＋ Follow back":"＋ Follow"}</button><button class="fb" data-bl="${R.id}">Block</button><button class="fb" data-rp="u:${R.id}">Report</button></div>`})}
 $("prof").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!user)return;const d=b.dataset;
@@ -819,7 +820,7 @@ function kmap(kk){if(!Array.isArray(kk)||!kk.length)return"";
  const dots=Object.values(G).map(g=>{const x=+g[0][0],y=+g[0][1],same=g.every(k=>k[2]===g[0][2]),c=same?col[g[0][2]]||"#ff5a4a":"#4d91ff";
   return`<circle cx="${x}" cy="${y}" r="6" fill="${c}" stroke="#fff" stroke-width="1.6"/>`+(g.length>1?`<text x="${x}" y="${y+3}" text-anchor="middle" font-size="8" font-weight="800" fill="#fff">${g.length}</text>`:"")}).join("");
  const trj=ktraj(kk,1.8);return`<svg viewBox="0 0 300 ${h}" role="img" aria-label="Kick map" style="width:100%;border-radius:10px;display:block;margin-top:10px"><rect width="300" height="300" fill="var(--fl)"/><rect width="300" height="30" fill="#000" opacity=".13"/><g stroke="var(--ln)" stroke-width="1.6" fill="none" opacity=".9"><line x1="0" y1="30" x2="300" y2="30" stroke-width="2.4"/><line x1="1" y1="30" x2="1" y2="300" stroke-width="2.4"/><line x1="299" y1="30" x2="299" y2="300" stroke-width="2.4"/><line x1="0" y1="51.4" x2="300" y2="51.4" stroke-dasharray="6 5"/><line x1="0" y1="124.3" x2="300" y2="124.3"/><line x1="0" y1="201.4" x2="300" y2="201.4" stroke-dasharray="6 5"/><line x1="0" y1="244.3" x2="300" y2="244.3"/><line x1="21.4" y1="30" x2="21.4" y2="300" stroke-dasharray="6 5"/><line x1="278.6" y1="30" x2="278.6" y2="300" stroke-dasharray="6 5"/><line x1="64.3" y1="30" x2="64.3" y2="300" stroke-dasharray="6 5"/><line x1="235.7" y1="30" x2="235.7" y2="300" stroke-dasharray="6 5"/></g><g stroke="#fff" stroke-width="3"><line x1="140" y1="30" x2="140" y2="12"/><line x1="160" y1="30" x2="160" y2="12"/><line x1="140" y1="21" x2="160" y2="21"/></g>${trj}${dots}</svg><div class="mut" style="font-size:12px;margin-top:4px">🟢 ${cnt.m} made · 🔴 ${cnt.x} missed${cnt.s?` · 🟠 ${cnt.s} short`:""}</div>`}
-function sessCard(s){s=s||{};const k=+s.k||0,km=+s.km||0,kk=Array.isArray(s.kk)?s.kk:[];
+function sessCard(s){s=s||{};if(s.coach)return coachCard(s);const k=+s.k||0,km=+s.km||0,kk=Array.isArray(s.kk)?s.kk:[];
  const meta=[s.type==="match"?"🏉 Match":"🏋️ Training",s.min?(+s.min)+" min":"",s.date?fd(s.date):""].filter(Boolean).join(" · ");
  const bd=[];if(k>=3&&km===k)bd.push("🎯 100% goal kicks");if(+s.tr>0)bd.push("🏉 "+s.tr+(+s.tr>1?" tries":" try"));if(+s.br>0)bd.push("💨 "+s.br+(+s.br>1?" breaks":" break"));
  return`<div class="sess"><div style="font-size:19px;font-weight:800;line-height:1.2">${esc(s.name||"Session")}</div><div class="mut" style="font-size:13px;margin-top:2px">${esc(meta)}</div><div class="zones" style="grid-template-columns:repeat(4,1fr);margin:10px 0 0">${cell("Points",+s.pts||0)}${cell("Kicks",pc(km,k),km+"/"+k)}${cell("Tackles",pc(+s.tk||0,+s.tkn||0))}${cell("Passes",pc(+s.ps||0,+s.psn||0))}</div>${bd.length?`<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${bd.map(x=>`<span class="pill">${x}</span>`).join("")}</div>`:""}${kmap(kk)}</div>`}
@@ -833,7 +834,7 @@ const NTX={like:"liked your post",follow:"started following you",follow_request:
 const ago=t=>{const s=Math.max(1,Math.round((Date.now()-new Date(t))/1000));if(s<60)return"now";const m=Math.round(s/60);if(m<60)return m+"m";const h=Math.round(m/60);if(h<24)return h+"h";const d=Math.round(h/24);return d<7?d+"d":fd(t)};
 function ntBadge(){document.querySelectorAll(".nbd").forEach(e=>{e.textContent=NT.unread>99?"99+":NT.unread;e.classList.toggle("hide",!NT.unread)})}
 async function ntCount(){if(!sb||!user)return;const r=await sb.from("notifications").select("id",{count:"exact",head:true}).eq("user_id",user.id).eq("read",false);if(r.error)return;NT.unread=r.count||0;ntBadge()}
-async function ntActor(id){if(FD.pr[id])return FD.pr[id];try{const r=await sb.from("profiles").select("id,name,handle,role,pos,private").eq("id",id).maybeSingle();if(r.data)FD.pr[id]=r.data}catch(e){}return FD.pr[id]||{name:"Someone",handle:""}}
+async function ntActor(id){if(FD.pr[id])return FD.pr[id];try{const r=await sb.from("profiles").select(PRC).eq("id",id).maybeSingle();if(r.data)FD.pr[id]=r.data}catch(e){}return FD.pr[id]||{name:"Someone",handle:""}}
 function ntStart(){if(NT.on||!sb||!user)return;NT.on=true;ntCount();
  try{sb.channel("nt-"+user.id).on("postgres_changes",{event:"INSERT",schema:"public",table:"notifications",filter:"user_id=eq."+user.id},async p=>{const n=p.new,a=await ntActor(n.actor_id);NT.unread++;ntBadge();toast("@"+(a.handle||"someone")+" "+(NTX[n.type]||"sent you a notification"));if(nv==="notif")notifs(true)}).subscribe()}catch(e){}
  setInterval(()=>{if(!document.hidden)ntCount()},60000)}
@@ -849,7 +850,7 @@ function ntRender(){const el=$("notif");
   else if(n.type==="follow"||n.type==="follow_accept"){const st=FD.fol[n.actor_id];act=`<button class="fb ${st?"on":""}" data-nfo="${n.actor_id}" data-pv="${a.private?1:0}" style="margin:0;padding:5px 12px">${st==="accepted"?"Following":st==="pending"?"Requested":"Follow back"}</button>`}
   else act=thumb(n);
   const who="@"+esc(a.handle||"someone"),oth=n.more.length,txt=n.type==="like"&&oth?`<b>${who}</b> and ${oth} other${oth>1?"s":""} liked your post`:`<b>${who}</b> ${NTX[n.type]||"sent you a notification"}`;
-  return`<div class="nrow${fresh?" new":""}"><button class="ring av" data-u="${esc(a.handle||"")}" aria-label="Open profile"><div class="ini" style="width:42px;height:42px;font-size:14px">${ini2(a.name)}</div></button><div style="flex:1;min-width:0"><div>${txt}${n.type==="comment"&&n.body?`: <span class="mut">${esc(n.body)}</span>`:""}</div><div class="mut" style="font-size:12px">${ago(n.created_at)}</div></div>${act}</div>`};
+  return`<div class="nrow${fresh?" new":""}"><button class="ring av" data-u="${esc(a.handle||"")}" aria-label="Open profile"><div class="ini" style="width:42px;height:42px;font-size:14px">${avI(a)}</div></button><div style="flex:1;min-width:0"><div>${txt}${n.type==="comment"&&n.body?`: <span class="mut">${esc(n.body)}</span>`:""}</div><div class="mut" style="font-size:12px">${ago(n.created_at)}</div></div>${act}</div>`};
  const isNew=n=>NT.fresh.has(n.id)||n.more.some(m=>NT.fresh.has(m.id));
  const nw=grp.filter(isNew),old=grp.filter(n=>!isNew(n));
  el.innerHTML=head+(grp.length?(nw.length?`<div class="mut nh">New</div>`+nw.map(row).join(""):"")+(old.length?`<div class="mut nh">Earlier</div>`+old.map(row).join(""):""):`<div class="card mut" style="text-align:center;padding:22px">🤍<br>No activity yet.<br><span style="font-size:13px">Likes, comments and new followers will show up here.</span></div>`)}
@@ -860,7 +861,7 @@ async function notifs(quiet){const el=$("notif");
  if(r.error){el.innerHTML=`<div class="card hl"><b>Activity isn’t set up yet</b><p class="mut" style="margin:6px 0 0">Run the file <b>supabase-notifications.sql</b> once in your Supabase project (SQL Editor), then reload this page.</p><p class="mut" style="font-size:12px;margin:8px 0 0">${esc(r.error.message)}</p></div>`;return}
  NT.list=r.data||[];
  const ids=[...new Set(NT.list.map(n=>n.actor_id))].filter(u=>!FD.pr[u]);
- if(ids.length)((await sb.from("profiles").select("id,name,handle,role,pos,private").in("id",ids)).data||[]).forEach(x=>FD.pr[x.id]=x);
+ if(ids.length)((await sb.from("profiles").select(PRC).in("id",ids)).data||[]).forEach(x=>FD.pr[x.id]=x);
  const pids=[...new Set(NT.list.filter(n=>n.post_id).map(n=>n.post_id))];NT.posts={};
  if(pids.length){const pr=await sb.from("posts").select("id,kind,media_path,session").in("id",pids);(pr.data||[]).forEach(x=>NT.posts[String(x.id)]=x)}
  const[f,q]=await Promise.all([sb.from("follows").select("followee_id,status").eq("follower_id",user.id),sb.from("follows").select("follower_id").eq("followee_id",user.id).eq("status","pending")]);
@@ -877,7 +878,7 @@ $("notif").addEventListener("click",async e=>{const b=e.target.closest("button")
  if(d.nfo){await followToggle(d.nfo,d.pv==="1");return}
  if(d.nac){const r=await sb.from("follows").update({status:"accepted"}).eq("follower_id",d.nac).eq("followee_id",user.id).select("follower_id");if(r.error||!(r.data||[]).length)toast("Couldn’t accept the request.");notifs(true);return}
  if(d.ndc){await sb.from("follows").delete().eq("follower_id",d.ndc).eq("followee_id",user.id);notifs(true)}});
-{const _ti=setInterval(()=>{if(user){clearInterval(_ti);ntStart()}},800)}
+{const _ti=setInterval(()=>{if(user){clearInterval(_ti);ntStart();liveStart()}},800)}
 document.addEventListener("visibilitychange",()=>{if(document.hidden||!user)return;ntCount();if(nv==="feed")feed();else if(nv==="notif")notifs(true)});
 
 const _s3=show;show=function(){_s3();nsu.classList.toggle("hide",!!user);if(user)ntStart()};
@@ -903,13 +904,13 @@ async function flRel(uid,wantMu){const out={fm:false,mu:null};try{
 async function flMine(F){const[a,b]=await Promise.all([sb.from("follows").select("followee_id,status").eq("follower_id",user.id),sb.from("follows").select("follower_id").eq("followee_id",user.id).eq("status","accepted")]);
  if(!a.error){FD.fol={};(a.data||[]).forEach(x=>FD.fol[x.followee_id]=x.status)}F.fm=new Set((b.data||[]).map(x=>x.follower_id))}
 async function flReqs(){const q=await sb.from("follows").select("follower_id").eq("followee_id",user.id).eq("status","pending");if(q.error)return[];const ids=(q.data||[]).map(x=>x.follower_id);if(!ids.length)return[];
- return((await sb.from("profiles").select("id,name,handle,role,pos,private").in("id",ids)).data||[]).map(flNorm)}
+ return((await sb.from("profiles").select(PRC).in("id",ids)).data||[]).map(flNorm)}
 async function flFetch(uid,kind,mine){const r=await sb.rpc("follow_list",{uid,kind});if(!r.error)return(r.data||[]).map(flNorm);
  if(!mine){const e=new Error(r.error.message);e.setup=true;throw e}
  const col=kind==="followers"?"followee_id":"follower_id",oth=kind==="followers"?"follower_id":"followee_id";
  const q=await sb.from("follows").select(oth).eq(col,uid).eq("status","accepted").limit(1000);if(q.error)throw q.error;
  const ids=(q.data||[]).map(x=>x[oth]),out=[];if(!ids.length)return[];
- for(let i=0;i<ids.length;i+=80){const p=await sb.from("profiles").select("id,name,handle,role,pos,private").in("id",ids.slice(i,i+80));if(p.error)throw p.error;out.push(...(p.data||[]))}
+ for(let i=0;i<ids.length;i+=80){const p=await sb.from("profiles").select(PRC).in("id",ids.slice(i,i+80));if(p.error)throw p.error;out.push(...(p.data||[]))}
  const m=Object.fromEntries(out.map(x=>[x.id,x]));return ids.map(i=>m[i]).filter(x=>x&&x.handle).map(flNorm)}
 const flMut=()=>(FL.data.followers||[]).filter(u=>FD.fol[u.id]==="accepted"&&u.id!==user.id);
 const flRows=()=>FL.tab==="mutual"?flMut():(FL.data[FL.tab]||[]);
@@ -924,12 +925,12 @@ function flRow(u){const s=FD.fol[u.id],c=FL.ctx;let a="";
  else{const l=s==="accepted"?"Following":s==="pending"?"Requested":FL.fm.has(u.id)?"Follow back":u.private?"Request":"Follow";
   a=`<button class="fb ${s?"on":""}" data-ffo="${u.id}" data-pv="${u.private?1:0}">${l}</button>`;
   if(c.mine&&FL.tab==="followers")a+=`<button class="fx" data-frm="${u.id}" aria-label="Remove @${esc(u.handle)}">✕</button>`}
- return`<div class="flr"><button class="flp" data-fp="${u.id===user.id?"me":esc(u.handle)}"><div class="ring"><div class="ini">${ini2(u.name)}</div></div><div style="min-width:0"><b>${esc(u.name)}${u.private?" 🔒":""}</b><span class="mut">@${esc(u.handle)}${u.pos?" · "+esc(u.pos):""}</span></div></button><span class="fla">${a}</span></div>`}
+ return`<div class="flr"><button class="flp" data-fp="${u.id===user.id?"me":esc(u.handle)}"><div class="ring"><div class="ini">${avI(FD.pr[u.id]||u)}</div></div><div style="min-width:0"><b>${esc(u.name)}${u.private?" 🔒":""}</b><span class="mut">@${esc(u.handle)}${u.pos?" · "+esc(u.pos):""}</span></div></button><span class="fla">${a}</span></div>`}
 function flList(){const el=$("flb"),F=FL,y=el.scrollTop,c=F.ctx;let h="";
  if(F.state==="load")h=Array(6).fill('<div class="flr"><i class="fsk" style="width:46px;height:46px;border-radius:50%"></i><div style="flex:1"><i class="fsk" style="width:55%;height:12px"></i><i class="fsk" style="width:34%;height:10px;margin-top:8px"></i></div></div>').join("");
  else if(F.msg)h=`<div class="mut" style="text-align:center;padding:40px 12px;line-height:1.6">${F.msg}</div>`;
  else{const q=F.q.trim().toLowerCase().replace(/^@/,""),all=flRows(),rows=q?all.filter(u=>(u.name+" "+u.handle).toLowerCase().includes(q)):all,sh=rows.slice(0,F.lim),rq=c.mine&&F.tab==="followers"&&!q&&F.reqs.length;
-  if(rq)h+=`<div class="nh mut">Follow requests · ${F.reqs.length}</div>`+F.reqs.map(u=>`<div class="flr"><button class="flp" data-fp="${esc(u.handle)}"><div class="ring"><div class="ini">${ini2(u.name)}</div></div><div style="min-width:0"><b>${esc(u.name)}</b><span class="mut">@${esc(u.handle)}</span></div></button><span class="fla"><button class="fb" data-far="${u.id}">Accept</button><button class="fb on" data-fdr="${u.id}">Decline</button></span></div>`).join("")+(all.length?'<div class="nh mut">Followers</div>':"");
+  if(rq)h+=`<div class="nh mut">Follow requests · ${F.reqs.length}</div>`+F.reqs.map(u=>`<div class="flr"><button class="flp" data-fp="${esc(u.handle)}"><div class="ring"><div class="ini">${avI(FD.pr[u.id]||u)}</div></div><div style="min-width:0"><b>${esc(u.name)}</b><span class="mut">@${esc(u.handle)}</span></div></button><span class="fla"><button class="fb" data-far="${u.id}">Accept</button><button class="fb on" data-fdr="${u.id}">Decline</button></span></div>`).join("")+(all.length?'<div class="nh mut">Followers</div>':"");
   h+=sh.length?sh.map(flRow).join("")+(rows.length>sh.length?'<button class="link" data-fmore="1" style="width:100%;padding:12px">Show more</button>':""):(rq?"":`<div class="mut" style="text-align:center;padding:40px 12px">${q?"No results for “"+esc(F.q.trim())+"”":F.tab==="following"?"Not following anyone yet.":F.tab==="mutual"?"No mutual followers.":"No followers yet."}</div>`)}
  el.innerHTML=h;el.scrollTop=y}
 async function flOpen(uid,tab){const c=FLC[uid]||{handle:"",name:"",flk:"",fr:"–",fg:"–"},
@@ -937,7 +938,7 @@ async function flOpen(uid,tab){const c=FLC[uid]||{handle:"",name:"",flk:"",fr:"�
  $("flq").value="";$("fl").classList.remove("hide");document.body.style.overflow="hidden";flTabs();flList();$("fl").querySelector("[data-fx]").focus();
  if(!F.ctx.mine&&F.ctx.flk){F.state="";F.msg=F.ctx.flk==="private"?`🔒<br><b>This account is private</b><br>Follow @${esc(c.handle)} to see who they follow and who follows them.`:"This player keeps their follower lists hidden.";flList();return}
  try{const[,A,B,R]=await Promise.all([flMine(F),flFetch(uid,"followers",F.ctx.mine),flFetch(uid,"following",F.ctx.mine),F.ctx.mine?flReqs():[]]);
-  if(F!==FL)return;F.data={followers:A,following:B};F.reqs=R;F.state=""}
+  if(F!==FL)return;await avFill([...A,...B,...R].map(u=>u.id));if(F!==FL)return;F.data={followers:A,following:B};F.reqs=R;F.state=""}
  catch(e){if(F!==FL)return;F.state="";F.msg=e&&e.setup?"Lists aren’t set up yet. Run <b>supabase-followlists.sql</b> once in your Supabase SQL Editor, then reload.":'Couldn’t load this list.<br><button class="fb on" data-fretry="1" style="margin-top:10px">Try again</button>'}
  flTabs();flList()}
 function flClose(skip){const F=FL;if(!F.open)return;F.open=false;$("fl").classList.add("hide");document.body.style.overflow="";
@@ -972,7 +973,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&FL.open){e.stopProp
 
 /* ===== POST GRID + VIEWER (Instagram-style) ===== */
 const PVD={};let PV={open:false,k:"",list:[],prev:null};
-const pvReg=(arr,u)=>arr.forEach(p=>PVD["p:"+p.id]={...p,u:{id:u.id,name:u.name,handle:u.handle,pos:u.pos}});
+const pvReg=(arr,u)=>arr.forEach(p=>PVD["p:"+p.id]={...p,u:{id:u.id,name:u.name,handle:u.handle,pos:u.pos,settings:u.settings||(FD.pr[u.id]||{}).settings}});
 function pvTile(p){const s=p.session||{};
  const inner=p.kind==="photo"?`<img src="${esc(pubUrl(p.media_path))}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"><span class="tbd">📷</span>`:p.kind==="video"?`<video src="${esc(pubUrl(p.media_path))}#t=0.1" preload="metadata" muted playsinline tabindex="-1"></video><span class="tbd">▶</span>`
   :(Array.isArray(s.kk)&&s.kk.length?`${kmini(s.kk)}<span class="tpt">${+s.pts||0} pts</span><span class="tbd">🏉</span>`:`<div class="tses"><b>${+s.pts||0}</b><span>pts</span><em>${esc(s.name||"Session")}</em></div><span class="tbd">🏉</span>`);
@@ -981,8 +982,8 @@ function pvTileLocal(v){const k="l:"+v.id,url=URL.createObjectURL(v.blob);PVD[k]
  return`<button class="tile" data-po="${k}" aria-label="Open video"><video src="${url}#t=0.1" preload="metadata" muted playsinline tabindex="-1"></video><span class="tbd">${v.pub?"▶":"🔒"}</span></button>`}
 const pvHeart=on=>`<svg viewBox="0 0 24 24" style="width:26px;height:26px;fill:${on?"#ff5c7a":"none"};stroke:${on?"#ff5c7a":"currentColor"};stroke-width:1.8"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>`;
 const pvRefresh=()=>{if(nv==="acct")acct();else if(nv==="prof")prof()};
-function pvHead(){const p=PVD[PV.k],u=p.local?{name:S.me.name||"You",handle:S.me.handle||""}:p.u,i=PV.list.indexOf(PV.k);
- $("pvh").innerHTML=`<div class="pvbar"><button class="link" data-pcx="1" style="text-decoration:none;color:var(--tx);font-size:16px;font-weight:700;padding:6px 4px">‹ Back</button><b>${p.local||p.kind==="video"?"Video":p.kind==="photo"?"Photo":"Session"}</b><span class="fla"><button class="fx" data-pnv="-1" aria-label="Previous post" ${i<1?"disabled":""}>‹</button><button class="fx" data-pnv="1" aria-label="Next post" ${i>=PV.list.length-1?"disabled":""}>›</button></span></div><button class="flp" data-pup="${p.local?"me":esc(u.handle)}"><div class="ring"><div class="ini" style="width:34px;height:34px;font-size:12px">${ini2(u.name)}</div></div><div style="min-width:0"><b>${esc(u.name)}</b><span class="mut">@${esc(u.handle)} · ${fd(p.created_at||p.ts)}</span></div></button>`}
+function pvHead(){const p=PVD[PV.k],u=p.local?{name:S.me.name||"You",handle:S.me.handle||"",me:1}:p.u,i=PV.list.indexOf(PV.k);
+ $("pvh").innerHTML=`<div class="pvbar"><button class="link" data-pcx="1" style="text-decoration:none;color:var(--tx);font-size:16px;font-weight:700;padding:6px 4px">‹ Back</button><b>${p.local||p.kind==="video"?"Video":p.kind==="photo"?"Photo":"Session"}</b><span class="fla"><button class="fx" data-pnv="-1" aria-label="Previous post" ${i<1?"disabled":""}>‹</button><button class="fx" data-pnv="1" aria-label="Next post" ${i>=PV.list.length-1?"disabled":""}>›</button></span></div><button class="flp" data-pup="${p.local?"me":esc(u.handle)}"><div class="ring"><div class="ini" style="width:34px;height:34px;font-size:12px">${avI(u)}</div></div><div style="min-width:0"><b>${esc(u.name)}</b><span class="mut">@${esc(u.handle)} · ${fd(p.created_at||p.ts)}</span></div></button>`}
 function pvMedia(){const p=PVD[PV.k],vs="width:100%;border-radius:10px;max-height:62vh;background:#000";
  $("pvm").innerHTML=p.local?`<video src="${p.url}" controls playsinline style="${vs}"></video>`:p.kind==="video"?`<video src="${esc(pubUrl(p.media_path))}" controls playsinline preload="metadata" style="${vs}"></video>`:p.kind==="photo"?`<img src="${esc(pubUrl(p.media_path))}" alt="" style="width:100%;border-radius:10px;max-height:70vh;object-fit:contain;background:#000;display:block">`:sessCard(p.session)}
 function pvActs(){const p=PVD[PV.k];
@@ -991,14 +992,13 @@ function pvActs(){const p=PVD[PV.k];
  $("pva").innerHTML=`<div class="act" style="margin-top:8px"><button data-plk="1" aria-label="${l.me?"Unlike":"Like"}" aria-pressed="${l.me}">${pvHeart(l.me)}</button><span class="mut">${l.n}</span><span class="mut" style="margin-left:8px">💬 ${FD.cc[id]!=null?FD.cc[id]:"–"}</span><span style="flex:1"></span>${mine?(p.kind==="video"?'<button class="link" data-ped="1">Edit</button>':"")+'<button class="link" data-pdp="1">Delete</button>':'<button class="link" data-prp="1">Report</button>'}</div>${p.caption?`<div><b>@${esc(p.u.handle)}</b> ${cap(p.caption)}</div>`:""}${tagLine(p.tags,"pup")}`}
 function pvComs(){const p=PVD[PV.k];$("pvi").classList.toggle("hide",!!p.local);if(p.local){$("pvc").innerHTML="";return}
  const id=p.id,mine=p.u.id===user.id,cm=FD.cm[id];
- $("pvc").innerHTML=!cm?'<div class="mut" style="padding:8px 0">Loading…</div>':cm.length?cm.map(c=>{const a=c.user_id===user.id?{handle:S.me.handle||"you"}:(FD.pr[c.user_id]||{});
-  return`<div class="sr2" style="padding:6px 0"><span><b>@${esc(a.handle||"player")}</b> ${cap(c.body)}<span class="mut" style="font-size:12px"> · ${ago(c.created_at)}</span></span>${c.user_id===user.id||mine?`<button class="link" data-pcd="${c.id}" aria-label="Delete comment">✕</button>`:""}</div>`}).join(""):'<div class="mut" style="padding:8px 0">No comments yet. Be the first.</div>'}
+ $("pvc").innerHTML=!cm?'<div class="mut" style="padding:8px 0">Loading…</div>':cm.length?cm.map(c=>cRow(c,c.user_id===user.id?{handle:S.me.handle||"you",id:user.id,name:S.me.name,me:1}:(FD.pr[c.user_id]||{}),mine)).join(""):'<div class="mut" style="padding:8px 0">No comments yet. Be the first.</div>'}
 async function pvLoad(k){const p=PVD[k];if(p.local)return;const id=p.id;
  const[l,c]=await Promise.all([sb.from("likes").select("user_id").eq("post_id",id),sb.from("comments").select("id,user_id,body,created_at").eq("post_id",id).order("created_at")]);
  if(PV.k!==k)return;
  if(!l.error)FD.lk[id]={n:(l.data||[]).length,me:(l.data||[]).some(x=>x.user_id===user.id)};
- if(!c.error){FD.cm[id]=c.data||[];FD.cc[id]=FD.cm[id].length;const miss=[...new Set(FD.cm[id].map(x=>x.user_id))].filter(u=>u!==user.id&&!FD.pr[u]);
-  if(miss.length)((await sb.from("profiles").select("id,name,handle,role,pos,private").in("id",miss)).data||[]).forEach(x=>FD.pr[x.id]=x)}
+ if(!c.error){FD.cm[id]=c.data||[];FD.cc[id]=FD.cm[id].length;await loadCL(id);const miss=[...new Set(FD.cm[id].map(x=>x.user_id))].filter(u=>u!==user.id&&!FD.pr[u]);
+  if(miss.length)((await sb.from("profiles").select(PRC).in("id",miss)).data||[]).forEach(x=>FD.pr[x.id]=x)}
  if(PV.k===k){pvActs();pvComs()}}
 function pvShow(k){PV.k=k;pvHead();pvMedia();pvActs();pvComs();$("pvci").value="";$("pv").querySelector(".pvc").scrollTop=0;pvLoad(k)}
 function pvOpen(k,list){if(!PVD[k])return;PV={open:true,k,list:list&&list.length?list:[k],prev:document.activeElement};$("pv").classList.remove("hide");document.body.style.overflow="hidden";pvShow(k);$("pv").querySelector("[data-pcx]").focus()}
@@ -1039,7 +1039,7 @@ async function srch(q){const n=++sq0;q=(q===undefined?$("sq").value:q).trim().re
     t=q?t.or(`name.ilike.%${q}%,handle.ilike.%${q}%`):t.order("created_at",{ascending:false});
     r=await t;if(r.error)throw r.error;
     r.data=(r.data||[]).filter(p=>p.handle&&!(p.settings&&p.settings.discoverable===false)&&!FD.blocked.includes(p.id))}
-   rows=(r.data||[]).map(map);if(!q)rows.sort((a,b)=>(b.pos===S.me.pos)-(a.pos===S.me.pos));
+   rows=(r.data||[]).map(map);await avFill(rows.map(x=>x.id));if(!q)rows.sort((a,b)=>(b.pos===S.me.pos)-(a.pos===S.me.pos));
    const f=await sb.from("follows").select("followee_id,status").eq("follower_id",user.id);if(!f.error){FD.fol={};(f.data||[]).forEach(x=>FD.fol[x.followee_id]=x.status)}
   }catch(e){msg="Couldn’t load accounts."}}
  else if(sb)msg="Log in to search players.";else msg="Online accounts are not connected.";
@@ -1160,17 +1160,17 @@ $("phov").addEventListener("click",async e=>{const b=e.target.closest("button");
 const CY=new Date().getFullYear(),CLV=["Youth / School","Amateur","Semi-pro","Professional","International"],CRL=["Head coach","Assistant coach","Forwards coach","Backs coach","Defence coach","Attack coach","Kicking coach","Skills coach","Strength & conditioning","Academy coach","Director of rugby","Analyst"];
 const cSetup='<div class="card mut">Career isn’t set up yet. Run <b>supabase-v2.sql</b> once in your Supabase SQL Editor, then reload.</div>';
 async function cFetch(uid){try{const r=await sb.from("career").select("*").eq("user_id",uid).order("start_year",{ascending:false});return r.error?false:(r.data||[])}catch(e){return false}}
-function cAgg(rs){const y=new Set(),cl=new Set(),o={w:0,d:0,l:0,t:0,a:0,tr:0};rs.forEach(r=>{cl.add((r.club||"").trim().toLowerCase());for(let i=r.start_year;i<=(r.end_year||CY);i++)y.add(i);o.w+=r.wins||0;o.d+=r.draws||0;o.l+=r.losses||0;o.t+=r.titles||0;o.a+=r.apps||0;o.tr+=r.tries||0});o.clubs=cl.size;o.yrs=y.size;o.g=o.w+o.d+o.l;return o}
+function cAgg(rs){const y=new Set(),cl=new Set(),o={w:0,d:0,l:0,t:0,a:0,tr:0};rs.forEach(r=>{cl.add((r.club||"").trim().toLowerCase());for(let i=r.start_year;i<=(r.end_year||SE(new Date()));i++)y.add(i);o.w+=r.wins||0;o.d+=r.draws||0;o.l+=r.losses||0;o.t+=r.titles||0;o.a+=r.apps||0;o.tr+=r.tries||0});o.clubs=cl.size;o.yrs=y.size;o.g=o.w+o.d+o.l;return o}
 function cHtml(rs,role,mine){const c=rs.filter(r=>r.kind===role),a=cAgg(c),co=role==="coach",
  st=co?[["Wins",a.w],["Win rate",a.g?Math.round(100*a.w/a.g)+"%":"–"],["Titles",a.t],["Clubs",a.clubs]]:[["Clubs",a.clubs],["Seasons",a.yrs],["Apps",a.a],["Tries",a.tr]],
  pl=r=>[r.wins||r.draws||r.losses?`${r.wins||0}W ${r.draws||0}D ${r.losses||0}L`:"",r.titles?"🏆 "+r.titles:"",r.apps?r.apps+" apps":"",r.tries?r.tries+" tries":""].filter(Boolean).map(x=>`<span class="pill">${x}</span>`).join(" "),
- row=r=>`<div class="stat"><div class="row" style="align-items:flex-start"><div style="min-width:0"><b>${esc(r.club)}</b><div>${esc([r.role,r.level].filter(Boolean).join(" · "))}</div><div class="mut" style="font-size:13px">${r.start_year} – ${r.end_year||"Present"}${r.location?" · "+esc(r.location):""}</div><div style="margin-top:4px">${pl(r)}</div>${r.description?`<div class="mut" style="margin-top:4px">${cap(r.description)}</div>`:""}</div>${mine?`<span style="display:flex"><button class="ib" data-ce="${r.id}" aria-label="Edit">✎</button><button class="ib" data-cx="${r.id}" aria-label="Delete">🗑</button></span>`:""}</div></div>`;
+ row=r=>`<div class="stat"><div class="row" style="align-items:flex-start"><div style="min-width:0"><b>${esc(r.club)}</b><div>${esc([r.role,r.level].filter(Boolean).join(" · "))}</div><div class="mut" style="font-size:13px">${SLB(r.start_year)}${r.end_year&&r.end_year===r.start_year?"":" – "+(r.end_year?SLB(r.end_year):"Present")}${r.location?" · "+esc(r.location):""}</div><div style="margin-top:4px">${pl(r)}</div>${r.description?`<div class="mut" style="margin-top:4px">${cap(r.description)}</div>`:""}</div>${mine?`<span style="display:flex"><button class="ib" data-ce="${r.id}" aria-label="Edit">✎</button><button class="ib" data-cx="${r.id}" aria-label="Delete">🗑</button></span>`:""}</div></div>`;
  return `<div class="card"><b>${co?"Coaching record":"Playing record"}</b><div class="zones" style="grid-template-columns:repeat(4,1fr)">${st.map(([t,v])=>cell(t,v)).join("")}</div>${co&&a.g?`<div class="mut" style="font-size:13px;margin-top:8px">${a.w}W · ${a.d}D · ${a.l}L over ${a.yrs} season${a.yrs===1?"":"s"}</div>`:""}</div><div class="card"><div class="row"><b>${co?"Coaching experience":"Playing career"}</b>${mine?'<button class="fb on" data-ca="1" style="margin:0">＋ Add</button>':""}</div>${c.map(row).join("")||`<div class="mut" style="padding:8px 0">${mine?"Add the clubs you "+(co?"coached":"played")+" for.":"Nothing added yet."}</div>`}</div>`}
 function cForm(r){const co=S.me.role==="coach",n=(k,l)=>`<input class="inp" id="ce_${k}" type="number" min="0" inputmode="numeric" placeholder="${l}" value="${r&&r[k]!=null?r[k]:""}">`,
- sel=(k,a)=>`<select class="inp" id="ce_${k}"><option value="">–</option>${a.map(x=>`<option${r&&r[k]===x?" selected":""}>${x}</option>`).join("")}</select>`,o=document.createElement("div");o.className="ov";
+ ss=(k,ph)=>`<select class="inp" id="ce_${k}"><option value="">${ph}</option>${Array.from({length:SE(new Date())-1989},(_,i)=>SE(new Date())-i).map(y=>`<option value="${y}"${r&&r[k]===y?" selected":""}>${SLB(y)}</option>`).join("")}</select>`,sel=(k,a)=>`<select class="inp" id="ce_${k}"><option value="">–</option>${a.map(x=>`<option${r&&r[k]===x?" selected":""}>${x}</option>`).join("")}</select>`,o=document.createElement("div");o.className="ov";
  o.innerHTML=`<div class="card" style="width:min(100%,440px);max-height:92vh;overflow:auto;padding:16px"><div class="row"><button class="link" data-x="1">Cancel</button><b>${r?"Edit":"Add"} ${co?"coaching experience":"club"}</b><button class="link" data-s="1" style="font-weight:700;color:var(--ac)">Save</button></div>
  <label class="lab" for="ce_club">Club or team</label><input class="inp" id="ce_club" maxlength="80" value="${esc(r?r.club:"")}"><label class="lab" for="ce_role">${co?"Role":"Position"}</label>${sel("role",co?CRL:POS)}<label class="lab" for="ce_level">Level</label>${sel("level",CLV)}<label class="lab" for="ce_location">Location</label><input class="inp" id="ce_location" maxlength="60" placeholder="City, country" value="${esc(r?r.location||"":"")}">
- <div class="meta" style="margin-top:8px;grid-template-columns:1fr 1fr"><div><label class="lab" for="ce_start_year" style="margin-top:0">From (year)</label>${n("start_year","2019")}</div><div><label class="lab" for="ce_end_year" style="margin-top:0">To (empty = present)</label>${n("end_year","Present")}</div>${co?n("wins","Wins")+n("draws","Draws")+n("losses","Losses")+n("titles","Titles"):n("apps","Appearances")+n("tries","Tries")}</div>
+ <div class="meta" style="margin-top:8px;grid-template-columns:1fr 1fr"><div><label class="lab" for="ce_start_year" style="margin-top:0">From (season)</label>${ss("start_year","Season")}</div><div><label class="lab" for="ce_end_year" style="margin-top:0">To (season · empty = present)</label>${ss("end_year","Present")}</div>${co?n("wins","Wins")+n("draws","Draws")+n("losses","Losses")+n("titles","Titles"):n("apps","Appearances")+n("tries","Tries")}</div>
  <label class="lab" for="ce_description">Description</label><textarea id="ce_description" maxlength="400" placeholder="Achievements, squad, highlights…">${esc(r?r.description||"":"")}</textarea><div class="mut" id="cem" style="min-height:18px;font-size:13px;margin-top:4px"></div></div>`;document.body.appendChild(o);
  o.addEventListener("click",async e=>{const b=e.target.closest("button");if(e.target===o||(b&&b.dataset.x))return o.remove();if(!b||!b.dataset.s)return;
   const g=k=>$("ce_"+k).value.trim(),num=k=>g(k)===""?null:Math.max(0,parseInt(g(k),10)||0),row={user_id:user.id,kind:co?"coach":"player",club:g("club"),role:g("role"),level:g("level"),location:g("location"),start_year:num("start_year"),end_year:num("end_year"),description:g("description")};
@@ -1181,6 +1181,111 @@ function cForm(r){const co=S.me.role==="coach",n=(k,l)=>`<input class="inp" id="
 document.addEventListener("click",e=>{const b=e.target.closest("[data-ca],[data-ce],[data-cx]");if(!b||!user||!sb)return;const d=b.dataset;
  if(d.cx)return ask("Delete this entry?","It will be removed from your profile.","Delete",async()=>{const r=await sb.from("career").delete().eq("id",d.cx);if(r.error)return toast(r.error.message);acct()});
  cForm(d.ce?CRS.find(r=>String(r.id)===d.ce):null)});
+
+/* ===== v3: avatars, live sync, comments, seasons, train, coach ===== */
+const PRC="id,name,handle,role,pos,private,settings";
+const avU=u=>{if(!u)return"";if(u.me||(user&&u.id===user.id))return S.me.photo||(sb&&S.me.set&&S.me.set.avatar?pubUrl(S.me.set.avatar):"");const a=u.settings&&u.settings.avatar;return a&&sb?pubUrl(a):""};
+const avI=u=>{const q=avU(u);return q?`<img src="${esc(q)}" alt="">`:ini2(u&&u.name)};
+async function avFill(a){if(!sb)return;const m=[...new Set(a)].filter(i=>i&&(!user||i!==user.id)&&(!FD.pr[i]||!("settings" in FD.pr[i])));if(!m.length)return;try{((await sb.from("profiles").select(PRC).in("id",m)).data||[]).forEach(x=>FD.pr[x.id]=Object.assign(FD.pr[x.id]||{},x))}catch(e){}}
+async function upAv(c){if(!sb||!user)return toast("Photo saved on this device. Log in to show it to everyone.");const b=await new Promise(r=>c.toBlob(r,"image/jpeg",.85));if(!b)return;const p=`${user.id}/avatar-${Date.now()}.jpg`,u=await sb.storage.from("highlights").upload(p,b,{contentType:"image/jpeg"});if(u.error)return toast(upMsg(u.error));const o=(S.me.set||{}).avatar;S.me.set=Object.assign(set(),{avatar:p});save();const r=await sb.from("profiles").update({settings:set()}).eq("id",user.id);if(r.error)return toast("Couldn’t share your photo: "+r.error.message);if(o)try{sb.storage.from("highlights").remove([o])}catch(e){}toast("Profile photo updated ✓")}
+async function loadMe(){if(!sb||!user)return;try{const r=await sb.from("profiles").select("settings").eq("id",user.id).maybeSingle(),s=r.data&&r.data.settings||{},l=S.me.set||{};if(s.avatar&&s.avatar!==l.avatar)S.me.photo="";S.me.set=Object.assign({},s,l,{avatar:s.avatar||l.avatar});save();setAv();
+ if(!s.avatar&&S.me.photo){const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=160;c.getContext("2d").drawImage(im,0,0,160,160);upAv(c)};im.src=S.me.photo}}catch(e){}}
+
+/* live refresh (realtime + polling) */
+const LV={};
+const lvSig=()=>JSON.stringify([FD.pos.map(p=>[p.id,p.caption,p.session]),FD.lk,FD.cc,FD.cl,FD.cm,Object.values(FD.pr).map(p=>[p.id,p.name,p.settings&&p.settings.avatar])]);
+async function liveTick(ev){if(!user||!sb||document.hidden||LV.b)return;if([...document.querySelectorAll("video")].some(v=>!v.paused&&!v.ended))return;LV.b=1;try{
+ if(nv==="feed"){const g=lvSig();await loadFeed(1);await Promise.all(Object.keys(FD.open).filter(k=>FD.open[k]).map(k=>loadComments(k,1)));if(lvSig()!==g)renderFeed()}
+ else if(ev&&!PV.open&&!FL.open){if(nv==="prof")await prof();else if(nv==="acct"&&!pe&&!(document.activeElement||{}).value)await acct()}
+ if(PV.open&&PVD[PV.k]&&!PVD[PV.k].local)await pvLoad(PV.k)}catch(e){}LV.b=0}
+const liveEv=()=>{clearTimeout(LV.t);LV.t=setTimeout(()=>liveTick(1),700)};
+function liveStart(){if(LV.on||!sb||!user)return;LV.on=1;try{const c=sb.channel("live");["posts","comments","likes","comment_likes","profiles"].forEach(t=>c.on("postgres_changes",{event:"*",schema:"public",table:t},p=>{if(t==="profiles"&&p.new&&p.new.id){const x=FD.pr[p.new.id];if(x){x.settings=p.new.settings;x.name=p.new.name;x.pos=p.new.pos}}liveEv()}));c.subscribe()}catch(e){}setInterval(()=>liveTick(0),20000)}
+{const _rf=renderFeed;renderFeed=function(){const a=document.activeElement,k=a&&a.dataset&&a.dataset.ci,v=k&&a.value;_rf();if(k){const n=document.querySelector(`[data-ci="${k}"]`);if(n){n.value=v;n.focus()}}}}
+
+/* comments: like + edit/delete menu */
+const cRe=()=>{if(nv==="feed")renderFeed();if(PV.open)pvComs()};
+const cRow=(c,a,pm)=>{const l=FD.cl[c.id]||{n:0,me:false},own=c.user_id===user.id;return`<div class="sr2" style="padding:6px 0;align-items:flex-start"><span style="display:flex;gap:8px;min-width:0"><span class="ring" style="flex:none"><span class="ini" style="width:26px;height:26px;font-size:10px;display:grid">${avI(a)}</span></span><span style="min-width:0"><b>@${esc(a.handle||"player")}</b> ${cap(c.body)}<span class="mut" style="font-size:12px"> · ${ago(c.created_at)}</span></span></span><span style="display:flex;align-items:center;flex:none"><button class="link" data-cl="${c.id}" aria-label="Like comment" style="padding:2px 4px;text-decoration:none;color:${l.me?"#ff5c7a":"var(--mut)"}">${l.me?"♥":"♡"}${l.n?" "+l.n:""}</button>${own||pm?`<button class="ib" data-cmn="${c.id}" aria-label="More options" style="font-size:18px;font-weight:800">⋯</button>`:""}</span></div>`};
+async function loadCL(pid){const ids=(FD.cm[pid]||[]).map(c=>c.id);if(!ids.length||FD.clOff)return;const r=await sb.from("comment_likes").select("comment_id,user_id").in("comment_id",ids);if(r.error){FD.clOff=1;return}ids.forEach(i=>FD.cl[i]={n:0,me:false});(r.data||[]).forEach(x=>{const l=FD.cl[x.comment_id]=FD.cl[x.comment_id]||{n:0,me:false};l.n++;if(x.user_id===user.id)l.me=true})}
+async function toggleCL(cid){const l=FD.cl[cid]=FD.cl[cid]||{n:0,me:false},on=!l.me;l.me=on;l.n+=on?1:-1;cRe();const r=on?await sb.from("comment_likes").insert({comment_id:cid,user_id:user.id}):await sb.from("comment_likes").delete().eq("comment_id",cid).eq("user_id",user.id);if(r.error){l.me=!on;l.n+=on?-1:1;cRe();toast("Couldn’t like: "+r.error.message+" (run supabase-v3.sql)")}}
+function cMenu(cid){let pid,c;for(const k in FD.cm){const f=FD.cm[k].find(x=>String(x.id)===String(cid));if(f){pid=k;c=f}}if(!c)return;const mine=c.user_id===user.id,o=document.createElement("div"),bx=()=>o.firstChild;o.className="ov";o.style.zIndex=95;
+ o.innerHTML=`<div class="card" style="width:min(100%,340px);padding:16px">${mine?'<button class="save" data-a="e" style="margin:0 0 8px">Edit comment</button>':""}<button class="save" data-a="d" style="margin:0 0 8px;background:#ff8292;color:#07132f">Delete comment</button><button class="link" data-a="x" style="width:100%">Cancel</button></div>`;document.body.appendChild(o);
+ o.onclick=async e=>{const a=e.target.closest("[data-a]"),t=a&&a.dataset.a;if(e.target===o||t==="x")return o.remove();if(!t)return;
+  if(t==="d"){const r=await sb.from("comments").delete().eq("id",cid).select("id");if(r.error||!(r.data||[]).length)return toast("Couldn’t delete the comment.");FD.cm[pid]=FD.cm[pid].filter(x=>x!==c);FD.cc[pid]=FD.cm[pid].length;o.remove();cRe()}
+  else if(t==="e"){bx().innerHTML=`<textarea id="cet" maxlength="300" style="min-height:90px">${esc(c.body)}</textarea><div class="acts" style="margin-top:8px"><button data-a="x">Cancel</button><button class="save" data-a="s" style="margin:0">Save</button></div>`}
+  else if(t==="s"){const v=$("cet").value.trim();if(!v)return;const r=await sb.from("comments").update({body:v}).eq("id",cid).eq("user_id",user.id).select("id");if(r.error||!(r.data||[]).length)return toast("Couldn’t edit the comment (run supabase-v3.sql).");c.body=v;o.remove();cRe()}}}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-cl],[data-cmn]");if(!b||!user||!sb)return;if(b.dataset.cl)toggleCL(b.dataset.cl);else cMenu(b.dataset.cmn)});
+
+/* session payload (flat + arrays, so online compare is stable) */
+const sj=x=>{if(x.coach)return{coach:1,name:x.name,type:"match",date:x.date,cs:x.cs||{},n:1,k:0,km:0,pts:0,tk:0,tkn:0,ps:0,psn:0,tr:0,br:0};
+ const kg=x.kg||{ok:0,ko:0},z={c:[0,0],p:[0,0],d:[0,0]},T=k=>kt(k)==="drop"?"d":kt(k)==="conv"?"c":"p";(x.kicks||[]).forEach(k=>{const a=z[T(k)];a[1]++;if(res(k)==="made")a[0]++});
+ return{...agg([x]),name:x.name,type:x.type,date:x.date,min:+x.min||0,kgo:kg.ok,kgn:kg.ok+kg.ko,kc:z.c,kp:z.p,kd:z.d,kk:(x.kicks||[]).map(k=>[k.x,k.y,{made:"m",left:"l",right:"r",short:"s"}[rk(k)]||"l",T(k)])}};
+
+/* career: seasons + stats (season / all time / by match) */
+const SE=d=>{const t=new Date(d);return isNaN(t)?null:t.getMonth()>=6?t.getFullYear():t.getFullYear()-1},SLB=y=>y+"-"+(y+1);
+let CSV={sel:"all",mode:"t"};
+const zs=n=>`<div class="zones" style="grid-template-columns:repeat(auto-fit,minmax(64px,1fr))">`;
+function cStats(L,co){L=(L||[]).filter(s=>!!s.coach===co&&(co||s.type==="match"));
+ const ss=[...new Set(L.map(s=>SE(s.date)).filter(v=>v!=null))].sort((a,b)=>b-a);if(CSV.sel!=="all"&&!ss.includes(+CSV.sel))CSV.sel="all";
+ const F=L.filter(s=>CSV.sel==="all"||SE(s.date)===+CSV.sel).sort((a,b)=>String(b.date).localeCompare(String(a.date))),
+ c=(s,k)=>+((s.cs||{})[k])||0,sm=k=>F.reduce((a,s)=>a+(+s[k]||0),0),sc=k=>F.reduce((a,s)=>a+c(s,k),0),ar=(k,i)=>F.reduce((a,s)=>a+((s[k]||[0,0])[i]||0),0);
+ const chips=`<div class="chips"><button class="chip ${CSV.sel==="all"?"on":""}" data-csel="all">All time</button>${ss.map(y=>`<button class="chip ${CSV.sel==y?"on":""}" data-csel="${y}">${SLB(y)}</button>`).join("")}</div><div class="tyrow" style="grid-template-columns:1fr 1fr"><button class="${CSV.mode==="t"?"on":""}" data-cmo="t">Totals</button><button class="${CSV.mode==="m"?"on":""}" data-cmo="m">By match</button></div>`;
+ const hd=`<div class="card"><b>${co?"Team stats":"Match stats"}</b> <span class="mut">${CSV.sel==="all"?"All time":SLB(+CSV.sel)}</span>${chips}`;
+ if(!F.length)return hd+`<div class="mut">${co?"Post match reports from the Record tab to build your season stats.":"No match yet. Save a session set to “Match” to build your stats."}</div></div>`;
+ let h;
+ if(CSV.mode==="t"){
+  if(co){const w=F.filter(s=>c(s,"pf")>c(s,"pa")).length,d=F.filter(s=>c(s,"pf")===c(s,"pa")).length,po=F.filter(s=>c(s,"po")).length;
+   h=zs()+cell("Matches",F.length)+cell("Won",w)+cell("Drawn",d)+cell("Lost",F.length-w-d)+cell("Win rate",pc(w,F.length))+`</div>`+zs()+cell("Points",sc("pf")+"–"+sc("pa"))+cell("Tries",sc("tf")+"–"+sc("ta"))+cell("Lineout",pc(sc("lw"),sc("lt")),sc("lw")+"/"+sc("lt"))+cell("Scrum",pc(sc("sw"),sc("st")),sc("sw")+"/"+sc("st"))+cell("Possession",po?Math.round(sc("po")/po)+"%":"–")+cell("Tackles",pc(sc("tk"),sc("tk")+sc("mt")))+cell("Pens",sc("pen"))+cell("Turnovers",sc("tw"))+cell("Cards",sc("yc")+"🟨 "+sc("rc")+"🟥")+`</div>`}
+  else{const k=sm("k"),kg=sm("kgn");
+   h=zs()+cell("Matches",F.length)+cell("Minutes",sm("min")||"–")+cell("Points",sm("pts"))+cell("Tries",sm("tr"))+cell("Breaks",sm("br"))+`</div>`+zs()+cell("Tackles",pc(sm("tk"),sm("tkn")),sm("tk")+"/"+sm("tkn"))+cell("Passes",pc(sm("ps"),sm("psn")),sm("ps")+"/"+sm("psn"))+(kg?cell("Kicks in play",pc(sm("kgo"),kg),sm("kgo")+"/"+kg):"")+`</div>`
+   +(k?`<div class="mut" style="margin:8px 0 2px">🎯 Goal kicking</div>`+zs()+cell("Success",pc(sm("km"),k),sm("km")+"/"+k)+cell("Conversions",pc(ar("kc",0),ar("kc",1)),ar("kc",0)+"/"+ar("kc",1))+cell("Penalties",pc(ar("kp",0),ar("kp",1)),ar("kp",0)+"/"+ar("kp",1))+cell("Drops",pc(ar("kd",0),ar("kd",1)),ar("kd",0)+"/"+ar("kd",1))+`</div>`:"")}
+  return hd+h+`</div>`}
+ h=F.map(s=>co?`<div class="stat"><div class="row"><b>${esc(s.name)}</b><span class="mut">${fd(s.date)}</span></div>${zs()}${cell("Score",c(s,"pf")+"–"+c(s,"pa"),c(s,"pf")>c(s,"pa")?"Won":c(s,"pf")<c(s,"pa")?"Lost":"Draw")}${cell("Tries",c(s,"tf")+"–"+c(s,"ta"))}${cell("Lineout",pc(c(s,"lw"),c(s,"lt")))}${cell("Scrum",pc(c(s,"sw"),c(s,"st")))}${cell("Poss.",c(s,"po")?c(s,"po")+"%":"–")}</div></div>`
+  :`<div class="stat"><div class="row"><b>${esc(s.name)}</b><span class="mut">${fd(s.date)}${s.min?" · "+s.min+" min":""}</span></div>${zs()}${cell("Points",+s.pts||0)}${cell("Tries",+s.tr||0)}${cell("Breaks",+s.br||0)}${cell("Tackles",pc(+s.tk||0,+s.tkn||0),(+s.tk||0)+"/"+(+s.tkn||0))}${cell("Passes",pc(+s.ps||0,+s.psn||0),(+s.ps||0)+"/"+(+s.psn||0))}${+s.kgn?cell("Kicks play",pc(+s.kgo||0,+s.kgn),(+s.kgo||0)+"/"+s.kgn):""}${+s.k?cell("Goal kicks",pc(+s.km||0,+s.k),(+s.km||0)+"/"+s.k):""}</div>${+s.k?`<div class="mut" style="font-size:12px">Conv ${(s.kc||[0,0]).join("/")} · Pen ${(s.kp||[0,0]).join("/")} · Drop ${(s.kd||[0,0]).join("/")}</div>`:""}</div>`).join("");
+ return hd+h+`</div>`}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-csel],[data-cmo]");if(!b)return;if(b.dataset.csel)CSV.sel=b.dataset.csel;else CSV.mode=b.dataset.cmo;pvRefresh()});
+
+/* coach: team match reports */
+document.body.insertAdjacentHTML("beforeend",'<section id="vc" class="hide"></section>');
+const CF=[["pf","Points for"],["pa","Points against"],["tf","Tries for"],["ta","Tries against"],["lw","Lineouts won"],["lt","Lineouts total"],["sw","Scrums won"],["st","Scrums total"],["po","Possession %"],["tk","Tackles made"],["mt","Tackles missed"],["pen","Penalties conceded"],["tw","Turnovers won"],["yc","Yellow cards"],["rc","Red cards"]];
+let CC={};
+function coachCard(s){const c=s.cs||{},w=c.pf>c.pa?"Won":c.pf<c.pa?"Lost":"Draw";return`<div class="sess"><div style="font-size:19px;font-weight:800;line-height:1.2">${esc(s.name||"Match report")}</div><div class="mut" style="font-size:13px;margin-top:2px">🧑‍🏫 Coach report · ${fd(s.date)}</div>${zs()}${cell("Score",(c.pf||0)+"–"+(c.pa||0),w)}${cell("Tries",(c.tf||0)+"–"+(c.ta||0))}${cell("Lineout",pc(c.lw||0,c.lt||0))}${cell("Scrum",pc(c.sw||0,c.st||0))}</div>${zs()}${cell("Possession",c.po?c.po+"%":"–")}${cell("Tackles",pc(c.tk||0,(c.tk||0)+(c.mt||0)))}${cell("Pens",c.pen||0)}${cell("Cards",(c.yc||0)+"🟨 "+(c.rc||0)+"🟥")}</div></div>`}
+function cch(){const e=CC.id?S.sessions.find(x=>x.id==CC.id):null,c=e&&e.cs||{},L=S.sessions.filter(x=>x.coach);
+ $("vc").innerHTML=`<div class="card"><b>${e?"Edit match report":"Team match report"}</b><div class="mut" style="margin:4px 0 8px">As a coach you post team stats instead of recording a training.</div><div class="cf"><div><label>Opponent</label><input id="cc_o" maxlength="40" value="${esc(e?e.opp||"":"")}"></div><div><label>Date</label><input type="date" id="cc_d" value="${esc(e?e.date:new Date().toLocaleDateString("sv"))}"></div>${CF.map(([k,l])=>`<div><label>${l}</label><input type="number" min="0" inputmode="numeric" id="cc_${k}" value="${c[k]!=null?c[k]:""}"></div>`).join("")}<div style="grid-column:1/3"><label>Notes</label><textarea id="cc_n" maxlength="300">${esc(e&&e.notes||"")}</textarea></div><div style="grid-column:1/3"><label>Visibility</label><select id="cc_v"><option value="public">🌐 Post to the feed</option><option value="private"${e&&e.vis==="private"?" selected":""}>🔒 Private</option></select></div></div><button class="save" data-ccs="1">${e?"Update report":"Save & post report"}</button>${e?'<button class="link" data-ccx="1" style="width:100%">Cancel edit</button>':""}</div>`
+ +(L.length?`<b>Your reports</b><div style="margin-top:8px">`+L.map(x=>`<div class="card srow" style="margin:0 0 8px;padding:10px 12px"><b>${esc(x.name)}</b><span class="mut">${(x.cs||{}).pf||0}–${(x.cs||{}).pa||0}</span><button class="ib" data-ccv="${x.id}">${x.vis==="public"?"🌐":"🔒"}</button><button class="ib" data-cce="${x.id}">✎</button><button class="ib" data-ccd="${x.id}">🗑</button></div>`).join("")+`</div>`:"")}
+$("vc").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+ if(d.ccx){CC={};return cch()}if(d.cce){CC.id=d.cce;cch();return window.scrollTo(0,0)}if(d.ccd)return delAsk(d.ccd,cch);
+ if(d.ccv){const x=S.sessions.find(y=>y.id==d.ccv);if(x){x.vis=x.vis==="public"?"private":"public";save();schedSync();cch()}return}
+ if(d.ccs){const o=$("cc_o").value.trim();if(!o)return toast("Add the opponent.");const cs={};CF.forEach(([k])=>{const v=$("cc_"+k).value;cs[k]=v===""?0:Math.max(0,+v||0)});
+  const f={coach:1,type:"match",name:"vs "+o,opp:o,date:$("cc_d").value||new Date().toLocaleDateString("sv"),min:"",notes:$("cc_n").value.trim(),vis:$("cc_v").value,kicks:[],tk:{ok:0,ko:0},ps:{ok:0,ko:0},kg:{ok:0,ko:0},br:0,tr:0,hl:[],cs},x=CC.id&&S.sessions.find(y=>y.id==CC.id);
+  if(x)Object.assign(x,f);else S.sessions.unshift({id:Date.now(),...f});CC={};save();schedSync();toast("Report saved ✓");cch()}});
+{const _s6=show;show=function(){_s6();const co=S.me.role==="coach"&&nv==="rec";if(co){["meta","foot","eb"].forEach(i=>$(i).classList.add("hide"));document.querySelector(".tabs").classList.add("hide");[1,2,3].forEach(i=>$("v"+i).classList.add("hide"));cch()}$("vc").classList.toggle("hide",!co)}}
+
+/* train tab */
+const DR=[["k1","Kicking","Goal-kick ladder","10 kicks: 5 from 15 m, 3 from 25 m, 2 from 35 m. Score = kicks made.","Same routine every kick: steps back, steps across, breathe, eyes on the ball.",10],
+["k2","Kicking","Touchline pressure","10 kicks from the touchline, 5 each side. Score = kicks made.","Plant foot beside the ball, follow through towards the posts.",10],
+["k3","Kicking","Bomb accuracy","10 up-and-unders into a 5 m target zone. Score = landings in the zone.","Strike the lower third of the ball, hands up to track it.",10],
+["p1","Passing","Wall passes","20 passes (10 each side) at a wall target 4 m away. Score = on target.","Hands to the target, snap the wrists, step into the pass.",20],
+["p2","Passing","Spin pass distance","10 spin passes at 10 m then 15 m. Score = caught cleanly by your partner.","Fingers along the seam, rotate through the ball.",10],
+["t1","Tackling","Tackle technique","10 controlled tackles on a bag, alternating shoulders. Score = clean tackles.","Head beside the hip, chin up, drive the legs, wrap tight.",10],
+["h1","Handling","Catch under pressure","20 high catches with a runner closing in. Score = secure catches.","Eyes on the ball, jump early, two hands then tuck.",20],
+["s1","Speed","30 m sprints x6","Six 30 m sprints with full recovery. Score = sprints under your target time.","Drive low for 10 m, rise gradually, relax the shoulders.",6],
+["s2","Speed","Agility zig-zag","8 runs through a 5-cone zig-zag. Score = clean runs.","Short quick steps, stay on the balls of your feet.",8],
+["f1","Fitness","Bronco shuttle","5 rounds of the bronco. Score = rounds done with good form.","Hold the same pace each round, breathe out on the way back.",5]];
+const TC=["All","Kicking","Passing","Tackling","Handling","Speed","Fitness"];let TF="All";
+function trSt(){const L=(S.dr&&S.dr.log)||[],xp=L.reduce((a,l)=>a+10+l.s,0),days=[...new Set(L.map(l=>l.d))];let st=0,c=new Date();if(!days.includes(c.toLocaleDateString("sv")))c.setDate(c.getDate()-1);while(days.includes(c.toLocaleDateString("sv"))){st++;c.setDate(c.getDate()-1)}
+ return{L,xp,st,wk:new Set(L.filter(l=>Date.now()-new Date(l.d)<7*864e5).map(l=>l.d)).size}}
+function trn(){const co=S.me.role==="coach",{L,xp,st,wk}=trSt(),dc=DR[Math.floor(Date.now()/864e5)%DR.length];
+ const card=d=>{const h=L.filter(l=>l.id===d[0]),b=Math.max(0,...h.map(l=>l.s)),sp=h.slice(-10).map((l,i,a)=>`${a.length>1?i*100/(a.length-1):50},${30-28*l.s/d[5]}`).join(" ");
+  return`<div class="card dr"><div class="row"><b>${d[2]}</b><span class="pill">${d[1]}</span></div><div class="mut" style="margin:4px 0">${d[3]}</div><div style="font-size:13px">💡 ${d[4]}</div>${h.length>1?`<svg viewBox="0 0 100 32" preserveAspectRatio="none" style="height:36px;margin-top:8px"><polyline points="${sp}" fill="none" stroke="#4bd3a6" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`:""}${h.length?`<div class="mut" style="font-size:12px;margin-top:4px">Best ${b}/${d[5]} · Last ${h[h.length-1].s}/${d[5]} · ${h.length} tr${h.length>1?"ies":"y"}</div>`:""}${co?"":`<button class="fb on" data-tl="${d[0]}">Log a try</button>`}</div>`};
+ const bd=[["🏁","First try",L.length>=1],["🔥","3-day streak",st>=3],["⭐","Perfect score",L.some(l=>l.s===(DR.find(x=>x[0]===l.id)||[])[5])],["💯","100 XP",xp>=100],["🚀","20 tries",L.length>=20]];
+ $("train").innerHTML=`<div class="row" style="margin-bottom:10px"><b style="font-size:20px">${co?"Drill bank":"Train"}</b></div>`
+ +(co?"":`<div class="card"><div class="row"><b>Level ${Math.floor(xp/100)+1}</b><span class="mut">${xp} XP</span></div><div class="bar" style="margin:8px 0"><i style="width:${xp%100}%"></i></div>${zs()}${cell("This week",wk+"/3","sessions")}${cell("Streak",st,"days")}${cell("Tries",L.length)}</div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${bd.map(x=>`<span class="pill" style="opacity:${x[2]?1:.35}">${x[0]} ${x[1]}</span>`).join("")}</div></div>`)
+ +`<div class="eyebrow" style="margin:12px 0 6px">TODAY’S CHALLENGE</div>${card(dc)}<div class="chips" style="margin-top:12px">${TC.map(c=>`<button class="chip ${TF===c?"on":""}" data-tf="${c}">${c}</button>`).join("")}</div><div id="trl">${DR.filter(d=>TF==="All"||d[1]===TF).map(card).join("")}</div>`}
+function trLog(id){const d=DR.find(x=>x[0]===id);let v=0;const o=document.createElement("div");o.className="ov";o.style.zIndex=95;
+ o.innerHTML=`<div class="card" style="width:min(100%,340px);padding:18px;text-align:center"><b>${d[2]}</b><div class="mut">Score out of ${d[5]}</div><div class="ctr" style="justify-content:center;margin:14px 0"><button class="m" data-v="-1">−</button><span id="tls" style="font-size:32px;min-width:70px">0</span><button class="p" data-v="1">+</button></div><div class="acts"><button data-x="1">Cancel</button><button class="save" data-s="1" style="margin:0">Save</button></div></div>`;document.body.appendChild(o);
+ o.onclick=e=>{const b=e.target.closest("button");if(e.target===o||(b&&b.dataset.x))return o.remove();if(!b)return;if(b.dataset.v){v=Math.max(0,Math.min(d[5],v+ +b.dataset.v));$("tls").textContent=v;return}
+  if(b.dataset.s){const x0=trSt().xp;(S.dr=S.dr||{log:[]}).log.push({id,s:v,d:new Date().toLocaleDateString("sv"),t:Date.now()});save();o.remove();toast(v===d[5]?"Perfect score! 🔥":"Logged ✓ +"+(10+v)+" XP");if(Math.floor(trSt().xp/100)>Math.floor(x0/100))setTimeout(()=>toast("Level up! 🎉"),1200);trn()}}}
+$("train").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.tf){TF=b.dataset.tf;trn()}else if(b.dataset.tl)trLog(b.dataset.tl)});
 
 setAv();render();show();
 document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;const lg=$("lg");if(lg&&!lg.classList.contains("hide"))return;
