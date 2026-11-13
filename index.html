@@ -786,6 +786,8 @@ input:focus, select:focus, textarea:focus {
 
 </head>
 <body>
+<div id="av" aria-hidden="true" style="display:none!important"></div>
+
 <div id="splash" aria-label="Ruckly"><div class="sp-bg"></div>
 <svg class="sp-svg" viewBox="0 0 320 250" aria-hidden="true"><defs><linearGradient id="spg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbeec6"/><stop offset=".55" stop-color="#c9a24a"/><stop offset="1" stop-color="#8a6a22"/></linearGradient><radialGradient id="spb" cx=".4" cy=".35"><stop offset="0" stop-color="#d9a35a"/><stop offset="1" stop-color="#5a2c10"/></radialGradient></defs>
 <ellipse class="sp-ring" cx="160" cy="214" rx="132" ry="24" fill="none" stroke="url(#spg)" stroke-width="1.2"/><ellipse class="sp-ring r2" cx="160" cy="214" rx="86" ry="14" fill="none" stroke="url(#spg)" stroke-width="1"/>
@@ -856,7 +858,7 @@ document.getElementById("spi").src=LOGO_F</script>
 <button data-n="search" aria-label="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="nav-label">Search</span></button>
 <button data-n="rec" class="on" aria-label="Record"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span class="nav-label">Record</span></button>
 <button data-n="hl" aria-label="Posts"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/></svg><span class="nav-label">Posts</span></button>
-<button data-n="notif" id="nnt" aria-label="Activity"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="nav-label">Alerts</span><span class="bdg nbd hide">0</span></button>
+<button data-n="notif" id="nnt" aria-label="Activity"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="nav-label">Activity</span><span class="bdg nbd hide">0</span></button>
 <button data-n="acct" aria-label="Profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg><span class="nav-label">Profile</span></button>
 </nav>
 <div id="foot"><button class="save" id="save">Save session</button>
