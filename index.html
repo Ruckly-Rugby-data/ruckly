@@ -341,6 +341,84 @@ input,select,textarea{font-size:16px;max-width:100%}
 svg[aria-label="Kick map"] text{pointer-events:none}
 .tile{border-radius:12px;overflow:hidden}
 </style>
+
+<style id="ruckly-refined-motion">
+/* RUCKLY — subtle interaction polish; original visual identity preserved */
+:root {
+  --rk-ease: cubic-bezier(.22, .68, 0, 1);
+  --rk-fast: 150ms;
+  --rk-smooth: 240ms;
+}
+html { scroll-behavior: smooth; }
+button, a, .card, .chip, .fb, .tile, .nav button, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+button, .chip, .fb, .tile, .nav button, .drop {
+  transition:
+    color var(--rk-fast) ease,
+    background-color var(--rk-fast) ease,
+    border-color var(--rk-fast) ease,
+    box-shadow var(--rk-smooth) var(--rk-ease),
+    opacity var(--rk-fast) ease,
+    transform var(--rk-fast) var(--rk-ease),
+    filter var(--rk-fast) ease;
+}
+button:active, .chip:active, .fb:active, .tile:active {
+  transform: scale(.975);
+}
+button:focus-visible, a:focus-visible, .tile:focus-visible {
+  outline: 2px solid var(--ac);
+  outline-offset: 3px;
+}
+input, select, textarea {
+  transition: border-color var(--rk-fast) ease, box-shadow var(--rk-fast) ease;
+}
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ac) 18%, transparent);
+}
+.nav button { position: relative; }
+.nav button span { transition: transform var(--rk-smooth) var(--rk-ease); }
+.nav button.on span { transform: translateY(-1px) scale(1.045); }
+.nav button.on { transition: color var(--rk-fast) ease, background-color var(--rk-fast) ease; }
+@media (hover:hover) and (pointer:fine) {
+  .card { transition: border-color var(--rk-smooth) ease, box-shadow var(--rk-smooth) ease; }
+  .card:hover { border-color: color-mix(in srgb, var(--bd) 72%, var(--ac)); }
+  .nav button:hover { transform: translateX(2px); }
+  button:hover:not(:disabled) { filter: brightness(1.055); }
+}
+.ruckly-page-enter {
+  animation: rucklyPageEnter 260ms var(--rk-ease) both;
+}
+@keyframes rucklyPageEnter {
+  from { opacity: 0; transform: translate3d(0, 7px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.ov:not(.hide) > .card,
+.ov:not(.hide) > .bx {
+  animation: rucklyModalEnter 220ms var(--rk-ease) both;
+}
+@keyframes rucklyModalEnter {
+  from { opacity: 0; transform: translate3d(0, 9px, 0) scale(.99); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+.sheet:not(.hide) {
+  animation: rucklySheetEnter 240ms var(--rk-ease) both;
+}
+@keyframes rucklySheetEnter {
+  from { opacity: .72; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="splash" aria-label="Ruckly"><div class="sp-bg"></div>
@@ -1522,5 +1600,48 @@ if(/[?&]install\b/.test(location.search)&&!standalone)setTimeout(panel,900);
 <script>
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});let rl=0;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(rl)return;rl=1;location.reload()})})}
 </script>
+
+<script id="ruckly-refined-motion-script">
+(() => {
+  const reduced = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced || !("MutationObserver" in window)) return;
+
+  const pageIds = new Set([
+    "feed", "search", "hl", "acct", "prof", "notif",
+    "v1", "v2", "v3", "hlist", "meta", "foot", "eb"
+  ]);
+
+  const animateEntry = (el) => {
+    if (!(el instanceof HTMLElement)) return;
+    el.classList.remove("ruckly-page-enter");
+    // Restart the short entrance animation when a hidden view becomes visible.
+    void el.offsetWidth;
+    el.classList.add("ruckly-page-enter");
+    el.addEventListener("animationend", () => {
+      el.classList.remove("ruckly-page-enter");
+    }, { once: true });
+  };
+
+  const observer = new MutationObserver((records) => {
+    for (const record of records) {
+      if (record.type !== "attributes" || record.attributeName !== "class") continue;
+      const el = record.target;
+      if (!(el instanceof HTMLElement)) continue;
+      const wasHidden = (record.oldValue || "").split(/\s+/).includes("hide");
+      const isVisible = !el.classList.contains("hide");
+      if (wasHidden && isVisible && pageIds.has(el.id)) animateEntry(el);
+    }
+  });
+
+  observer.observe(document.body, {
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["class"],
+    attributeOldValue: true
+  });
+})();
+</script>
+
 </body>
 </html>
