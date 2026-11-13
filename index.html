@@ -646,6 +646,146 @@ input:focus, select:focus, textarea:focus {
 }
 </style>
 
+
+<style id="ruckly-premium-mobile-nav-v4">
+/* A quieter, more refined mobile navigation. Keep RUCKLY's existing palette. */
+@media (max-width: 899px) {
+  body { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important; }
+
+  .nav {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    max-width: 520px !important;
+    min-height: 62px !important;
+    margin: 0 !important;
+    padding: 5px 7px calc(5px + env(safe-area-inset-bottom, 0px)) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-around !important;
+    gap: 2px !important;
+    background: rgba(5,14,11,.94) !important;
+    border: 0 !important;
+    border-top: 1px solid rgba(201,162,74,.22) !important;
+    box-shadow: 0 -5px 18px rgba(0,0,0,.12) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .nav button {
+    position: relative !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    min-height: 52px !important;
+    margin: 0 !important;
+    padding: 5px 1px 4px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #929b9a !important;
+    font-size: 10px !important;
+    font-weight: 550 !important;
+    letter-spacing: .015em !important;
+    line-height: 1.1 !important;
+    text-transform: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .nav button svg {
+    width: 19px !important;
+    height: 19px !important;
+    flex: 0 0 19px !important;
+    stroke: currentColor !important;
+    stroke-width: 1.65 !important;
+    fill: none !important;
+    opacity: .9;
+  }
+
+  .nav button .nav-label {
+    display: block !important;
+    max-width: 100%;
+    overflow: hidden;
+    color: inherit !important;
+    font-size: 10px !important;
+    font-weight: inherit !important;
+    line-height: 1.1 !important;
+    letter-spacing: inherit !important;
+    text-overflow: ellipsis;
+  }
+
+  .nav button.on,
+  .nav button.on:hover,
+  .nav button.on:active {
+    color: #d7b866 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-weight: 650 !important;
+  }
+
+  /* Replace the oversized glowing marker and selected pill with a fine indicator. */
+  .nav button.on::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 50% !important;
+    width: 18px !important;
+    height: 2px !important;
+    border-radius: 2px !important;
+    transform: translateX(-50%) !important;
+    background: #c9a24a !important;
+    box-shadow: 0 0 5px rgba(201,162,74,.22) !important;
+  }
+
+  .nav button span:not(.nav-label) {
+    font-size: 10px !important;
+  }
+
+  .nav .bdg {
+    position: absolute !important;
+    top: 2px !important;
+    left: calc(50% + 7px) !important;
+    min-width: 14px !important;
+    height: 14px !important;
+    padding: 0 3px !important;
+    border-radius: 8px !important;
+    font-size: 9px !important;
+    line-height: 14px !important;
+  }
+
+  /* Keep the app header compact; do not turn the brand mark into a second hero. */
+  header.top {
+    min-height: 48px !important;
+    padding: 6px 2px 8px !important;
+    margin-bottom: 9px !important;
+    background: rgba(5,14,11,.88) !important;
+    border-bottom: 1px solid rgba(201,162,74,.12) !important;
+  }
+  header.top .brand {
+    font-size: 15px !important;
+    letter-spacing: .10em !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .nav { padding-left: 3px !important; padding-right: 3px !important; }
+  .nav button { gap: 2px !important; }
+  .nav button svg { width: 18px !important; height: 18px !important; flex-basis: 18px !important; }
+  .nav button .nav-label { font-size: 9px !important; }
+}
+</style>
+
 </head>
 <body>
 <div id="splash" aria-label="Ruckly"><div class="sp-bg"></div>
