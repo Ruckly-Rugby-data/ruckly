@@ -920,14 +920,82 @@ function openPost(f,v){
  $("pch").textContent=v?"Edit post":"New post";$("pcg").textContent=v?"Save":"Share";$("pcs").textContent=v?"Save":"Share";
  $("postov").classList.remove("hide");pcUi()}
 function closePost(){if(!PC)return;const p=$("pcv");p.pause();p.removeAttribute("src");p.load();if(!PC.cloud)URL.revokeObjectURL(PC.url);PC=null;$("postov").classList.add("hide")}
-async function sharePost(){if(!PC)return;const cp=$("pcc").value.trim();
- if(PC.cloud){const r=await sb.from("posts").update({caption:cp}).eq("id",PC.id).select("id");if(r.error||!(r.data||[]).length){toast("Couldn’t save the caption.");return}closePost();hlv();toast("Caption updated");return}
- if(PC.pub&&PC.file.size>52428800){const b=await compressUi(PC.file);if(b)PC.file=b}
-  let pub=PC.pub;if(PC.file.size>52428800)pub=false;
- try{if(PC.id){const v=(await vAll()).find(x=>x.id===PC.id);if(v){v.cap=cp;v.pub=pub;await vPut(v)}}
-  else await vPut({id:Date.now()*1000+Math.floor(Math.random()*1000),cap:cp,blob:PC.file,pub,ts:Date.now()})}
- catch(e){alert("Couldn’t save this video.");return}
- const edit=!!PC.id;closePost();hlv();if(pub||edit)schedSync();else toast("Post saved on this device")}
+async function sharePost(){
+ if(!PC||PC.uploading)return;
+ const cp=$("pcc").value.trim(),pc=PC;
+ pc.uploading=true;
+ const buttons=[$("pcs"),$("pcg")].filter(Boolean);
+ buttons.forEach(b=>{b.disabled=true;b.dataset.oldText=b.textContent;b.textContent="Please wait…"});
+ const restore=()=>{if(PC===pc){pc.uploading=false;buttons.forEach(b=>{b.disabled=false;b.textContent=b.dataset.oldText||"Share"})}};
+ try{
+  if(pc.cloud){
+   const r=await sb.from("posts").update({caption:cp}).eq("id",pc.id).select("id").single();
+   if(r.error)throw r.error;
+   closePost();await hlv();if(typeof loadFeed==="function")await loadFeed(true);
+   toast("Caption updated ✓");return;
+  }
+
+  let local=null;
+  if(pc.id){try{local=(await vAll()).find(x=>x.id===pc.id)||null}catch(e){}}
+  const v=local||{id:Date.now()*1000+Math.floor(Math.random()*1000),ts:Date.now()};
+  v.cap=cp;v.blob=pc.file;v.ts=v.ts||Date.now();
+
+  // Existing online post: update its caption without uploading the media again.
+  if(v.postId&&sb&&user){
+   const u=await sb.from("posts").update({caption:cp}).eq("id",v.postId).eq("user_id",user.id).select("id").single();
+   if(u.error)throw u.error;
+   v.pub=true;await vPut(v);closePost();await hlv();
+   if(typeof loadFeed==="function")await loadFeed(true);
+   toast("Post updated ✓");return;
+  }
+
+  if(pc.pub&&sb&&user){
+   if(v.blob.size>52428800){
+    const compressed=await compressUi(v.blob);
+    if(!compressed)throw new Error("Video optimisation failed. Your original video is still saved on this device.");
+    v.blob=compressed;
+   }
+   if(v.blob.size>52428800)throw new Error("This video is still over the 50 MB upload limit. Try a shorter or smaller video.");
+
+   toast("Uploading video… Keep RUCKLY open until the upload finishes.");
+   const mime=v.blob.type||"video/mp4";
+   const ext=({ "video/quicktime":"mov","video/mp4":"mp4","video/webm":"webm","video/x-m4v":"m4v" })[mime]||mime.split("/")[1]||"mp4";
+   const token=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now()+"-"+Math.random().toString(36).slice(2);
+   const path=`${user.id}/${token}.${ext}`;
+   const up=await sb.storage.from("highlights").upload(path,v.blob,{contentType:mime,upsert:false,cacheControl:"3600"});
+   if(up.error)throw up.error;
+
+   const ins=await sb.from("posts").insert({
+    user_id:user.id,kind:"video",caption:cp,media_path:path
+   }).select("id").single();
+
+   if(ins.error){
+    try{await sb.storage.from("highlights").remove([path])}catch(cleanErr){}
+    throw ins.error;
+   }
+
+   v.postId=ins.data.id;v.path=path;v.pub=true;
+   try{await vPut(v)}catch(cacheErr){
+    // The online post already exists; do not report it as failed because local caching failed.
+   }
+   closePost();
+   await hlv();
+   if(typeof loadFeed==="function")await loadFeed(true);
+   toast("Video posted online ✓");
+   return;
+  }
+
+  // Guest or private post: save locally and state clearly that it is not online.
+  v.pub=false;v.postId=null;v.path=null;
+  await vPut(v);
+  closePost();await hlv();
+  toast(user?"Saved privately on this device.":"Saved on this device only — log in to publish online.");
+ }catch(e){
+  const msg=(e&&e.message)||String(e)||"Unknown error";
+  toast("Couldn’t publish the video: "+upMsg(e));
+  console.error("Ruckly video publish error:",e);
+ }finally{restore()}
+}
 $("pcx").onclick=closePost;$("pcs").onclick=sharePost;$("pcg").onclick=sharePost;$("pcc").oninput=pcUi;
 document.querySelectorAll("#postov [data-pa]").forEach(b=>b.onclick=()=>{if(PC){PC.pub=b.dataset.pa==="1";pcUi()}});
 $("hlist").addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;const d=b.dataset;
@@ -1139,7 +1207,7 @@ function schedSync(){if(!sb||!user){if(!window._gt){window._gt=1;toast("Posts ar
 async function syncAll(){if(!sb||!user)return;if(syBusy){window.syAg=1;return}syBusy=true;try{
  const mr=await sb.from("posts").select("id,kind,caption,media_path,session").eq("user_id",user.id);if(mr.error){syBusy=false;return}const mine=mr.data||[],by=Object.fromEntries(mine.map(p=>[p.id,p]));
  let vs=[];try{vs=await vAll()}catch(e){}
- for(const v of vs){const p=v.postId&&by[v.postId];if(v.postId&&!p){await vDel(v.id);continue}
+ for(const v of vs){let p=v.postId&&by[v.postId];if(v.postId&&!p){v.postId=null;v.path=null;await vPut(v)}
   if(v.pub&&!p){if(v.blob.size>52428800){toast("A video is over 50 MB and wasn’t posted.");v.pub=false;await vPut(v);continue}
    toast("Posting video…");const ext=((v.blob.type||"video/mp4").split("/")[1]||"mp4").replace("quicktime","mov"),path=`${user.id}/${v.id}-${Date.now()}.${ext}`;
    const up=await sb.storage.from("highlights").upload(path,v.blob,{contentType:v.blob.type||"video/mp4"});
@@ -1152,7 +1220,7 @@ async function syncAll(){if(!sb||!user)return;if(syBusy){window.syAg=1;return}sy
   if(pub&&!p){const ins=await sb.from("posts").insert({user_id:user.id,kind:"session",caption:x.notes||"",session:j()}).select("id").single();if(!ins.error){x.postId=ins.data.id;save();toast("Session shared to your feed ✓")}else toast("Couldn’t share the session: "+ins.error.message)}
   else if(!pub&&p){await sb.from("posts").delete().eq("id",p.id);x.postId=null;save()}
   else if(pub&&p){const q=j();if(cj(q)!==cj(p.session||{})||(p.caption||"")!==(x.notes||"")){const u=await sb.from("posts").update({session:q,caption:x.notes||""}).eq("id",p.id).select("id");if(u.error||!(u.data||[]).length)toast("Couldn’t update the online session"+(u.error?": "+u.error.message:" (run supabase-v4.sql)"));else FD.pos.forEach(f=>{if(f.id===p.id){f.session=q;f.caption=x.notes||""}})}}}
- }catch(e){}syBusy=false;if(window.syAg){window.syAg=0;schedSync()}}
+ }catch(e){console.error("Ruckly background sync error:",e);if(!document.hidden)toast("Some posts could not sync: "+upMsg(e))}syBusy=false;if(window.syAg){window.syAg=0;schedSync()}}
 async function loadFeed(quiet){try{if(!quiet)await syncAll();const me=user.id,fp=S.fpos||"";
  const[f,r,bl]=await Promise.all([sb.from("follows").select("followee_id,status").eq("follower_id",me),sb.from("follows").select("follower_id").eq("followee_id",me).eq("status","pending"),sb.from("blocks").select("blocked_id")]);
  if(f.error||bl.error)throw (f.error||bl.error);FD.fol={};(f.data||[]).forEach(x=>FD.fol[x.followee_id]=x.status);FD.blocked=(bl.data||[]).map(x=>x.blocked_id);FD.req=(r.data||[]).map(x=>x.follower_id);
@@ -1489,9 +1557,11 @@ function kmini(kk){const col={m:"#2ecc71",l:"#ff5a4a",r:"#ff5a4a",s:"#f0a030"},d
 
 /* ===== VIDEO UPLOAD: readable errors + automatic shrinking of big videos ===== */
 const upMsg=e=>{const m=String((e&&e.message)||e||"");
- if(/bucket not found/i.test(m))return"Video storage isn’t set up yet. Run supabase-storage.sql in Supabase, then try again.";
- if(/row-level security|policy|not authorized|permission/i.test(m))return"Supabase is blocking this upload. Run supabase-storage.sql in Supabase, then try again.";
- if(/exceed|too large|payload|maximum/i.test(m))return"This video is too large for the server (50 MB max).";
+ if(/bucket not found/i.test(m))return"Video storage isn’t set up yet. Check that the public “highlights” bucket exists in Supabase.";
+ if(/row-level security|policy|not authorized|permission/i.test(m))return"Supabase permissions are blocking the upload. The Storage INSERT policy must allow the signed-in user to upload into their own user-id folder, and the posts INSERT policy must allow them to create their own post.";
+ if(/exceed|too large|payload|maximum/i.test(m))return"This video exceeds the upload limit. Try a shorter or smaller video.";
+ if(/failed to fetch|network|load failed|offline/i.test(m))return"Network error. Check your connection and try again; the video has not been published.";
+ if(/mime|content.?type|unsupported/i.test(m))return"This video format is not accepted by storage. Try exporting it as MP4.";
  return"Upload failed: "+m};
 async function compressVideo(file,onp){
  const AC=window.AudioContext||window.webkitAudioContext,ac=new AC();try{ac.resume()}catch(e){}
@@ -1904,5 +1974,20 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
 })();
 </script>
 
+
+<script id="ruckly-video-file-validation">
+(() => {
+ const input=document.getElementById("fi");
+ if(!input)return;
+ input.addEventListener("change",()=>{
+  const f=input.files&&input.files[0];
+  if(!f)return;
+  if(f.type.startsWith("video/") && f.size===0){
+   input.value="";
+   if(typeof toast==="function")toast("This video file is empty or could not be read. Choose another file.");
+  }
+ });
+})();
+</script>
 </body>
 </html>
