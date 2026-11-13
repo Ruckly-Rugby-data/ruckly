@@ -663,7 +663,15 @@ async function sharePost(){
    toast("Post updated ✓");return;
   }
 
-  let uploadBlob=v.blob;
+  // Upload the original selected File/Blob directly. IndexedDB is only a local backup;
+  // relying on the round-tripped value can leave Supabase with an empty upload body.
+  let uploadBlob=pc.file||v.blob;
+  if(!uploadBlob || typeof uploadBlob.size!=="number" || uploadBlob.size===0){
+   throw new Error("Video file not provided. Please select the video again and retry.");
+  }
+  if(!(uploadBlob instanceof Blob)){
+   uploadBlob=new Blob([uploadBlob],{type:uploadBlob.type||"video/mp4"});
+  }
   if(uploadBlob.size>52428800){
    try{
     const compressed=await compressUi(uploadBlob);
