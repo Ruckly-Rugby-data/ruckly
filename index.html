@@ -387,7 +387,7 @@ document.getElementById("spi").src=LOGO_F</script>
 
 <section id="v1">
   <div class="card">
-    <div class="mut" style="margin-bottom:6px">Tap the pitch where you kicked from, up to the touchline. One window lets you set the number of kicks, the type and the result, or edit / delete them.</div>
+    <div class="mut" style="margin-bottom:6px">Tap the pitch or select “Add a kick” to record a kick. Both open the same kick editor: choose the kick type, then place the exact crossing point between or around the posts.</div>
     <svg id="field" viewBox="0 0 300 300" aria-label="Rugby pitch">
       <defs><clipPath id="pc"><rect x="0" y="30" width="300" height="270"/></clipPath></defs>
       <rect width="300" height="300" fill="var(--fl)"/><g fill="#fff" opacity=".07"><rect y="30" width="300" height="42"/><rect y="114" width="300" height="42"/><rect y="198" width="300" height="42"/></g>
@@ -412,6 +412,7 @@ document.getElementById("spi").src=LOGO_F</script>
       <g id="dots"></g>
       <text x="298" y="297" text-anchor="end" fill="#fff" font-size="8" opacity=".85">Tap the pitch to place your kick</text>
     </svg>
+    <button class="save" id="rka-add-kick-main" type="button" style="margin-top:10px">＋ ADD A KICK</button>
     <div class="row" style="margin-top:8px"><span class="mut">Last kick: <span id="last">–</span></span><button class="link" id="undo">Undo last</button></div>
   </div>
   <div class="card">
@@ -568,6 +569,12 @@ function dlgSave(){const d=D;if(!d||!d.gp)return;
   S.ty=d.t;D=null;save();dlg();
   document.dispatchEvent(new Event("ruckly:kicks-updated"));
 }
+const addKickButton=$("rka-add-kick-main");
+if(addKickButton)addKickButton.addEventListener("click",()=>{
+  $("field").scrollIntoView({behavior:"smooth",block:"center"});
+  $("field").classList.add("rka-field-ready");
+  setTimeout(()=>$("field").classList.remove("rka-field-ready"),1100);
+});
 $("field").addEventListener("click",e=>{
   const r=$("field").getBoundingClientRect();
   const x=clampX(Math.round((e.clientX-r.left)/r.width*300)),y=Math.round((e.clientY-r.top)/r.height*300);
@@ -1714,8 +1721,6 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
       <div id="rka-metrics" class="rka-grid"></div>
       <div id="rka-breakdown" style="margin-top:12px"></div>
     </div>
-    <div class="card"><h3>Kick Heatmap</h3><div class="mut" style="font-size:12px;margin:4px 0 8px">Where your kick origins are recorded across selected sessions. Goal-only entries are excluded until their starting position is mapped.</div><div id="rka-kick-map"></div></div>
-    <div class="card"><h3>Posts Heatmap</h3><div class="mut" style="font-size:12px;margin:4px 0 8px">Where the ball crossed the goal plane. New kicks can record an exact crossing point.</div><div id="rka-post-map"></div></div>
     <div class="card"><h3>Longest successful kick</h3><div id="rka-longest"></div></div>
     <div class="card"><h3>Performance over time</h3><div id="rka-trend"></div></div>
   `;
@@ -1858,7 +1863,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
   if(typeof save==="function"){const oldSave=save;save=function(){oldSave();renderAnalytics();};}
   if(typeof render==="function"){const oldRender=render;render=function(){oldRender();renderAnalytics();};}
   if(typeof show==="function"){const oldShow=show;show=function(){oldShow();renderAnalytics();};}
-  if(typeof acct==="function"){const oldAcct=acct;acct=async function(){await oldAcct();const el=document.getElementById("acct");if(!el)return;let c=document.getElementById("rka-account");if(!c){c=document.createElement("div");c.id="rka-account";c.className="card";el.appendChild(c);}const ss=allKickSessions(),it=flat(ss),ks=it.map(x=>x.k),m=ks.filter(success).length,pp=postPoints(it);c.innerHTML=`<div class="eyebrow">KICKING PERFORMANCE</div><h3 style="margin:2px 0 10px">Your kicking snapshot</h3><div class="rka-grid">${metric(ks.length,"Total kicks")}${metric(ks.length?Math.round(m/ks.length*100)+"%":"–","Success rate")}${metric(ks.reduce((a,k)=>a+pointsK(k),0),"Kicking points")}${metric(it.filter(x=>success(x.k)).length?Math.max(...it.filter(x=>success(x.k)).map(x=>distK(x.k)))+"m":"–","Longest successful")}</div><div style="margin-top:12px"><b style="font-size:14px">Kick Heatmap</b>${heatSvg(ks.map(k=>({x:+k.x,y:+k.y})),false)}</div><div class="rka-note">${pp.exact} exact posts crossing points · ${pp.estimated} estimated legacy points.</div>`;};}
+  if(typeof acct==="function"){const oldAcct=acct;acct=async function(){await oldAcct();const el=document.getElementById("acct");if(!el)return;let c=document.getElementById("rka-account");if(!c){c=document.createElement("div");c.id="rka-account";c.className="card";el.appendChild(c);}const ss=allKickSessions(),it=flat(ss),ks=it.map(x=>x.k),m=ks.filter(success).length,pp=postPoints(it);c.innerHTML=`<div class="eyebrow">KICKING PERFORMANCE</div><h3 style="margin:2px 0 10px">Your kicking snapshot</h3><div class="rka-grid">${metric(ks.length,"Total kicks")}${metric(ks.length?Math.round(m/ks.length*100)+"%":"–","Success rate")}${metric(ks.reduce((a,k)=>a+pointsK(k),0),"Kicking points")}${metric(it.filter(x=>success(x.k)).length?Math.max(...it.filter(x=>success(x.k)).map(x=>distK(x.k)))+"m":"–","Longest successful")}</div>`;};}
   renderAnalytics();
 })();
 </script>
@@ -1872,31 +1877,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
 
 
 
-<script>
-/* RUCKLY session cards: two swipeable maps, pitch trajectory then exact posts heatmap. */
-(function(){
-  if(typeof sessCard!="function"||window.__rucklySessionHeatmaps)return;
-  window.__rucklySessionHeatmaps=true;
-  const original=sessCard;
-  function postsMap(kk){
-    const pts=(kk||[]).filter(k=>k&&k[4]!=null&&k[5]!=null&&Number.isFinite(+k[4])&&Number.isFinite(+k[5])).map(k=>({x:Math.max(0,Math.min(300,+k[4])),y:Math.max(0,Math.min(150,+k[5]))}));
-    if(!pts.length)return '';
-    const bins={};pts.forEach(p=>{const key=Math.round(p.x/4)*4+','+Math.round(p.y/4)*4;bins[key]=(bins[key]||0)+1});
-    const max=Math.max(...Object.values(bins));
-    const glows=Object.entries(bins).map(([key,n])=>{const [x,y]=key.split(',').map(Number);return `<circle cx="${x}" cy="${y}" r="${15+Math.min(12,n*2)}" fill="url(#rka-session-heat-gradient)" opacity="${.45+.48*n/max}"/>`}).join('');
-    return `<div class="mut" style="font-size:12px;font-weight:800;margin:8px 0">POSTS HEATMAP</div><svg viewBox="0 0 300 150" role="img" aria-label="Session posts heatmap" style="width:100%;display:block;border-radius:10px;background:#176b37"><defs><radialGradient id="rka-session-heat-gradient"><stop offset="0" stop-color="#ff3028"/><stop offset=".3" stop-color="#ffb52e"/><stop offset=".58" stop-color="#65e5a4"/><stop offset="1" stop-color="#168bff" stop-opacity="0"/></radialGradient></defs><rect width="300" height="150" fill="#176b37"/>${glows}<line x1="0" y1="140" x2="300" y2="140" stroke="#dce8dd" stroke-width="2" opacity=".55"/><g stroke="#f7faf5" stroke-width="4.5" stroke-linecap="round" fill="none"><path d="M105 139 V7 M195 139 V7 M105 96 H195"/></g><g fill="#101d65"><rect x="98" y="97" width="14" height="43"/><rect x="188" y="97" width="14" height="43"/></g></svg><div class="mut" style="font-size:11px;margin-top:4px">${pts.length} recorded crossing points</div>`;
-  }
-  sessCard=function(s){
-    const base=original(s),kk=Array.isArray(s&&s.kk)?s.kk:[],second=postsMap(kk);
-    if(!second)return base;
-    const first=kmap(kk);
-    if(!first||!base.includes(first))return base.replace(/<\/div>\s*$/,second+'</div>');
-    const gallery=`<div class="rka-session-gallery"><div class="rka-session-slide">${first}</div><div class="rka-session-slide">${second}</div></div><div class="rka-session-dots">●　●</div>`;
-    return base.replace(first,gallery);
-  };
-  const st=document.createElement('style');st.textContent='.rka-session-gallery{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin-top:10px;padding-bottom:5px}.rka-session-gallery>.rka-session-slide{flex:0 0 100%;min-width:0;scroll-snap-align:start}.rka-session-gallery svg{margin-top:0!important}.rka-session-dots{text-align:center;color:var(--mut);font-size:12px;letter-spacing:8px;margin-top:3px}';document.head.appendChild(st);
-})();
-</script>
+
 
 
 <script>
@@ -1918,7 +1899,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
       };
       const pitch=`<svg viewBox="0 0 300 300" style="width:100%;display:block;border-radius:8px;background:#176b37"><rect width="300" height="300" fill="#176b37"/><g stroke="#fff" stroke-width="2" fill="none" opacity=".8"><rect x="2" y="30" width="296" height="268"/><line x1="0" y1="124" x2="300" y2="124"/><line x1="0" y1="201" x2="300" y2="201"/><line x1="0" y1="244" x2="300" y2="244"/></g>${heat(origins,300,false)}</svg>`;
       const post=`<svg viewBox="0 0 300 150" style="width:100%;display:block;border-radius:8px;background:#176b37"><rect width="300" height="150" fill="#176b37"/>${heat(posts,150,true)}<line x1="0" y1="140" x2="300" y2="140" stroke="#dce8dd" stroke-width="2" opacity=".55"/><g stroke="#f7faf5" stroke-width="4.5" stroke-linecap="round" fill="none"><path d="M105 139 V7 M195 139 V7 M105 96 H195"/></g><g fill="#101d65"><rect x="98" y="97" width="14" height="43"/><rect x="188" y="97" width="14" height="43"/></g></svg>`;
-      card.innerHTML=`<div class="eyebrow">KICKING PERFORMANCE</div><h3 style="margin:2px 0 10px">Your kicking snapshot</h3><div class="rka-grid"><div class="rka-metric"><b>${kicks.length}</b><span>Total kicks</span></div><div class="rka-metric"><b>${kicks.length?Math.round(made/kicks.length*100)+'%':'–'}</b><span>Success rate</span></div><div class="rka-metric"><b>${points}</b><span>Kicking points</span></div><div class="rka-metric"><b>${made}</b><span>Successful</span></div></div><div style="margin-top:12px"><b style="font-size:14px">Kick Heatmap</b>${pitch}</div><div style="margin-top:12px"><b style="font-size:14px">Posts Heatmap</b>${post}</div>`;
+      card.innerHTML=`<div class="eyebrow">KICKING PERFORMANCE</div><h3 style="margin:2px 0 10px">Your kicking snapshot</h3><div class="rka-grid"><div class="rka-metric"><b>${kicks.length}</b><span>Total kicks</span></div><div class="rka-metric"><b>${kicks.length?Math.round(made/kicks.length*100)+'%':'–'}</b><span>Success rate</span></div><div class="rka-metric"><b>${points}</b><span>Kicking points</span></div><div class="rka-metric"><b>${made}</b><span>Successful</span></div></div>`;
     }catch(e){}
   });
 })();
@@ -1932,4 +1913,31 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
 #rka-post-input{display:block!important;margin:12px 0!important;padding:12px!important;border:1px solid var(--bd)!important;border-radius:14px!important}
 #rka-post-edit{width:100%;height:auto;display:block;touch-action:none;cursor:crosshair}
 #sh-ok:disabled{opacity:.45;cursor:not-allowed}
+</style>
+
+<style>
+:root{--ruckly-pitch:#176b3b;--ruckly-pitch-line:#f2f4e9}
+#field{
+  display:block;width:100%;height:auto;aspect-ratio:1/1;
+  background:var(--ruckly-pitch);border:1.5px solid #caa64b;
+  border-radius:18px;overflow:hidden;touch-action:manipulation;
+  box-shadow:inset 0 0 0 1px #ffffff22
+}
+#field [stroke="var(--ln)"]{stroke:var(--ruckly-pitch-line)!important}
+#field [fill="var(--fl)"]{fill:var(--ruckly-pitch)!important}
+#field.rka-field-ready{outline:3px solid #d7b45b;outline-offset:3px}
+#rka-post-edit{
+  display:block;width:100%;height:auto;aspect-ratio:2/1;
+  background:var(--ruckly-pitch);border:1.5px solid #caa64b;
+  border-radius:14px;touch-action:none;cursor:crosshair
+}
+#rka-post-edit>rect:first-child{fill:var(--ruckly-pitch)!important}
+#rka-post-edit line,#rka-post-edit path{stroke:var(--ruckly-pitch-line)}
+#rka-post-edit g[fill="#101d65"] rect{fill:#d7b45b}
+#rka-add-kick-main{width:100%;min-height:54px;background:linear-gradient(180deg,#f0d38b,#bd9235)!important;color:#07130f!important;border:1px solid #d7b45b!important;font-weight:900;letter-spacing:.08em}
+#sh-ok:disabled{opacity:.45;cursor:not-allowed}
+</style>
+
+<style>
+#rka-kick-map,#rka-post-map,[aria-label*="heatmap" i],.rka-heatmap{display:none!important}
 </style>
