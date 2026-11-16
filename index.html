@@ -1901,14 +1901,36 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
       <div class="mut rka-small" style="margin-top:5px">Tap the pitch to place the kick. Drag the marker to adjust the exact starting position.</div>
       <div class="rka-info" id="rka-kick-distance">Select the kick position on the pitch.</div>
       <svg id="rka-origin-pitch" viewBox="0 0 300 300" aria-label="Choose kick starting position">
+        <defs><clipPath id="rka-origin-clip"><rect x="0" y="30" width="300" height="270"/></clipPath></defs>
         <rect width="300" height="300" fill="#176b37"/>
-        <g fill="#fff" opacity=".07"><rect y="30" width="300" height="42"/><rect y="114" width="300" height="42"/><rect y="198" width="300" height="42"/></g>
-        <rect width="300" height="30" fill="#000" opacity=".13"/>
-        <g stroke="#fff" stroke-width="1.7" fill="none" opacity=".9">
-          <line x1="0" y1="30" x2="300" y2="30"/><line x1="1" y1="30" x2="1" y2="300"/><line x1="299" y1="30" x2="299" y2="300"/>
-          <line x1="0" y1="51.4" x2="300" y2="51.4" stroke-dasharray="6 5"/><line x1="0" y1="124.3" x2="300" y2="124.3"/><line x1="0" y1="201.4" x2="300" y2="201.4"/><line x1="0" y1="244.3" x2="300" y2="244.3"/>
+        <g fill="#fff" opacity=".07">
+          <rect y="30" width="300" height="42"/>
+          <rect y="114" width="300" height="42"/>
+          <rect y="198" width="300" height="42"/>
         </g>
-        <g stroke="#fff" stroke-width="3"><line x1="140" y1="30" x2="140" y2="12"/><line x1="160" y1="30" x2="160" y2="12"/><line x1="140" y1="21" x2="160" y2="21"/></g>
+        <rect width="300" height="30" fill="#000" opacity=".13"/>
+        <g stroke="#f2f5ed" stroke-width="1.7" fill="none" opacity=".92">
+          <line x1="0" y1="30" x2="300" y2="30" stroke-width="2.4"/>
+          <line x1="1" y1="30" x2="1" y2="300" stroke-width="2.4"/>
+          <line x1="299" y1="30" x2="299" y2="300" stroke-width="2.4"/>
+          <line x1="0" y1="51.4" x2="300" y2="51.4" stroke-dasharray="6 5"/>
+          <line x1="0" y1="124.3" x2="300" y2="124.3"/>
+          <line x1="0" y1="201.4" x2="300" y2="201.4" stroke-dasharray="6 5"/>
+          <line x1="0" y1="244.3" x2="300" y2="244.3"/>
+          <line x1="21.4" y1="30" x2="21.4" y2="300" stroke-dasharray="6 5"/>
+          <line x1="278.6" y1="30" x2="278.6" y2="300" stroke-dasharray="6 5"/>
+          <line x1="64.3" y1="30" x2="64.3" y2="300" stroke-dasharray="6 5"/>
+          <line x1="235.7" y1="30" x2="235.7" y2="300" stroke-dasharray="6 5"/>
+        </g>
+        <g fill="#f2f5ed" font-size="8" opacity=".9">
+          <text x="3" y="27">Goal line</text><text x="3" y="49">5 m</text>
+          <text x="3" y="122">22 m</text><text x="3" y="199">40 m</text><text x="3" y="242">50 m</text>
+        </g>
+        <g stroke="#f2f5ed" stroke-width="3" fill="none">
+          <line x1="140" y1="30" x2="140" y2="12"/>
+          <line x1="160" y1="30" x2="160" y2="12"/>
+          <line x1="140" y1="21" x2="160" y2="21"/>
+        </g>
         <path id="rka-preview-arc" d="" fill="none" stroke="#12a8ff" stroke-width="3.5" stroke-linecap="round"/>
         <circle id="rka-origin-marker" cx="-20" cy="-20" r="8" fill="#168bff" stroke="#07130f" stroke-width="3"/>
       </svg>
