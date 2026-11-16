@@ -530,7 +530,7 @@ const clampX=x=>Math.max(3,Math.min(297,x)),clampY=y=>Math.max(GY+4,Math.min(297
 function spotAt(x,y){const G={};S.kicks.forEach((k,i)=>{(G[k.x+","+k.y]=G[k.x+","+k.y]||[]).push(i)});let best=null,bd=13;Object.values(G).forEach(ix=>{const k=S.kicks[ix[0]],d=Math.hypot(k.x-x,k.y-y);if(d<bd){bd=d;best=ix}});return best}
 function openDlg(x,y,ix){const c={made:0,left:0,right:0,short:0};let t=S.ty;
   if(ix){ix.forEach(i=>c[rk(S.kicks[i])]++);t=kt(S.kicks[ix[0]])}else c.made=1;
-  D={ix,x,y,t,c,moving:false};dlg()}
+  D={ix,x,y,t,c,moving:false,gpCleared:false,gp:ix&&S.kicks[ix[0]]&&Number.isFinite(+S.kicks[ix[0]].gx)&&Number.isFinite(+S.kicks[ix[0]].gy)?{x:+S.kicks[ix[0]].gx,y:+S.kicks[ix[0]].gy}:null};dlg()}
 function dlg(){const sh=$("sheet");
   if(!D){sh.classList.add("hide");$("shbg").classList.add("hide");render();return}
   const tot=RK.reduce((a,r)=>a+D.c[r],0);
@@ -548,9 +548,9 @@ function closeSheet(){D=null;dlg()}
 function dlgSave(){const d=D;if(!d)return;
   const cur=(d.ix||[]).map(i=>S.kicks[i]).filter(Boolean),rem=new Set(),add=[];
   RK.forEach(r=>{const have=cur.filter(k=>rk(k)===r),df=d.c[r]-have.length;
-    if(df<0)have.slice(df).forEach(k=>rem.add(k));else for(let j=0;j<df;j++)add.push({x:d.x,y:d.y,res:r,t:d.t})});
+    if(df<0)have.slice(df).forEach(k=>rem.add(k));else for(let j=0;j<df;j++)add.push({x:d.x,y:d.y,res:r,t:d.t,...(d.gp?{gx:d.gp.x,gy:d.gp.y}:{})})});
   S.kicks=S.kicks.filter(k=>!rem.has(k));
-  cur.forEach(k=>{if(!rem.has(k)){k.x=d.x;k.y=d.y;k.t=d.t}});
+  cur.forEach(k=>{if(!rem.has(k)){k.x=d.x;k.y=d.y;k.t=d.t;if(d.gp){k.gx=d.gp.x;k.gy=d.gp.y}else if(d.gpCleared){delete k.gx;delete k.gy}}});
   S.kicks.push(...add);S.ty=d.t;D=null;save();dlg()}
 $("field").addEventListener("click",e=>{
   const r=$("field").getBoundingClientRect();
@@ -1467,7 +1467,7 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-cl],[data-
 /* session payload (flat + arrays, so online compare is stable) */
 const sj=x=>{if(x.coach)return{coach:1,name:x.name,type:"match",date:x.date,cs:x.cs||{},n:1,k:0,km:0,pts:0,tk:0,tkn:0,ps:0,psn:0,tr:0,br:0};
  const kg=x.kg||{ok:0,ko:0},z={c:[0,0],p:[0,0],d:[0,0]},T=k=>kt(k)==="drop"?"d":kt(k)==="conv"?"c":"p";(x.kicks||[]).forEach(k=>{const a=z[T(k)];a[1]++;if(res(k)==="made")a[0]++});
- return{...agg([x]),name:x.name,type:x.type,date:x.date,min:+x.min||0,px:x.px||{},pos:x.pos||"",kgo:kg.ok,kgn:kg.ok+kg.ko,kc:z.c,kp:z.p,kd:z.d,kk:(x.kicks||[]).map(k=>[k.x,k.y,{made:"m",left:"l",right:"r",short:"s"}[rk(k)]||"l",T(k)])}};
+ return{...agg([x]),name:x.name,type:x.type,date:x.date,min:+x.min||0,px:x.px||{},pos:x.pos||"",kgo:kg.ok,kgn:kg.ok+kg.ko,kc:z.c,kp:z.p,kd:z.d,kk:(x.kicks||[]).map(k=>[k.x,k.y,{made:"m",left:"l",right:"r",short:"s"}[rk(k)]||"l",T(k),Number.isFinite(+k.gx)?+k.gx:null,Number.isFinite(+k.gy)?+k.gy:null])}};
 
 /* career: seasons + stats (season / all time / by match) */
 const SE=d=>{const t=new Date(d);return isNaN(t)?null:t.getMonth()>=6?t.getFullYear():t.getFullYear()-1},SLB=y=>y+"-"+(y+1);
@@ -1657,5 +1657,174 @@ if(/[?&]install\b/.test(location.search)&&!standalone)setTimeout(panel,900);
 <script>
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});let rl=0;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(rl)return;rl=1;location.reload()})})}
 </script>
+
+<script>
+/* ===== RUCKLY KICK ANALYTICS UPGRADE ===== */
+(function(){
+  if (document.getElementById("rka")) return;
+  const css = `
+  #rka{margin-top:12px}
+  #rka .rka-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  #rka h3{margin:0;font-size:17px}
+  #rka .rka-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #rka .rka-metric{padding:10px;background:rgba(255,255,255,.035);border:1px solid rgba(201,162,74,.17);min-width:0}
+  #rka .rka-metric b{display:block;font-size:23px;color:#f1d58f;overflow-wrap:anywhere}
+  #rka .rka-metric span{font-size:11px;color:var(--mut)}
+  #rka .rka-filter{padding:8px 10px;border:1px solid var(--bd);background:#07130f;color:var(--tx);font:inherit;max-width:100%}
+  #rka .rka-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:7px}
+  #rka .rka-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+  #rka .rka-table{width:100%;border-collapse:collapse;font-size:13px}
+  #rka .rka-table td,#rka .rka-table th{padding:8px 5px;border-top:1px solid rgba(201,162,74,.16);text-align:left}
+  #rka .rka-table td:last-child,#rka .rka-table th:last-child{text-align:right}
+  #rka .rka-note{font-size:11px;color:var(--mut);line-height:1.45;margin-top:7px}
+  #rka-post-input{margin-top:10px;padding:10px;border:1px solid var(--bd);background:rgba(255,255,255,.025)}
+  #rka-post-input svg{touch-action:none;cursor:crosshair}
+  #rka-post-input .rka-map-dot{pointer-events:none}
+  #rka-account{margin-top:12px}
+  @media(min-width:700px){#rka .rka-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  @media(max-width:360px){#rka .rka-metric b{font-size:19px}}
+  `;
+  document.head.insertAdjacentHTML("beforeend","<style>"+css+"</style>");
+  const root=document.createElement("div");
+  root.id="rka";
+  root.innerHTML=`
+    <div class="card">
+      <div class="rka-head"><div><div class="eyebrow">PLAYER ANALYTICS</div><h3>Performance insights</h3></div>
+        <select class="rka-filter" id="rka-filter" aria-label="Analytics filter">
+          <option value="all">All sessions</option><option value="season">Current season</option>
+          <option value="match">Matches</option><option value="training">Training</option><option value="current">Current session</option>
+        </select>
+      </div>
+      <div id="rka-metrics" class="rka-grid"></div>
+      <div id="rka-breakdown" style="margin-top:12px"></div>
+    </div>
+    <div class="card"><h3>Kick Heatmap</h3><div class="mut" style="font-size:12px;margin:4px 0 8px">Where your kicks are taken across the selected sessions. Red indicates the most frequent areas.</div><div id="rka-kick-map"></div></div>
+    <div class="card"><h3>Posts Heatmap</h3><div class="mut" style="font-size:12px;margin:4px 0 8px">Where the ball crossed the goal plane. New kicks can record an exact crossing point.</div><div id="rka-post-map"></div></div>
+    <div class="card"><h3>Longest successful kick</h3><div id="rka-longest"></div></div>
+    <div class="card"><h3>Performance over time</h3><div id="rka-trend"></div></div>
+  `;
+  const v2=document.getElementById("v2");
+  if(v2) v2.appendChild(root);
+
+  const allKickSessions=()=> {
+    const arr=(Array.isArray(S.sessions)?S.sessions:[]).filter(x=>!S.editId||x.id!=S.editId).map(x=>({...x,kicks:Array.isArray(x.kicks)?x.kicks:[]}));
+    if(Array.isArray(S.kicks)&&S.kicks.length) arr.unshift({id:"__current",name:S.meta?.name||"Current session",type:S.meta?.type||"training",date:S.meta?.date||new Date().toISOString().slice(0,10),kicks:S.kicks,current:true});
+    return arr;
+  };
+  const seasonStart=()=>{
+    const n=new Date(),y=n.getFullYear();
+    return new Date(n.getMonth()>=7?y:y-1,7,1).getTime();
+  };
+  const getFiltered=()=>{
+    const mode=document.getElementById("rka-filter")?.value||"all";
+    let a=allKickSessions();
+    if(mode==="current") a=a.filter(x=>x.current);
+    else if(mode==="match"||mode==="training") a=a.filter(x=>x.type===mode);
+    else if(mode==="season") a=a.filter(x=>{const t=new Date(x.date||0).getTime();return !isNaN(t)&&t>=seasonStart()});
+    return a;
+  };
+  const flat=ss=>ss.flatMap(s=>(s.kicks||[]).filter(k=>Number.isFinite(+k.x)&&Number.isFinite(+k.y)).map(k=>({k,s})));
+  const distK=k=>typeof dist==="function"?Math.round(dist(+k.x,+k.y)):Math.round(Math.hypot(+k.x-150,+k.y-30)*70/300);
+  const success=k=>typeof res==="function"?res(k)==="made":(k.res==="made"||k.ok===true);
+  const typeK=k=>typeof kt==="function"?kt(k):(k.t||"pen");
+  const typeName=t=>({conv:"Conversions",pen:"Penalties",drop:"Drop goals"})[t]||"Other";
+  const pointsK=k=>typeof kp==="function"?kp(k):(success(k)?({conv:2,pen:3,drop:3}[typeK(k)]||0):0);
+  const escA=t=>typeof esc==="function"?esc(String(t??"")):String(t??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const metric=(v,l)=>`<div class="rka-metric"><b>${v}</b><span>${l}</span></div>`;
+  function pitchBase(){
+    return `<rect width="300" height="300" fill="#176b37"/><g stroke="#f2f5ed" stroke-width="2" fill="none" opacity=".8"><rect x="2" y="30" width="296" height="268"/><line x1="0" y1="124" x2="300" y2="124"/><line x1="0" y1="201" x2="300" y2="201"/><line x1="0" y1="244" x2="300" y2="244"/><line x1="140" y1="30" x2="140" y2="12"/><line x1="160" y1="30" x2="160" y2="12"/><line x1="140" y1="21" x2="160" y2="21"/></g>`;
+  }
+  function heatLayer(points, id){
+    if(!points.length)return `<text x="150" y="155" fill="#fff" text-anchor="middle" font-size="12">No kick data yet</text>`;
+    const grouped={};
+    points.forEach(p=>{const key=Math.round(p.x/4)*4+","+Math.round(p.y/4)*4;grouped[key]=(grouped[key]||0)+1});
+    const max=Math.max(...Object.values(grouped));
+    const circles=Object.entries(grouped).map(([key,n])=>{
+      const [x,y]=key.split(",").map(Number),op=.38+.42*n/max;
+      return `<circle cx="${x}" cy="${y}" r="${18+Math.min(14,n*2)}" fill="url(#${id})" opacity="${op}"/>`;
+    }).join("");
+    return `<defs><radialGradient id="${id}"><stop offset="0" stop-color="#ff3028" stop-opacity=".95"/><stop offset=".28" stop-color="#ffb52e" stop-opacity=".85"/><stop offset=".55" stop-color="#65e5a4" stop-opacity=".7"/><stop offset="1" stop-color="#168bff" stop-opacity="0"/></radialGradient></defs>${circles}`;
+  }
+  function heatSvg(points,posts){
+    if(posts){
+      return `<svg viewBox="0 0 300 130" role="img" aria-label="Posts heatmap" style="width:100%;display:block;border-radius:8px;background:#176b37"><rect width="300" height="130" fill="#176b37"/>${heatLayer(points,"rka-post-gradient")}<g stroke="#fff" stroke-width="4" fill="none"><line x1="105" y1="12" x2="105" y2="108"/><line x1="195" y1="12" x2="195" y2="108"/><line x1="105" y1="105" x2="195" y2="105"/></g></svg>`;
+    }
+    return `<svg viewBox="0 0 300 300" role="img" aria-label="Kick heatmap" style="width:100%;display:block;border-radius:8px;background:#176b37">${pitchBase()}${heatLayer(points,"rka-kick-gradient")}</svg>`;
+  }
+  function postPoints(items){
+    const out=[];let exact=0,estimated=0;
+    items.forEach(({k})=>{
+      if(Number.isFinite(+k.gx)&&Number.isFinite(+k.gy)){out.push({x:Math.max(0,Math.min(300,+k.gx)),y:Math.max(0,Math.min(130,+k.gy))});exact++;return}
+      let e=null;try{e=typeof end==="function"?end(k):null}catch(_){}
+      if(e){out.push({x:e[0],y:Math.max(0,Math.min(130,12+(e[1]/30)*82))});estimated++}
+    });
+    return {points:out,exact,estimated};
+  }
+  function trendSvg(ss){
+    const rows=ss.map(s=>{const ks=s.kicks||[],n=ks.length,m=ks.filter(success).length;return{date:s.date||"",rate:n?100*m/n:0,n}}).filter(x=>x.n).sort((a,b)=>String(a.date).localeCompare(String(b.date))).slice(-12);
+    if(!rows.length)return `<div class="rka-note">Save sessions with kicks to see your progress.</div>`;
+    const W=300,H=110,pts=rows.map((r,i)=>`${rows.length===1?150:12+i*(276/(rows.length-1))},${94-r.rate*.78}`).join(" ");
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Kick success rate trend" style="width:100%;display:block"><line x1="12" y1="94" x2="288" y2="94" stroke="rgba(255,255,255,.25)"/><polyline points="${pts}" fill="none" stroke="#d9b75e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${rows.map((r,i)=>{const x=rows.length===1?150:12+i*(276/(rows.length-1)),y=94-r.rate*.78;return `<circle cx="${x}" cy="${y}" r="4" fill="#f5df9c"/><text x="${x}" y="108" text-anchor="middle" fill="#9aa1b5" font-size="8">${escA((r.date||"").slice(5,10))}</text>`}).join("")}</svg><div class="rka-note">${rows.map(r=>`${escA(r.date)}: ${Math.round(r.rate)}% (${r.n} kicks)`).join(" · ")}</div>`;
+  }
+  function renderAnalytics(){
+    const box=document.getElementById("rka");if(!box)return;
+    const ss=getFiltered(),items=flat(ss),ks=items.map(x=>x.k),made=ks.filter(success),miss=ks.length-made.length;
+    const pts=ks.reduce((a,k)=>a+pointsK(k),0),dists=ks.map(distK),avg=dists.length?Math.round(dists.reduce((a,b)=>a+b,0)/dists.length):0;
+    const longest=items.filter(x=>success(x.k)).map(x=>({...x,d:distK(x.k)})).sort((a,b)=>b.d-a.d)[0];
+    document.getElementById("rka-metrics").innerHTML=metric(ss.length,"Sessions")+metric(ks.length,"Kicks recorded")+metric(`${ks.length?Math.round(made.length/ks.length*100):0}%`,"Success rate")+metric(pts,"Points from kicks")+metric(made.length,"Successful")+metric(miss,"Missed")+metric(avg?avg+"m":"–","Average distance")+metric(longest?longest.d+"m":"–","Longest successful");
+    const types=["conv","pen","drop"];
+    document.getElementById("rka-breakdown").innerHTML=`<div class="mut" style="font-weight:700;margin-bottom:5px">KICK TYPE BREAKDOWN</div><table class="rka-table"><thead><tr><th>Type</th><th>Made / attempts</th><th>Rate</th></tr></thead><tbody>${types.map(t=>{const a=ks.filter(k=>typeK(k)===t),m=a.filter(success).length;return `<tr><td>${typeName(t)}</td><td>${m}/${a.length}</td><td>${a.length?Math.round(m/a.length*100):0}%</td></tr>`}).join("")}</tbody></table>`;
+    document.getElementById("rka-kick-map").innerHTML=heatSvg(ks.map(k=>({x:+k.x,y:+k.y})) ,false)+`<div class="rka-legend"><span><i class="rka-dot" style="background:#168bff"></i>Low frequency</span><span><i class="rka-dot" style="background:#ff3028"></i>High frequency</span><span>${ks.length} kicks mapped</span></div>`;
+    const pp=postPoints(items);
+    document.getElementById("rka-post-map").innerHTML=heatSvg(pp.points,true)+`<div class="rka-legend"><span>${pp.exact} exact positions</span><span>${pp.estimated} estimated from legacy result</span></div><div class="rka-note">Older kicks without a recorded crossing point use the result-based visual estimate available in the original app. They are not presented as exact measurements.</div>`;
+    document.getElementById("rka-longest").innerHTML=longest?`<div class="big">${longest.d}m</div><div class="mut">${escA(typeName(typeK(longest.k)))} · ${escA(longest.s.name||"Session")} · ${escA(longest.s.date||"")}</div><svg viewBox="0 0 300 76" style="width:100%;margin-top:8px"><rect width="300" height="76" rx="5" fill="#176b37"/><path d="M150 68 Q${Math.max(10,Math.min(290,+longest.k.x))} 18 150 8" fill="none" stroke="#d9b75e" stroke-width="3" stroke-dasharray="5 4"/><circle cx="${Math.max(10,Math.min(290,+longest.k.x))}" cy="18" r="5" fill="#fff"/><circle cx="150" cy="8" r="5" fill="#d9b75e"/></svg>`:`<div class="mut">No successful kicks recorded yet.</div>`;
+    document.getElementById("rka-trend").innerHTML=trendSvg(ss);
+  }
+  document.getElementById("rka-filter").addEventListener("change",renderAnalytics);
+
+  /* Optional exact post-crossing point capture for new kicks. */
+  const shBody=document.getElementById("sh-body");
+  if(shBody&&!document.getElementById("rka-post-input")){
+    const d=document.createElement("div");d.id="rka-post-input";
+    d.innerHTML=`<div class="row"><b style="font-size:13px">Post crossing point</b><button type="button" class="link" id="rka-post-clear">Clear</button></div><div class="mut" style="font-size:11px;margin:3px 0 7px">Optional: tap or drag where the ball crossed the goal plane.</div><svg id="rka-post-edit" viewBox="0 0 300 130" aria-label="Mark ball crossing point"><rect width="300" height="130" fill="#176b37"/><g stroke="#fff" stroke-width="4" fill="none"><line x1="105" y1="12" x2="105" y2="108"/><line x1="195" y1="12" x2="195" y2="108"/><line x1="105" y1="105" x2="195" y2="105"/></g><g id="rka-post-marker"></g></svg><div class="mut" id="rka-post-status" style="font-size:11px;margin-top:4px">No crossing point recorded.</div>`;
+    shBody.appendChild(d);
+    const map=document.getElementById("rka-post-edit");
+    const setPoint=e=>{
+      if(!D)return;const r=map.getBoundingClientRect();
+      D.gp={x:Math.round((e.clientX-r.left)/r.width*300),y:Math.round((e.clientY-r.top)/r.height*130)};
+      updatePostEditor();
+    };
+    let dragging=false;
+    map.addEventListener("pointerdown",e=>{dragging=true;map.setPointerCapture?.(e.pointerId);setPoint(e)});
+    map.addEventListener("pointermove",e=>{if(dragging)setPoint(e)});
+    map.addEventListener("pointerup",()=>dragging=false);
+    map.addEventListener("pointercancel",()=>dragging=false);
+    document.getElementById("rka-post-clear").onclick=()=>{if(D){D.gp=null;D.gpCleared=true;updatePostEditor()}};
+  }
+  function updatePostEditor(){
+    const status=document.getElementById("rka-post-status"),marker=document.getElementById("rka-post-marker");
+    if(!status||!marker)return;
+    const p=D&&D.gp;
+    marker.innerHTML=p?`<circle class="rka-map-dot" cx="${p.x}" cy="${p.y}" r="7" fill="#f6d77e" stroke="#07130f" stroke-width="3"/><circle class="rka-map-dot" cx="${p.x}" cy="${p.y}" r="13" fill="none" stroke="#f6d77e" stroke-width="1.5"/>`:"";
+    status.textContent=p?`Crossing point: ${p.x}, ${p.y} · saved with this kick group.`:"No crossing point recorded. The heatmap will use an estimate for this kick if available.";
+  }
+  if(typeof openDlg==="function"){
+    const oldOpenDlg=openDlg;
+    openDlg=function(x,y,ix){oldOpenDlg(x,y,ix);if(D&&ix&&ix.length){const k=S.kicks[ix[0]];D.gp=Number.isFinite(+k.gx)&&Number.isFinite(+k.gy)?{x:+k.gx,y:+k.gy}:null;}else if(D)D.gp=null;updatePostEditor();};
+  }
+  if(typeof dlg==="function"){
+    const oldDlg=dlg;
+    dlg=function(){oldDlg();updatePostEditor();};
+  }
+
+  /* Re-render analytics whenever the shared local data changes. */
+  if(typeof save==="function"){const oldSave=save;save=function(){oldSave();renderAnalytics();};}
+  if(typeof render==="function"){const oldRender=render;render=function(){oldRender();renderAnalytics();};}
+  if(typeof show==="function"){const oldShow=show;show=function(){oldShow();renderAnalytics();};}
+  if(typeof acct==="function"){const oldAcct=acct;acct=async function(){await oldAcct();const el=document.getElementById("acct");if(!el)return;let c=document.getElementById("rka-account");if(!c){c=document.createElement("div");c.id="rka-account";c.className="card";el.appendChild(c);}const ss=allKickSessions(),it=flat(ss),ks=it.map(x=>x.k),m=ks.filter(success).length,pp=postPoints(it);c.innerHTML=`<div class="eyebrow">KICKING PERFORMANCE</div><h3 style="margin:2px 0 10px">Your kicking snapshot</h3><div class="rka-grid">${metric(ks.length,"Total kicks")}${metric(ks.length?Math.round(m/ks.length*100)+"%":"–","Success rate")}${metric(ks.reduce((a,k)=>a+pointsK(k),0),"Kicking points")}${metric(it.filter(x=>success(x.k)).length?Math.max(...it.filter(x=>success(x.k)).map(x=>distK(x.k)))+"m":"–","Longest successful")}</div><div style="margin-top:12px"><b style="font-size:14px">Kick Heatmap</b>${heatSvg(ks.map(k=>({x:+k.x,y:+k.y})),false)}</div><div class="rka-note">${pp.exact} exact posts crossing points · ${pp.estimated} estimated legacy points.</div>`;};}
+  renderAnalytics();
+})();
+</script>
+
 </body>
 </html>
