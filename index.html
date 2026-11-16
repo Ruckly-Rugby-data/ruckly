@@ -444,11 +444,10 @@ document.getElementById("spi").src=LOGO_F</script>
   <div class="row"><b id="sh-title"></b><button class="link" id="sh-close">Close</button></div>
   <div id="sh-body">
     <label class="lab">Kick type</label>
-    <div class="segs" id="sh-ty" style="grid-template-columns:repeat(3,1fr);margin-top:0"><button data-t="conv">Conversion · 2</button><button data-t="pen">Penalty · 3</button><button data-t="drop">Drop goal · 3</button></div>
-    <label class="lab">Number of kicks · <span id="sh-tot">0</span></label>
-    <div class="kc" id="sh-cnt"></div>
-    <div class="acts"><button id="sh-move">Move</button><button class="del" id="sh-del">Delete</button></div>
-    <button class="save" id="sh-ok">Save</button>
+    <div class="segs" id="sh-ty" style="grid-template-columns:repeat(3,1fr);margin-top:0"><button data-t="conv">Conversion</button><button data-t="pen">Penalty</button><button data-t="drop">Drop Goal</button></div>
+    <div class="mut" style="font-size:12px;margin:8px 0 4px">Place the ball on the goal map below. RUCKLY will determine the result automatically.</div>
+    <div id="rka-post-holder"></div>
+    <button class="save" id="sh-ok" disabled>Add kick</button>
   </div>
   <button class="save hide" id="sh-mc">Cancel move</button>
 </div>
@@ -483,8 +482,8 @@ const ZN=["0–15 m","15–30 m","30–45 m","45 m+"];
 const pc=(a,b)=>b?Math.round(100*a/b)+"%":"–";
 // old saved kicks had only ok:true/false
 const res=k=>k.res||(k.ok?"made":"miss");
-const COL={made:"#48f08f",left:"#ff6b5a",right:"#ff6b5a",short:"#ffb347",miss:"#ff6b5a"};
-const LBL={made:"made",left:"wide left",right:"wide right",short:"short",miss:"missed"};
+const COL={made:"#48f08f",left:"#ff6b5a",right:"#ff6b5a",short:"#ffb347",post:"#ff6b5a",miss:"#ff6b5a"};
+const LBL={made:"made",left:"wide left",right:"wide right",short:"short",post:"hit the post",miss:"missed"};
 const PTS={conv:2,pen:3,drop:3},TS={conv:"Conv",pen:"Pen",drop:"Drop"};
 const kt=k=>k.t||"pen",kp=k=>res(k)==="made"?PTS[kt(k)]:0;
 function end(k){
@@ -529,7 +528,7 @@ function render(){
   +[["tr","Tries","5 points each"],["br","Line breaks","Clean breaks through the defence"]].map(one).join("");
 }
 let D=null;
-const RK=["made","left","right","short"],RN={made:"✓ Made",left:"← Wide left",right:"Wide right →",short:"↓ Short"};
+const RK=["made","left","right","short","post"],RN={made:"✓ Made",left:"← Wide left",right:"Wide right →",short:"↓ Short",post:"● Post hit"};
 const rk=k=>res(k)==="miss"?"left":res(k);
 const clampX=x=>Math.max(3,Math.min(297,x)),clampY=y=>Math.max(GY+4,Math.min(297,y));
 function spotAt(x,y){const G={};S.kicks.forEach((k,i)=>{if(k.originUnknown)return;(G[k.x+","+k.y]=G[k.x+","+k.y]||[]).push(i)});let best=null,bd=13;Object.values(G).forEach(ix=>{const k=S.kicks[ix[0]],d=Math.hypot(k.x-x,k.y-y);if(d<bd){bd=d;best=ix}});return best}
@@ -538,25 +537,37 @@ function openDlg(x,y,ix){const c={made:0,left:0,right:0,short:0};let t=S.ty;
   D={ix,x,y,t,c,moving:false,gpCleared:false,gp:ix&&S.kicks[ix[0]]&&Number.isFinite(+S.kicks[ix[0]].gx)&&Number.isFinite(+S.kicks[ix[0]].gy)?{x:+S.kicks[ix[0]].gx,y:+S.kicks[ix[0]].gy}:null};dlg()}
 function dlg(){const sh=$("sheet");
   if(!D){sh.classList.add("hide");$("shbg").classList.add("hide");render();return}
-  const tot=RK.reduce((a,r)=>a+D.c[r],0);
-  sh.classList.remove("hide");sh.classList.toggle("mv",D.moving);$("shbg").classList.toggle("hide",D.moving);
-  $("sh-body").classList.toggle("hide",D.moving);$("sh-mc").classList.toggle("hide",!D.moving);
-  $("sh-title").textContent=D.moving?"Tap the pitch for the new position":`${D.ix?"Edit kicks":"New kicks"} · ${Math.round(dist(D.x,D.y))} m`;
+  sh.classList.remove("hide");sh.classList.remove("mv");$("shbg").classList.add("hide");
+  $("sh-body").classList.remove("hide");$("sh-mc").classList.add("hide");
+  $("sh-title").textContent=`${D.ix?"Edit kick":"New kick"} · ${Math.round(dist(D.x,D.y))} m`;
   document.querySelectorAll("#sh-ty button").forEach(b=>b.classList.toggle("on",b.dataset.t===D.t));
-  $("sh-cnt").innerHTML=RK.map(r=>`<div><div class="mut" style="color:${COL[r]}">${RN[r]}</div><div class="ctr"><button class="u" data-r="${r}" data-d="-1" aria-label="Less">−</button><span>${D.c[r]}</span><button class="p" data-r="${r}" data-d="1" aria-label="More">+</button></div></div>`).join("");
-  $("sh-tot").textContent=tot;
-  $("sh-del").classList.toggle("hide",!D.ix);
-  $("sh-ok").textContent=tot?(D.ix?"Save":"Add"):(D.ix?"Remove":"Add");
-  $("sh-ok").disabled=!tot&&!D.ix;
+  const del=$("sh-del"),cnt=$("sh-cnt"),tot=$("sh-tot");
+  if(del)del.classList.add("hide");if(cnt)cnt.innerHTML="";if(tot)tot.textContent="0";
+  $("sh-ok").textContent=D.ix?"Save kick":"Add kick";
+  $("sh-ok").disabled=!D.gp;
   render()}
 function closeSheet(){D=null;dlg()}
-function dlgSave(){const d=D;if(!d)return;
-  const cur=(d.ix||[]).map(i=>S.kicks[i]).filter(Boolean),rem=new Set(),add=[];
-  RK.forEach(r=>{const have=cur.filter(k=>rk(k)===r),df=d.c[r]-have.length;
-    if(df<0)have.slice(df).forEach(k=>rem.add(k));else for(let j=0;j<df;j++)add.push({x:d.x,y:d.y,res:r,t:d.t,...(d.gp?{gx:d.gp.x,gy:d.gp.y}:{})})});
-  S.kicks=S.kicks.filter(k=>!rem.has(k));
-  cur.forEach(k=>{if(!rem.has(k)){k.x=d.x;k.y=d.y;k.t=d.t;if(d.gp){k.gx=d.gp.x;k.gy=d.gp.y}else if(d.gpCleared){delete k.gx;delete k.gy}}});
-  S.kicks.push(...add);S.ty=d.t;D=null;save();dlg()}
+function classifyGoalPoint(p){
+  if(!p)return null;
+  const x=+p.x,y=+p.y;
+  // Uprights are centred at x=105 and x=195; crossbar is at y=96.
+  if((x>=99&&x<=111)||(x>=189&&x<=201)||(y>=92&&y<=101&&x>=105&&x<=195))return "post";
+  if(x<105)return "left";
+  if(x>195)return "right";
+  if(y>101)return "short";
+  return "made";
+}
+function dlgSave(){const d=D;if(!d||!d.gp)return;
+  const result=classifyGoalPoint(d.gp);
+  if(d.ix&&d.ix.length){
+    const k=S.kicks[d.ix[0]];
+    if(k){k.x=d.x;k.y=d.y;k.t=d.t;k.res=result;k.gx=d.gp.x;k.gy=d.gp.y;d.ix.slice(1).forEach(i=>{if(S.kicks[i])S.kicks.splice(i,1)})}
+  }else{
+    S.kicks.push({x:d.x,y:d.y,res:result,t:d.t,gx:d.gp.x,gy:d.gp.y});
+  }
+  S.ty=d.t;D=null;save();dlg();
+  document.dispatchEvent(new Event("ruckly:kicks-updated"));
+}
 $("field").addEventListener("click",e=>{
   const r=$("field").getBoundingClientRect();
   const x=clampX(Math.round((e.clientX-r.left)/r.width*300)),y=Math.round((e.clientY-r.top)/r.height*300);
@@ -565,12 +576,12 @@ $("field").addEventListener("click",e=>{
   const h=spotAt(x,y);
   if(h)openDlg(S.kicks[h[0]].x,S.kicks[h[0]].y,h);else openDlg(x,clampY(y),null)});
 document.querySelectorAll("#sh-ty button").forEach(b=>b.onclick=()=>{if(D){D.t=b.dataset.t;dlg()}});
-$("sh-cnt").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!D)return;D.c[b.dataset.r]=Math.max(0,Math.min(99,D.c[b.dataset.r]+Number(b.dataset.d)));dlg()});
+if($("sh-cnt"))$("sh-cnt").innerHTML="";
 $("sh-ok").onclick=dlgSave;
-$("sh-move").onclick=()=>{if(D){D.moving=true;dlg()}};
+if($("sh-move"))$("sh-move").onclick=()=>{};
 $("sh-mc").onclick=()=>{if(D){D.moving=false;dlg()}};
 $("sh-close").onclick=closeSheet;$("shbg").onclick=closeSheet;
-$("sh-del").onclick=()=>{if(!D||!D.ix)return;const cur=D.ix.map(i=>S.kicks[i]);ask("Delete these kicks?","They will be removed from the map.","Delete",()=>{S.kicks=S.kicks.filter(k=>!cur.includes(k));D=null;save();dlg()})};
+$("sh-del").onclick=()=>{};
 $("undo").onclick=()=>{closeSheet();S.kicks.pop();save();render()};
 $("stats").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.k,d=b.dataset.d;if(typeof S[k]==="number")S[k]=Math.max(0,S[k]+(d?-1:1));else{const o=S[k],f=b.dataset.f;o[f]=d?Math.max(0,o[f]-1):o[f]+1}save();render()});
 $("reset").onclick=()=>{if(confirm("Reset the current session?")){S.kicks=[];S.tk={ok:0,ko:0};S.ps={ok:0,ko:0};S.kg={ok:0,ko:0};S.br=0;S.tr=0;save();render()}};
@@ -1800,7 +1811,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
   const shBody=document.getElementById("sh-body");
   if(shBody&&!document.getElementById("rka-post-input")){
     const d=document.createElement("div");d.id="rka-post-input";
-    d.innerHTML=`<div class="row"><b style="font-size:13px">Post crossing point</b><button type="button" class="link" id="rka-post-clear">Clear</button></div><div class="mut" style="font-size:11px;margin:3px 0 7px">Optional: tap or drag where the ball crossed the goal plane.</div><svg id="rka-post-edit" viewBox="0 0 300 150" aria-label="Mark ball crossing point"><rect width="300" height="150" fill="#176b37"/>
+    d.innerHTML=`<div class="row"><b style="font-size:13px">Post crossing point</b><button type="button" class="link" id="rka-post-clear">Clear</button></div><div class="mut" style="font-size:11px;margin:3px 0 7px">Tap or drag the exact point where the ball passes the posts. This decides the kick result.</div><svg id="rka-post-edit" viewBox="0 0 300 150" aria-label="Mark ball crossing point"><rect width="300" height="150" fill="#176b37"/>
   <line x1="0" y1="122" x2="300" y2="122" stroke="#dce8dd" stroke-width="2" opacity=".55"/>
   <g stroke="#f7faf5" stroke-width="4.5" stroke-linecap="round" fill="none">
     <path d="M105 121 V7 M195 121 V7 M105 96 H195"/>
@@ -1809,26 +1820,30 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
     <rect x="99" y="97" width="12" height="26" rx="1"/>
     <rect x="189" y="97" width="12" height="26" rx="1"/>
   </g><g id="rka-post-marker"></g></svg><div class="mut" id="rka-post-status" style="font-size:11px;margin-top:4px">No crossing point recorded.</div>`;
-    shBody.appendChild(d);
+    shBody.insertBefore(d,document.getElementById("sh-ok"));
     const map=document.getElementById("rka-post-edit");
     const setPoint=e=>{
       if(!D)return;const r=map.getBoundingClientRect();
-      D.gp={x:Math.round((e.clientX-r.left)/r.width*300),y:Math.round((e.clientY-r.top)/r.height*150)};
-      updatePostEditor();
+      D.gp={x:Math.max(0,Math.min(300,Math.round((e.clientX-r.left)/r.width*300))),y:Math.max(0,Math.min(150,Math.round((e.clientY-r.top)/r.height*150)))};
+      updatePostEditor();if(typeof dlg==="function")dlg();
     };
     let dragging=false;
     map.addEventListener("pointerdown",e=>{dragging=true;map.setPointerCapture?.(e.pointerId);setPoint(e)});
     map.addEventListener("pointermove",e=>{if(dragging)setPoint(e)});
     map.addEventListener("pointerup",()=>dragging=false);
     map.addEventListener("pointercancel",()=>dragging=false);
-    document.getElementById("rka-post-clear").onclick=()=>{if(D){D.gp=null;D.gpCleared=true;updatePostEditor()}};
+    document.getElementById("rka-post-clear").onclick=()=>{if(D){D.gp=null;D.gpCleared=true;updatePostEditor();if(typeof dlg==="function")dlg()}};
   }
   function updatePostEditor(){
     const status=document.getElementById("rka-post-status"),marker=document.getElementById("rka-post-marker");
     if(!status||!marker)return;
     const p=D&&D.gp;
-    marker.innerHTML=p?`<circle class="rka-map-dot" cx="${p.x}" cy="${p.y}" r="7" fill="#f6d77e" stroke="#07130f" stroke-width="3"/><circle class="rka-map-dot" cx="${p.x}" cy="${p.y}" r="13" fill="none" stroke="#f6d77e" stroke-width="1.5"/>`:"";
-    status.textContent=p?`Crossing point: ${p.x}, ${p.y} · saved with this kick group.`:"No crossing point recorded. The heatmap will use an estimate for this kick if available.";
+    const result=p&&typeof classifyGoalPoint==="function"?classifyGoalPoint(p):null;
+    const colour=result==="made"?"#48f08f":"#ff6259";
+    const labels={made:"SUCCESS · between the posts",left:"MISS · wide left",right:"MISS · wide right",short:"MISS · too short",post:"MISS · hit the post or crossbar"};
+    marker.innerHTML=p?`<circle class="rka-map-dot" cx="${p.x}" cy="${p.y}" r="7" fill="${colour}" stroke="#07130f" stroke-width="3"/><circle class="rka-map-dot" cx="${p.x}" cy="${p.y}" r="13" fill="none" stroke="${colour}" stroke-width="1.8"/>`:"";
+    status.textContent=p?`${labels[result]||"Select a valid crossing point"} · point ${p.x}, ${p.y}`:"Select the ball crossing point to calculate the result.";
+    const saveButton=document.getElementById("sh-ok");if(saveButton)saveButton.disabled=!p;
   }
   if(typeof openDlg==="function"){
     const oldOpenDlg=openDlg;
@@ -1854,163 +1869,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
 
 
 
-<script>
-/* RUCKLY Add a kick — full pitch, scroll to full posts, auto result and synced analytics. */
-(function(){
-  if(document.getElementById("rka-add-kick"))return;
-  const field=document.getElementById("field");if(!field)return;
 
-  const css=`
-  #rka-add-kick{width:100%;margin:10px 0 0}
-  #rka-kick-modal{position:fixed;inset:0;z-index:140;background:rgba(0,0,0,.74);display:none;align-items:flex-end;justify-content:center}
-  #rka-kick-modal.open{display:flex}
-  #rka-kick-panel{width:min(100%,620px);max-height:96dvh;overflow-y:auto;overscroll-behavior:contain;background:var(--bg,#fff);color:var(--tx,#222);padding:16px;padding-bottom:calc(18px + env(safe-area-inset-bottom));border-radius:22px 22px 0 0;box-shadow:0 -12px 45px #0005}
-  #rka-kick-panel .rka-head{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:-16px;z-index:2;background:var(--bg,#fff);padding:8px 0}
-  #rka-kick-panel .rka-stage{border:1px solid var(--bd);border-radius:16px;padding:12px;margin-top:12px}
-  #rka-kick-panel svg{display:block;width:100%;border-radius:10px;margin:10px 0;touch-action:none;cursor:crosshair}
-  #rka-kick-panel .rka-type-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:12px 0}
-  #rka-kick-panel .rka-type-row button{border:1px solid var(--bd);border-radius:12px;padding:12px 5px;background:var(--fl);color:var(--tx);font:inherit;font-size:13px;font-weight:750}
-  #rka-kick-panel .rka-type-row button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
-  #rka-kick-panel .rka-info{font-size:13px;padding:10px 11px;border-radius:10px;background:var(--fl);margin:8px 0}
-  #rka-kick-panel .rka-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
-  #rka-kick-panel .rka-actions button{min-height:48px}
-  #rka-kick-panel .rka-stage-title{font-size:16px;font-weight:800}
-  #rka-kick-panel .rka-small{font-size:12px;line-height:1.45}
-  @media(min-width:700px){#rka-kick-modal{align-items:center;padding:18px}#rka-kick-panel{border-radius:22px;max-height:92vh}}
-  `;
-  document.head.insertAdjacentHTML("beforeend","<style>"+css+"</style>");
-
-  const add=document.createElement("button");
-  add.id="rka-add-kick";add.type="button";add.className="save";add.textContent="＋ Add a kick";
-  field.insertAdjacentElement("afterend",add);
-
-  const goalArt=`
-    <rect width="300" height="150" fill="#176b37"/>
-    <line x1="0" y1="140" x2="300" y2="140" stroke="#dce8dd" stroke-width="2" opacity=".55"/>
-    <g stroke="#f7faf5" stroke-width="5" stroke-linecap="round" fill="none">
-      <path d="M105 139 V8 M195 139 V8 M105 96 H195"/>
-    </g>
-    <g fill="#101d65"><rect x="98" y="97" width="14" height="43" rx="1"/><rect x="188" y="97" width="14" height="43" rx="1"/></g>
-    <g stroke="#f7faf5" stroke-width="1.5" opacity=".8"><line x1="95" y1="8" x2="115" y2="8"/><line x1="185" y1="8" x2="205" y2="8"/></g>`;
-
-  const modal=document.createElement("div");modal.id="rka-kick-modal";
-  modal.innerHTML=`
-  <div id="rka-kick-panel">
-    <div class="rka-head"><b style="font-size:20px">Add a kick</b><button type="button" class="link" id="rka-kick-close">Close ✕</button></div>
-    <section class="rka-stage">
-      <div class="rka-stage-title">1 · Kick position</div>
-      <div class="mut rka-small" style="margin-top:5px">Tap the pitch to place the kick. Drag the marker to adjust the exact starting position.</div>
-      <div class="rka-info" id="rka-kick-distance">Select the kick position on the pitch.</div>
-      <svg id="rka-origin-pitch" viewBox="0 0 300 300" aria-label="Choose kick starting position">
-        <rect width="300" height="300" fill="#176b37"/>
-        <g fill="#fff" opacity=".07"><rect y="30" width="300" height="42"/><rect y="114" width="300" height="42"/><rect y="198" width="300" height="42"/></g>
-        <rect width="300" height="30" fill="#000" opacity=".13"/>
-        <g stroke="#fff" stroke-width="1.7" fill="none" opacity=".9">
-          <line x1="0" y1="30" x2="300" y2="30"/><line x1="1" y1="30" x2="1" y2="300"/><line x1="299" y1="30" x2="299" y2="300"/>
-          <line x1="0" y1="51.4" x2="300" y2="51.4" stroke-dasharray="6 5"/><line x1="0" y1="124.3" x2="300" y2="124.3"/><line x1="0" y1="201.4" x2="300" y2="201.4"/><line x1="0" y1="244.3" x2="300" y2="244.3"/>
-        </g>
-        <g stroke="#fff" stroke-width="3"><line x1="140" y1="30" x2="140" y2="12"/><line x1="160" y1="30" x2="160" y2="12"/><line x1="140" y1="21" x2="160" y2="21"/></g>
-        <path id="rka-preview-arc" d="" fill="none" stroke="#12a8ff" stroke-width="3.5" stroke-linecap="round"/>
-        <circle id="rka-origin-marker" cx="-20" cy="-20" r="8" fill="#168bff" stroke="#07130f" stroke-width="3"/>
-      </svg>
-    </section>
-    <section class="rka-stage">
-      <div class="rka-stage-title">2 · Scroll to the posts</div>
-      <div class="mut rka-small" style="margin-top:5px">Tap or drag the marker where the ball crosses the goal plane. A kick is successful only when it passes cleanly between the uprights and above the crossbar. Touching a post or the crossbar is a miss.</div>
-      <div class="rka-info" id="rka-kick-result">Choose the starting point first, then mark the crossing point.</div>
-      <svg id="rka-posts-pitch" viewBox="0 0 300 150" aria-label="Full rugby goal posts crossing point selector">
-        ${goalArt}
-        <g id="rka-cross-marker"></g>
-      </svg>
-      <div class="rka-type-row" id="rka-kick-types">
-        <button type="button" data-type="conv" class="on">Conversion</button>
-        <button type="button" data-type="pen">Penalty</button>
-        <button type="button" data-type="drop">Drop Goal</button>
-      </div>
-    </section>
-    <div class="rka-actions"><button type="button" class="alt" id="rka-kick-cancel">Cancel</button><button type="button" class="save" id="rka-kick-add" disabled>Add kick</button></div>
-  </div>`;
-  document.body.appendChild(modal);
-
-  let origin=null,cross=null,type="conv",dragging=false;
-  const $=id=>document.getElementById(id);
-  const pitch=$("rka-origin-pitch"),posts=$("rka-posts-pitch");
-  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  const mapField=p=>({x:116.6667+p.x*(66.6666/300),y:12+(p.y/150)*18});
-
-  // Posts are centred at x=105 and x=195; the crossbar is y=96.
-  // A 4px safety margin means contact with the upright/crossbar is always a miss.
-  const classify=p=>{
-    if(p.x<=109)return{res:"left",label:"Missed · left post / wide left",made:false};
-    if(p.x>=191)return{res:"right",label:"Missed · right post / wide right",made:false};
-    if(p.y>=92)return{res:"short",label:p.y<=101?"Missed · crossbar":"Missed · below the crossbar",made:false};
-    return{res:"made",label:"Successful · cleanly between the posts",made:true};
-  };
-  const distance=()=>origin?Math.round(Math.hypot(150-origin.x,30-origin.y)*70/300):0;
-  function refresh(){
-    const marker=$("rka-origin-marker"),crossMarker=$("rka-cross-marker"),arc=$("rka-preview-arc");
-    if(origin){
-      marker.setAttribute("cx",origin.x);marker.setAttribute("cy",origin.y);
-      const e=cross?mapField(cross):{x:150,y:16},cx=(origin.x+e.x)/2,cy=Math.max(8,Math.min(origin.y,e.y)-34);
-      arc.setAttribute("d",`M ${origin.x} ${origin.y} Q ${cx} ${cy} ${e.x} ${e.y}`);
-      arc.setAttribute("stroke",cross?(classify(cross).made?"#48f08f":"#ff6259"):"#12a8ff");
-      const dx=origin.x-150,dy=origin.y-30,angle=Math.round(Math.atan2(Math.abs(dx),Math.max(1,dy))*180/Math.PI);
-      $("rka-kick-distance").textContent=`Distance: ${distance()} m · Angle: ${angle}°`;
-    }else{
-      marker.setAttribute("cx",-20);marker.setAttribute("cy",-20);arc.setAttribute("d","");
-      $("rka-kick-distance").textContent="Select the kick position on the pitch.";
-    }
-    if(cross){
-      const q=classify(cross),ptColor=q.made?"#48f08f":"#ff6259";
-      crossMarker.innerHTML=`<circle cx="${cross.x}" cy="${cross.y}" r="8" fill="${ptColor}" stroke="#07130f" stroke-width="3"/><circle cx="${cross.x}" cy="${cross.y}" r="15" fill="none" stroke="#fff" stroke-width="2"/>`;
-      $("rka-kick-result").textContent=q.label+" · "+(type==="conv"?"Conversion":type==="pen"?"Penalty":"Drop Goal");
-    }else{
-      crossMarker.innerHTML="";
-      $("rka-kick-result").textContent="Choose the starting point, then mark the crossing point.";
-    }
-    $("rka-kick-add").disabled=!(origin&&cross);
-  }
-  function bind(svg,w,h,cb){
-    const get=e=>{const r=svg.getBoundingClientRect();return{x:clamp(Math.round((e.clientX-r.left)/r.width*w),0,w),y:clamp(Math.round((e.clientY-r.top)/r.height*h),0,h)}};
-    svg.addEventListener("pointerdown",e=>{dragging=true;svg.setPointerCapture?.(e.pointerId);cb(get(e));refresh()});
-    svg.addEventListener("pointermove",e=>{if(dragging){cb(get(e));refresh()}});
-    svg.addEventListener("pointerup",()=>dragging=false);svg.addEventListener("pointercancel",()=>dragging=false);
-  }
-  bind(pitch,300,300,p=>{origin={x:clamp(p.x,3,297),y:clamp(p.y,34,297)}});
-  bind(posts,300,150,p=>{cross=p});
-  $("rka-kick-types").addEventListener("click",e=>{
-    const b=e.target.closest("button[data-type]");if(!b)return;
-    type=b.dataset.type;
-    $("rka-kick-types").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
-    refresh();
-  });
-  const close=()=>{modal.classList.remove("open");origin=null;cross=null;type="conv";};
-  add.addEventListener("click",()=>{
-    origin=null;cross=null;type="conv";
-    $("rka-kick-types").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x.dataset.type==="conv"));
-    refresh();modal.classList.add("open");
-    $("rka-kick-panel").scrollTop=0;
-  });
-  $("rka-kick-close").onclick=close;$("rka-kick-cancel").onclick=close;
-  modal.addEventListener("click",e=>{if(e.target===modal)close()});
-  $("rka-kick-add").onclick=()=>{
-    if(!origin||!cross)return;
-    const outcome=classify(cross);
-    S.kicks.push({x:origin.x,y:origin.y,gx:cross.x,gy:cross.y,res:outcome.res,t:type});
-    S.ty=type;
-    save();render();
-    document.dispatchEvent(new Event("ruckly:kicks-updated"));
-    close();
-    if(typeof toast==="function")toast(outcome.made?"Kick added · successful":"Kick added · missed");
-  };
-  // Rebuild all app analytics/profile views whenever this active session changes.
-  document.addEventListener("ruckly:kicks-updated",()=>{
-    try{if(typeof renderAnalytics==="function")renderAnalytics()}catch(_){}
-    try{if(typeof render==="function")render()}catch(_){}
-  });
-  refresh();
-})();
-</script>
 
 
 <script>
@@ -2067,3 +1926,10 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
 
 </body>
 </html>
+
+<style>
+#sh-cnt,#sh-tot,#sh-del,#sh-move,#sh-mc{display:none!important}
+#rka-post-input{display:block!important;margin:12px 0!important;padding:12px!important;border:1px solid var(--bd)!important;border-radius:14px!important}
+#rka-post-edit{width:100%;height:auto;display:block;touch-action:none;cursor:crosshair}
+#sh-ok:disabled{opacity:.45;cursor:not-allowed}
+</style>
