@@ -488,6 +488,11 @@ const LBL={made:"made",left:"wide left",right:"wide right",short:"short",miss:"m
 const PTS={conv:2,pen:3,drop:3},TS={conv:"Conv",pen:"Pen",drop:"Drop"};
 const kt=k=>k.t||"pen",kp=k=>res(k)==="made"?PTS[kt(k)]:0;
 function end(k){
+  // Exact goal-plane coordinates (gx: 0..300, gy: 0..130) take priority.
+  if(k.gx!=null&&k.gy!=null&&Number.isFinite(+k.gx)&&Number.isFinite(+k.gy)){
+    const gx=Math.max(0,Math.min(300,+k.gx)),gy=Math.max(0,Math.min(130,+k.gy));
+    return[116.6667+gx*(66.6666/300),12+(gy/130)*18];
+  }
   const r=res(k);
   if(r==="made")return[150,16];
   if(r==="left")return[118,14];
@@ -497,7 +502,7 @@ function end(k){
 }
 function render(){
   $("lines").innerHTML=S.kicks.map((k,i)=>{const e=end(k);if(k.originUnknown||!e)return"";const c=COL[res(k)],hs=D&&D.ix,sel=hs&&D.ix.includes(i),w=sel?4.2:2.6,o=hs&&!sel?.25:1;
-    return`<g opacity="${o}"><line x1="${k.x}" y1="${k.y}" x2="${e[0]}" y2="${e[1]}" stroke="#03130a" stroke-width="${w*2}" stroke-linecap="round" opacity=".5"/><line x1="${k.x}" y1="${k.y}" x2="${e[0]}" y2="${e[1]}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"${sel?"":` stroke-dasharray="${w*3} ${w*1.6}"`}/><circle cx="${e[0]}" cy="${e[1]}" r="${sel?7:4}" fill="${c}" stroke="#fff" stroke-width="1.6"/></g>`}).join("");
+    const cx=(+k.x+e[0])/2,cy=Math.max(8,Math.min(+k.y,e[1])-34),d=`M ${k.x} ${k.y} Q ${cx} ${cy} ${e[0]} ${e[1]}`;return`<g opacity="${o}"><path d="${d}" fill="none" stroke="#03130a" stroke-width="${w*2}" stroke-linecap="round" opacity=".5"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"${sel?"":` stroke-dasharray="${w*3} ${w*1.6}"`}/><circle cx="${e[0]}" cy="${e[1]}" r="${sel?7:4}" fill="${c}" stroke="#fff" stroke-width="1.6"/></g>`}).join("");
   const G={};S.kicks.forEach((k,i)=>{if(k.originUnknown)return;(G[k.x+","+k.y]=G[k.x+","+k.y]||[]).push(i)});
   $("dots").innerHTML=Object.values(G).map(ix=>{const k=S.kicks[ix[0]],rs=ix.map(i=>res(S.kicks[i])),c=rs.every(r=>r===rs[0])?COL[rs[0]]:"#9ab8ff",n=ix.length;
     return`<circle cx="${k.x}" cy="${k.y}" r="${n>1?8:6}" fill="${c}" stroke="#fff" stroke-width="2"/>`+(n>1?`<text x="${k.x}" y="${k.y+3.2}" text-anchor="middle" font-size="9" font-weight="700" fill="#07132f">${n}</text>`:"")}).join("");
@@ -1305,8 +1310,8 @@ $("sr").addEventListener("click",async e=>{const b=e.target.closest("[data-sfo]"
 
 /* ===== TRAJECTORIES (feed, post page, grid tiles) ===== */
 function ktraj(kk,w){const col={m:"#6dffa6",l:"#ff6b5a",r:"#ff6b5a",s:"#ffb347"};
- return kk.map(k=>{const x=+k[0],y=+k[1],r=k[2],e=r==="m"?[150,16]:r==="l"?[118,14]:r==="r"?[182,14]:r==="s"?[x+(150-x)*.62,y+(21-y)*.62]:null;if(!e)return"";const c=col[r],L=`x1="${x}" y1="${y}" x2="${e[0]}" y2="${e[1]}" stroke-linecap="round"`;
-  return`<g class="tj" data-g="${x},${y}"><line ${L} stroke="#03130a" stroke-width="${w*2.1}" opacity=".55"/><line ${L} stroke="${c}" stroke-width="${w}" stroke-dasharray="${w*3} ${w*1.6}"/><circle cx="${e[0]}" cy="${e[1]}" r="${w*1.5}" fill="${c}" stroke="#fff" stroke-width="${w*.45}"/></g>`}).join("")}
+ return kk.map(k=>{const x=+k[0],y=+k[1],r=k[2],e=k[4]!=null&&k[5]!=null&&Number.isFinite(+k[4])&&Number.isFinite(+k[5])?[116.6667+Math.max(0,Math.min(300,+k[4]))*(66.6666/300),12+(Math.max(0,Math.min(130,+k[5]))/130)*18]:r==="m"?[150,16]:r==="l"?[118,14]:r==="r"?[182,14]:r==="s"?[x+(150-x)*.62,y+(21-y)*.62]:null;if(!e)return"";const c=col[r],cx=(x+e[0])/2,cy=Math.max(8,Math.min(y,e[1])-34),d=`M ${x} ${y} Q ${cx} ${cy} ${e[0]} ${e[1]}`;
+  return`<g class="tj" data-g="${x},${y}"><path d="${d}" fill="none" stroke="#03130a" stroke-width="${w*2.1}" opacity=".55"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-dasharray="${w*3} ${w*1.6}"/><circle cx="${e[0]}" cy="${e[1]}" r="${w*1.5}" fill="${c}" stroke="#fff" stroke-width="${w*.45}"/></g>`}).join("")}
 function kmini(kk){const col={m:"#2ecc71",l:"#ff5a4a",r:"#ff5a4a",s:"#f0a030"},dots=kk.map(k=>`<circle cx="${+k[0]}" cy="${+k[1]}" r="7" fill="${col[k[2]]||"#ff5a4a"}" stroke="#fff" stroke-width="2"/>`).join("");
  return`<svg viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;border-radius:0"><rect width="300" height="300" fill="var(--fl)"/><g fill="#fff" opacity=".07"><rect y="30" width="300" height="42"/><rect y="114" width="300" height="42"/><rect y="198" width="300" height="42"/></g><rect width="300" height="30" fill="#000" opacity=".13"/><g stroke="var(--ln)" stroke-width="3" fill="none" opacity=".8"><line x1="0" y1="30" x2="300" y2="30"/><line x1="0" y1="124" x2="300" y2="124"/></g><g stroke="#fff" stroke-width="5"><line x1="140" y1="30" x2="140" y2="8"/><line x1="160" y1="30" x2="160" y2="8"/><line x1="140" y1="19" x2="160" y2="19"/></g>${ktraj(kk,4)}${dots}</svg>`}
 
@@ -1754,7 +1759,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
   function postPoints(items){
     const out=[];let exact=0,estimated=0;
     items.forEach(({k})=>{
-      if(Number.isFinite(+k.gx)&&Number.isFinite(+k.gy)){out.push({x:Math.max(0,Math.min(300,+k.gx)),y:Math.max(0,Math.min(130,+k.gy))});exact++;return}
+      if(k.gx!=null&&k.gy!=null&&Number.isFinite(+k.gx)&&Number.isFinite(+k.gy)){out.push({x:Math.max(0,Math.min(300,+k.gx)),y:Math.max(0,Math.min(130,+k.gy))});exact++;return}
       let e=null;try{e=typeof end==="function"?end(k):null}catch(_){}
       if(e){out.push({x:e[0],y:Math.max(0,Math.min(130,12+(e[1]/30)*82))});estimated++}
     });
@@ -1781,6 +1786,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
     document.getElementById("rka-trend").innerHTML=trendSvg(ss);
   }
   document.getElementById("rka-filter").addEventListener("change",renderAnalytics);
+  document.addEventListener("ruckly:kicks-updated",renderAnalytics);
 
   /* Optional exact post-crossing point capture for new kicks. */
   const shBody=document.getElementById("sh-body");
@@ -1827,166 +1833,134 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
 </script>
 
 
-<script>
-/* ===== RUCKLY: dedicated goal-post kick capture + session post heatmap ===== */
-(function(){
-  if (document.getElementById("rka-add-kick")) return;
-  const css = `
-  #rka-add-kick{width:100%;margin:10px 0 0}
-  #rka-goal-modal{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center;padding:0}
-  #rka-goal-modal.open{display:flex}
-  #rka-goal-panel{background:var(--bg,#fff);color:var(--tx,#222);width:min(100%,620px);max-height:94dvh;overflow:auto;border-radius:22px 22px 0 0;padding:16px;box-shadow:0 -12px 50px #0004}
-  #rka-goal-panel .rka-goal-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  #rka-goal-map{display:block;width:100%;border-radius:14px;touch-action:none;cursor:crosshair;background:#287f35;margin:12px 0}
-  #rka-goal-panel .rka-goal-segs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
-  #rka-goal-panel .rka-goal-segs button{border:1px solid var(--bd);border-radius:999px;padding:11px 5px;background:var(--fl);color:var(--tx);font:inherit;font-weight:700}
-  #rka-goal-panel .rka-goal-segs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
-  #rka-goal-result{font-size:13px;padding:9px 11px;border-radius:10px;background:var(--fl);margin:8px 0}
-  #rka-goal-panel .rka-goal-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-  #rka-goal-panel .rka-goal-actions button{min-height:48px}
-  @media(min-width:700px){#rka-goal-modal{align-items:center;padding:18px}#rka-goal-panel{border-radius:22px;max-height:90vh}}
-  `;
-  document.head.insertAdjacentHTML("beforeend","<style>"+css+"</style>");
-  const field=document.getElementById("field"); if(!field)return;
-  const add=document.createElement("button");add.id="rka-add-kick";add.className="save";add.type="button";add.textContent="＋ Add a kick";
-  field.insertAdjacentElement("afterend",add);
-  const modal=document.createElement("div");modal.id="rka-goal-modal";
-  modal.innerHTML=`
-    <div id="rka-goal-panel">
-      <div class="rka-goal-top"><b style="font-size:19px">Add kick</b><button type="button" class="link" id="rka-goal-close">✕</button></div>
-      <div class="mut" style="font-size:13px;margin-top:4px">Tap where the ball crossed the posts. Drag the marker to fine-tune the exact position.</div>
-      <svg id="rka-goal-map" viewBox="0 0 300 180" aria-label="Goal posts crossing point selector">
-        <rect width="300" height="180" fill="#287f35"/><rect y="143" width="300" height="37" fill="#1e702e"/>
-        <line x1="0" y1="143" x2="300" y2="143" stroke="#fff" stroke-width="3"/>
-        <line x1="105" y1="20" x2="105" y2="143" stroke="#fff" stroke-width="4"/>
-        <line x1="195" y1="20" x2="195" y2="143" stroke="#fff" stroke-width="4"/>
-        <line x1="105" y1="112" x2="195" y2="112" stroke="#fff" stroke-width="4"/>
-        <rect x="132" y="109" width="36" height="6" fill="#f0bb32"/><rect x="145" y="109" width="10" height="6" fill="#0b225b"/>
-        <g id="rka-goal-marker"></g><text x="150" y="169" fill="#fff" text-anchor="middle" font-size="9" opacity=".9">GOAL LINE</text>
-      </svg>
-      <div class="mut" style="font-size:12px">Kick type</div>
-      <div class="rka-goal-segs" id="rka-goal-types">
-        <button type="button" data-type="conv" class="on">Conversion · 2</button>
-        <button type="button" data-type="pen">Penalty · 3</button>
-        <button type="button" data-type="drop">Drop goal · 3</button>
-      </div>
-      <div id="rka-goal-result">Choose the point where the ball crossed the goal plane.</div>
-      <div class="rka-goal-actions"><button type="button" class="alt" id="rka-goal-cancel">Cancel</button><button type="button" class="save" id="rka-goal-add" disabled>Add kick</button></div>
-    </div>`;
-  document.body.appendChild(modal);
-  let point=null,type="conv",drag=false;
-  const map=document.getElementById("rka-goal-map"),marker=document.getElementById("rka-goal-marker"),result=document.getElementById("rka-goal-result"),addBtn=document.getElementById("rka-goal-add");
-  const close=()=>{modal.classList.remove("open");point=null;type="conv";marker.innerHTML="";addBtn.disabled=true;};
-  const classify=p=>p.x<105?{res:"left",label:"Missed · wide left"}:p.x>195?{res:"right",label:"Missed · wide right"}:p.y>112?{res:"short",label:"Missed · below the crossbar"}:{res:"made",label:"Successful kick · between the posts"};
-  const draw=()=>{if(!point){marker.innerHTML="";addBtn.disabled=true;result.textContent="Choose the point where the ball crossed the goal plane.";return}
-    const q=classify(point);marker.innerHTML=`<circle cx="${point.x}" cy="${point.y}" r="9" fill="${q.res==="made"?"#00c83b":"#ff2424"}" stroke="#06130b" stroke-width="3"/><circle cx="${point.x}" cy="${point.y}" r="15" fill="none" stroke="#fff" stroke-width="2"/>`;
-    result.textContent=q.label+` · X ${point.x}, Y ${point.y}`;addBtn.disabled=false;};
-  const place=e=>{const r=map.getBoundingClientRect();point={x:Math.max(0,Math.min(300,Math.round((e.clientX-r.left)/r.width*300))),y:Math.max(0,Math.min(180,Math.round((e.clientY-r.top)/r.height*180)))};draw();};
-  map.addEventListener("pointerdown",e=>{drag=true;map.setPointerCapture?.(e.pointerId);place(e)});
-  map.addEventListener("pointermove",e=>{if(drag)place(e)});map.addEventListener("pointerup",()=>drag=false);map.addEventListener("pointercancel",()=>drag=false);
-  document.getElementById("rka-goal-types").addEventListener("click",e=>{const b=e.target.closest("button[data-type]");if(!b)return;type=b.dataset.type;document.querySelectorAll("#rka-goal-types button").forEach(x=>x.classList.toggle("on",x===b));});
-  add.addEventListener("click",()=>modal.classList.add("open"));
-  document.getElementById("rka-goal-close").onclick=close;document.getElementById("rka-goal-cancel").onclick=close;modal.addEventListener("click",e=>{if(e.target===modal)close()});
-  addBtn.addEventListener("click",()=>{if(!point)return;const q=classify(point);
-    S.kicks.push({x:150,y:150,originUnknown:true,gx:point.x,gy:Math.round(point.y/180*130),res:q.res,t:type});
-    S.ty=type;save();render();close();if(typeof toast==="function")toast("Kick added · exact posts position saved");
-  });
-  if(typeof kmap==="function"){const oldKmap=kmap;kmap=function(kk){return oldKmap((kk||[]).filter(k=>k&&k[0]!=null&&k[1]!=null));};}
 
-  function postMiniMap(kk){
-    const pts=(kk||[]).filter(k=>k&&k[4]!=null&&k[5]!=null).map(k=>({x:+k[4],y:+k[5]}));if(!pts.length)return "";
-    const bins={};pts.forEach(p=>{const key=Math.round(p.x/4)*4+","+Math.round(p.y/4)*4;bins[key]=(bins[key]||0)+1});const max=Math.max(...Object.values(bins));
-    const glows=Object.entries(bins).map(([key,n])=>{const [x,y]=key.split(",").map(Number);return `<circle cx="${x}" cy="${y}" r="${12+Math.min(8,n*2)}" fill="url(#rka-session-post-gradient)" opacity="${.5+.45*n/max}"/>`;}).join("");
-    return `<div class="rka-session-posts"><div class="mut" style="font-size:12px;font-weight:700;margin:12px 0 6px">POSTS HEATMAP</div><svg viewBox="0 0 300 130" role="img" aria-label="Session posts heatmap" style="width:100%;display:block;border-radius:10px;background:#287f35"><defs><radialGradient id="rka-session-post-gradient"><stop offset="0" stop-color="#ff3028" stop-opacity=".98"/><stop offset=".3" stop-color="#ffb52e" stop-opacity=".88"/><stop offset=".58" stop-color="#65e5a4" stop-opacity=".72"/><stop offset="1" stop-color="#168bff" stop-opacity="0"/></radialGradient></defs><rect width="300" height="130" fill="#287f35"/>${glows}<g stroke="#fff" stroke-width="4" fill="none"><line x1="105" y1="12" x2="105" y2="108"/><line x1="195" y1="12" x2="195" y2="108"/><line x1="105" y1="105" x2="195" y2="105"/></g></svg><div class="mut" style="font-size:11px;margin-top:4px">${pts.length} exact crossing point${pts.length===1?"":"s"}</div></div>`;
-  }
-  const carouselCss=`.rka-session-gallery{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin-top:10px;padding-bottom:5px}.rka-session-gallery>.rka-session-slide{flex:0 0 100%;min-width:0;scroll-snap-align:start}.rka-session-gallery svg{margin-top:0!important}.rka-session-dots{text-align:center;color:var(--mut);font-size:12px;letter-spacing:8px;margin-top:3px}`;
-  document.head.insertAdjacentHTML("beforeend","<style>"+carouselCss+"</style>");
-  if(typeof sessCard==="function"){const oldSessCard=sessCard;sessCard=function(s){
-    const html=oldSessCard(s),kk=Array.isArray(s&&s.kk)?s.kk:[],mini=postMiniMap(kk),kick=kmap(kk);
-    if(!mini)return html;
-    const gallery=`<div class="rka-session-gallery"><div class="rka-session-slide">${kick||'<div class="mut">Kick starting positions not recorded.</div>'}</div><div class="rka-session-slide">${mini}</div></div><div class="rka-session-dots">● ●</div>`;
-    if(kick&&html.includes(kick))return html.replace(kick,gallery);
-    return html.replace(/<\/div>\s*$/,gallery+"</div>");
-  };}
-  const analyticsText=document.querySelector("#rka .card:nth-of-type(2) .mut");if(analyticsText)analyticsText.textContent="Visualize where your kicks pass through the posts. Red shows your high-frequency areas.";
-})();
-</script>
+
 
 
 <script>
-/* ===== RUCKLY: dedicated goal-post kick capture + session post heatmap ===== */
+/* RUCKLY Add a kick — video-matched workflow: origin, flight path, posts crossing, type. */
 (function(){
-  if (document.getElementById("rka-add-kick")) return;
-  const css = `
+  if(document.getElementById("rka-add-kick"))return;
+  const field=document.getElementById("field");if(!field)return;
+  const css=`
   #rka-add-kick{width:100%;margin:10px 0 0}
-  #rka-goal-modal{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center;padding:0}
-  #rka-goal-modal.open{display:flex}
-  #rka-goal-panel{background:var(--bg,#fff);color:var(--tx,#222);width:min(100%,620px);max-height:94dvh;overflow:auto;border-radius:22px 22px 0 0;padding:16px;box-shadow:0 -12px 50px #0004}
-  #rka-goal-panel .rka-goal-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  #rka-goal-map{display:block;width:100%;border-radius:14px;touch-action:none;cursor:crosshair;background:#287f35;margin:12px 0}
-  #rka-goal-panel .rka-goal-segs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
-  #rka-goal-panel .rka-goal-segs button{border:1px solid var(--bd);border-radius:999px;padding:11px 5px;background:var(--fl);color:var(--tx);font:inherit;font-weight:700}
-  #rka-goal-panel .rka-goal-segs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
-  #rka-goal-result{font-size:13px;padding:9px 11px;border-radius:10px;background:var(--fl);margin:8px 0}
-  #rka-goal-panel .rka-goal-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-  #rka-goal-panel .rka-goal-actions button{min-height:48px}
-  @media(min-width:700px){#rka-goal-modal{align-items:center;padding:18px}#rka-goal-panel{border-radius:22px;max-height:90vh}}
+  #rka-kick-modal{position:fixed;inset:0;z-index:140;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center}
+  #rka-kick-modal.open{display:flex}
+  #rka-kick-panel{width:min(100%,620px);max-height:96dvh;overflow:auto;background:var(--bg,#fff);color:var(--tx,#222);padding:16px;border-radius:22px 22px 0 0;box-shadow:0 -12px 45px #0005}
+  #rka-kick-panel .rka-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  #rka-kick-panel .rka-stage{border:1px solid var(--bd);border-radius:16px;padding:12px;margin-top:12px}
+  #rka-kick-panel svg{display:block;width:100%;border-radius:10px;margin:9px 0;touch-action:none;cursor:crosshair}
+  #rka-kick-panel .rka-type-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+  #rka-kick-panel .rka-type-row button{border:1px solid var(--bd);border-radius:999px;padding:10px 4px;background:var(--fl);color:var(--tx);font:inherit;font-size:13px;font-weight:700}
+  #rka-kick-panel .rka-type-row button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+  #rka-kick-panel .rka-info{font-size:13px;padding:9px 11px;border-radius:10px;background:var(--fl);margin:7px 0}
+  #rka-kick-panel .rka-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+  #rka-kick-panel .rka-actions button{min-height:48px}
+  @media(min-width:700px){#rka-kick-modal{align-items:center;padding:18px}#rka-kick-panel{border-radius:22px;max-height:92vh}}
   `;
   document.head.insertAdjacentHTML("beforeend","<style>"+css+"</style>");
-  const field=document.getElementById("field"); if(!field)return;
-  const add=document.createElement("button");add.id="rka-add-kick";add.className="save";add.type="button";add.textContent="＋ Add a kick";
+  const add=document.createElement("button");add.id="rka-add-kick";add.type="button";add.className="save";add.textContent="＋ Add a kick";
   field.insertAdjacentElement("afterend",add);
-  const modal=document.createElement("div");modal.id="rka-goal-modal";
+  const modal=document.createElement("div");modal.id="rka-kick-modal";
   modal.innerHTML=`
-    <div id="rka-goal-panel">
-      <div class="rka-goal-top"><b style="font-size:19px">Add kick</b><button type="button" class="link" id="rka-goal-close">✕</button></div>
-      <div class="mut" style="font-size:13px;margin-top:4px">Tap where the ball crossed the posts. Drag the marker to fine-tune the exact position.</div>
-      <svg id="rka-goal-map" viewBox="0 0 300 180" aria-label="Goal posts crossing point selector">
-        <rect width="300" height="180" fill="#287f35"/><rect y="143" width="300" height="37" fill="#1e702e"/>
-        <line x1="0" y1="143" x2="300" y2="143" stroke="#fff" stroke-width="3"/>
-        <line x1="105" y1="20" x2="105" y2="143" stroke="#fff" stroke-width="4"/>
-        <line x1="195" y1="20" x2="195" y2="143" stroke="#fff" stroke-width="4"/>
-        <line x1="105" y1="112" x2="195" y2="112" stroke="#fff" stroke-width="4"/>
-        <rect x="132" y="109" width="36" height="6" fill="#f0bb32"/><rect x="145" y="109" width="10" height="6" fill="#0b225b"/>
-        <g id="rka-goal-marker"></g><text x="150" y="169" fill="#fff" text-anchor="middle" font-size="9" opacity=".9">GOAL LINE</text>
+  <div id="rka-kick-panel">
+    <div class="rka-head"><b style="font-size:19px">Add kick</b><button type="button" class="link" id="rka-kick-close">✕</button></div>
+    <section class="rka-stage">
+      <b>Kick position</b>
+      <div class="mut" style="font-size:13px;margin-top:4px">Tap the pitch to place a kick marker. Drag to adjust its position.</div>
+      <div class="rka-info" id="rka-kick-distance">Distance: —　 Angle: —</div>
+      <svg id="rka-origin-pitch" viewBox="0 0 300 300" aria-label="Choose kick position">
+        <rect width="300" height="300" fill="#176b37"/><g fill="#fff" opacity=".07"><rect y="30" width="300" height="42"/><rect y="114" width="300" height="42"/><rect y="198" width="300" height="42"/></g>
+        <rect width="300" height="30" fill="#000" opacity=".13"/>
+        <g stroke="#fff" stroke-width="1.7" fill="none" opacity=".9"><line x1="0" y1="30" x2="300" y2="30"/><line x1="1" y1="30" x2="1" y2="300"/><line x1="299" y1="30" x2="299" y2="300"/><line x1="0" y1="51.4" x2="300" y2="51.4" stroke-dasharray="6 5"/><line x1="0" y1="124.3" x2="300" y2="124.3"/><line x1="0" y1="201.4" x2="300" y2="201.4"/><line x1="0" y1="244.3" x2="300" y2="244.3"/></g>
+        <g stroke="#fff" stroke-width="3"><line x1="140" y1="30" x2="140" y2="12"/><line x1="160" y1="30" x2="160" y2="12"/><line x1="140" y1="21" x2="160" y2="21"/></g>
+        <path id="rka-preview-arc" d="" fill="none" stroke="#12a8ff" stroke-width="3.2" stroke-linecap="round"/>
+        <circle id="rka-origin-marker" cx="-20" cy="-20" r="8" fill="#168bff" stroke="#07130f" stroke-width="3"/>
       </svg>
-      <div class="mut" style="font-size:12px">Kick type</div>
-      <div class="rka-goal-segs" id="rka-goal-types">
-        <button type="button" data-type="conv" class="on">Conversion · 2</button>
-        <button type="button" data-type="pen">Penalty · 3</button>
-        <button type="button" data-type="drop">Drop goal · 3</button>
+    </section>
+    <section class="rka-stage">
+      <b>Kick result</b>
+      <div class="mut" style="font-size:13px;margin-top:4px">Tap to mark where the ball passed the posts. Drag to adjust the position.</div>
+      <svg id="rka-posts-pitch" viewBox="0 0 300 130" aria-label="Choose exact ball crossing point">
+        <rect width="300" height="130" fill="#287f35"/>
+        <g stroke="#fff" stroke-width="4" fill="none"><line x1="105" y1="12" x2="105" y2="108"/><line x1="195" y1="12" x2="195" y2="108"/><line x1="105" y1="105" x2="195" y2="105"/></g>
+        <rect x="132" y="102" width="36" height="6" fill="#e8b936"/><rect x="145" y="102" width="10" height="6" fill="#0b225b"/>
+        <circle id="rka-cross-marker" cx="-20" cy="-20" r="8" fill="#00c83b" stroke="#07130f" stroke-width="3"/>
+      </svg>
+      <div class="rka-type-row" id="rka-kick-types">
+        <button type="button" data-type="conv" class="on">Conversion</button>
+        <button type="button" data-type="pen">Penalty</button>
+        <button type="button" data-type="drop">Drop Goal</button>
       </div>
-      <div id="rka-goal-result">Choose the point where the ball crossed the goal plane.</div>
-      <div class="rka-goal-actions"><button type="button" class="alt" id="rka-goal-cancel">Cancel</button><button type="button" class="save" id="rka-goal-add" disabled>Add kick</button></div>
-    </div>`;
+      <div class="rka-info" id="rka-kick-result">Select the kick position and crossing point.</div>
+    </section>
+    <div class="rka-actions"><button type="button" class="alt" id="rka-kick-cancel">Cancel</button><button type="button" class="save" id="rka-kick-add" disabled>Add kick</button></div>
+  </div>`;
   document.body.appendChild(modal);
-  let point=null,type="conv",drag=false;
-  const map=document.getElementById("rka-goal-map"),marker=document.getElementById("rka-goal-marker"),result=document.getElementById("rka-goal-result"),addBtn=document.getElementById("rka-goal-add");
-  const close=()=>{modal.classList.remove("open");point=null;type="conv";marker.innerHTML="";addBtn.disabled=true;};
-  const classify=p=>p.x<105?{res:"left",label:"Missed · wide left"}:p.x>195?{res:"right",label:"Missed · wide right"}:p.y>112?{res:"short",label:"Missed · below the crossbar"}:{res:"made",label:"Successful kick · between the posts"};
-  const draw=()=>{if(!point){marker.innerHTML="";addBtn.disabled=true;result.textContent="Choose the point where the ball crossed the goal plane.";return}
-    const q=classify(point);marker.innerHTML=`<circle cx="${point.x}" cy="${point.y}" r="9" fill="${q.res==="made"?"#00c83b":"#ff2424"}" stroke="#06130b" stroke-width="3"/><circle cx="${point.x}" cy="${point.y}" r="15" fill="none" stroke="#fff" stroke-width="2"/>`;
-    result.textContent=q.label+` · X ${point.x}, Y ${point.y}`;addBtn.disabled=false;};
-  const place=e=>{const r=map.getBoundingClientRect();point={x:Math.max(0,Math.min(300,Math.round((e.clientX-r.left)/r.width*300))),y:Math.max(0,Math.min(180,Math.round((e.clientY-r.top)/r.height*180)))};draw();};
-  map.addEventListener("pointerdown",e=>{drag=true;map.setPointerCapture?.(e.pointerId);place(e)});
-  map.addEventListener("pointermove",e=>{if(drag)place(e)});map.addEventListener("pointerup",()=>drag=false);map.addEventListener("pointercancel",()=>drag=false);
-  document.getElementById("rka-goal-types").addEventListener("click",e=>{const b=e.target.closest("button[data-type]");if(!b)return;type=b.dataset.type;document.querySelectorAll("#rka-goal-types button").forEach(x=>x.classList.toggle("on",x===b));});
-  add.addEventListener("click",()=>modal.classList.add("open"));
-  document.getElementById("rka-goal-close").onclick=close;document.getElementById("rka-goal-cancel").onclick=close;modal.addEventListener("click",e=>{if(e.target===modal)close()});
-  addBtn.addEventListener("click",()=>{if(!point)return;const q=classify(point);
-    S.kicks.push({x:150,y:150,originUnknown:true,gx:point.x,gy:Math.round(point.y/180*130),res:q.res,t:type});
-    S.ty=type;save();render();close();if(typeof toast==="function")toast("Kick added · exact posts position saved");
-  });
-  if(typeof kmap==="function"){const oldKmap=kmap;kmap=function(kk){return oldKmap((kk||[]).filter(k=>k&&k[0]!=null&&k[1]!=null));};}
-  if(typeof sj==="function"){const oldSj=sj;sj=function(x){const q=oldSj(x);q.kk=(x.kicks||[]).map(k=>[k.originUnknown?null:k.x,k.originUnknown?null:k.y,{made:"m",left:"l",right:"r",short:"s"}[k.res||"miss"]||"l",k.t==="drop"?"d":k.t==="conv"?"c":"p",Number.isFinite(+k.gx)?+k.gx:null,Number.isFinite(+k.gy)?+k.gy:null]);return q;};}
-  function postMiniMap(kk){
-    const pts=(kk||[]).filter(k=>k&&k[4]!=null&&k[5]!=null).map(k=>({x:+k[4],y:+k[5]}));if(!pts.length)return "";
-    const bins={};pts.forEach(p=>{const key=Math.round(p.x/4)*4+","+Math.round(p.y/4)*4;bins[key]=(bins[key]||0)+1});const max=Math.max(...Object.values(bins));
-    const glows=Object.entries(bins).map(([key,n])=>{const [x,y]=key.split(",").map(Number);return `<circle cx="${x}" cy="${y}" r="${12+Math.min(8,n*2)}" fill="url(#rka-session-post-gradient)" opacity="${.5+.45*n/max}"/>`;}).join("");
-    return `<div class="rka-session-posts"><div class="mut" style="font-size:12px;font-weight:700;margin:12px 0 6px">POSTS HEATMAP</div><svg viewBox="0 0 300 130" role="img" aria-label="Session posts heatmap" style="width:100%;display:block;border-radius:10px;background:#287f35"><defs><radialGradient id="rka-session-post-gradient"><stop offset="0" stop-color="#ff3028" stop-opacity=".98"/><stop offset=".3" stop-color="#ffb52e" stop-opacity=".88"/><stop offset=".58" stop-color="#65e5a4" stop-opacity=".72"/><stop offset="1" stop-color="#168bff" stop-opacity="0"/></radialGradient></defs><rect width="300" height="130" fill="#287f35"/>${glows}<g stroke="#fff" stroke-width="4" fill="none"><line x1="105" y1="12" x2="105" y2="108"/><line x1="195" y1="12" x2="195" y2="108"/><line x1="105" y1="105" x2="195" y2="105"/></g></svg><div class="mut" style="font-size:11px;margin-top:4px">${pts.length} exact crossing point${pts.length===1?"":"s"}</div></div>`;
+
+  let origin=null,cross=null,type="conv",dragging=false;
+  const $=id=>document.getElementById(id);
+  const pitch=$("rka-origin-pitch"),posts=$("rka-posts-pitch");
+  const mapField=p=>({x:116.6667+p.x*(66.6666/300),y:12+(p.y/130)*18});
+  const classify=p=>p.x<105?{res:"left",label:"Missed · wide left"}:p.x>195?{res:"right",label:"Missed · wide right"}:p.y>105?{res:"short",label:"Missed · below the crossbar"}:{res:"made",label:"Successful · between the posts"};
+  const distance=()=>origin?Math.round(Math.hypot(150-origin.x,30-origin.y)*70/300):0;
+  function refresh(){
+    const marker=$("rka-origin-marker"),crossMarker=$("rka-cross-marker"),arc=$("rka-preview-arc");
+    if(origin){
+      marker.setAttribute("cx",origin.x);marker.setAttribute("cy",origin.y);
+      const e=cross?mapField(cross):{x:150,y:16},cx=(origin.x+e.x)/2,cy=Math.max(8,Math.min(origin.y,e.y)-34);
+      arc.setAttribute("d",`M ${origin.x} ${origin.y} Q ${cx} ${cy} ${e.x} ${e.y}`);
+      const dx=origin.x-150,dy=origin.y-30,angle=Math.round(Math.atan2(Math.abs(dx),Math.max(1,dy))*180/Math.PI);
+      $("rka-kick-distance").textContent=`Distance: ${distance()}m　 Angle: ${angle}°`;
+    }else{
+      marker.setAttribute("cx",-20);marker.setAttribute("cy",-20);arc.setAttribute("d","");
+      $("rka-kick-distance").textContent="Distance: —　 Angle: —";
+    }
+    if(cross){crossMarker.setAttribute("cx",cross.x);crossMarker.setAttribute("cy",cross.y);const q=classify(cross);$("rka-kick-result").textContent=q.label+" · "+typeName(type);}
+    else{crossMarker.setAttribute("cx",-20);crossMarker.setAttribute("cy",-20);$("rka-kick-result").textContent="Select the kick position and crossing point.";}
+    $("rka-kick-add").disabled=!(origin&&cross);
   }
-  if(typeof sessCard==="function"){const oldSessCard=sessCard;sessCard=function(s){const html=oldSessCard(s),mini=postMiniMap(Array.isArray(s&&s.kk)?s.kk:[]);return mini?html.replace(/<\/div>\s*$/,mini+"</div>"):html;};}
-  const analyticsText=document.querySelector("#rka .card:nth-of-type(2) .mut");if(analyticsText)analyticsText.textContent="Visualize where your kicks pass through the posts. Red shows your high-frequency areas.";
+  function typeName(t){return t==="conv"?"Conversion":t==="pen"?"Penalty":"Drop goal";}
+  function bind(svg,w,h,cb){
+    const get=e=>{const r=svg.getBoundingClientRect();return{x:Math.max(0,Math.min(w,Math.round((e.clientX-r.left)/r.width*w))),y:Math.max(0,Math.min(h,Math.round((e.clientY-r.top)/r.height*h)))}};
+    svg.addEventListener("pointerdown",e=>{dragging=true;svg.setPointerCapture?.(e.pointerId);cb(get(e));refresh()});
+    svg.addEventListener("pointermove",e=>{if(dragging){cb(get(e));refresh()}});
+    svg.addEventListener("pointerup",()=>dragging=false);svg.addEventListener("pointercancel",()=>dragging=false);
+  }
+  bind(pitch,300,300,p=>{origin={x:Math.max(3,Math.min(297,p.x)),y:Math.max(34,Math.min(297,p.y))}});
+  bind(posts,300,130,p=>{cross=p});
+  $("rka-kick-types").addEventListener("click",e=>{const b=e.target.closest("button[data-type]");if(!b)return;type=b.dataset.type;$("rka-kick-types").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));refresh()});
+  const close=()=>{modal.classList.remove("open");origin=null;cross=null;type="conv";refresh()};
+  add.addEventListener("click",()=>{origin=null;cross=null;type="conv";$("rka-kick-types").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x.dataset.type==="conv"));refresh();modal.classList.add("open")});
+  $("rka-kick-close").onclick=close;$("rka-kick-cancel").onclick=close;modal.addEventListener("click",e=>{if(e.target===modal)close()});
+  $("rka-kick-add").onclick=()=>{
+    if(!origin||!cross)return;
+    const outcome=classify(cross);
+    S.kicks.push({x:origin.x,y:origin.y,gx:cross.x,gy:cross.y,res:outcome.res,t:type});
+    S.ty=type;
+    save();render();
+    document.dispatchEvent(new Event("ruckly:kicks-updated"));
+    close();
+    if(typeof toast==="function")toast("Kick added · trajectory and heatmaps updated");
+  };
+  function postsHeatmap(kk){
+    const pts=(kk||[]).filter(k=>k&&k[4]!=null&&k[5]!=null).map(k=>({x:+k[4],y:+k[5]}));if(!pts.length)return"";
+    const bins={};pts.forEach(p=>{const key=Math.round(p.x/4)*4+","+Math.round(p.y/4)*4;bins[key]=(bins[key]||0)+1});
+    const max=Math.max(...Object.values(bins));
+    const glow=Object.entries(bins).map(([key,n])=>{const [x,y]=key.split(",").map(Number);return`<circle cx="${x}" cy="${y}" r="${16+Math.min(12,n*2)}" fill="url(#rka-posts-session-gradient)" opacity="${.45+.45*n/max}"/>`}).join("");
+    return `<div class="mut" style="font-size:12px;font-weight:700;margin:10px 0 6px">POSTS HEATMAP</div><svg viewBox="0 0 300 130" role="img" aria-label="Posts heatmap for this session" style="width:100%;display:block;border-radius:10px;background:#287f35"><defs><radialGradient id="rka-posts-session-gradient"><stop offset="0" stop-color="#ff3028"/><stop offset=".3" stop-color="#ffb52e"/><stop offset=".58" stop-color="#65e5a4"/><stop offset="1" stop-color="#168bff" stop-opacity="0"/></radialGradient></defs><rect width="300" height="130" fill="#287f35"/>${glow}<g stroke="#fff" stroke-width="4" fill="none"><line x1="105" y1="12" x2="105" y2="108"/><line x1="195" y1="12" x2="195" y2="108"/><line x1="105" y1="105" x2="195" y2="105"/></g></svg><div class="mut" style="font-size:11px;margin-top:4px">${pts.length} kicks recorded</div>`;
+  }
+  const galleryStyle=`.rka-session-gallery{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin-top:10px;padding-bottom:5px}.rka-session-gallery>.rka-session-slide{flex:0 0 100%;min-width:0;scroll-snap-align:start}.rka-session-gallery svg{margin-top:0!important}.rka-session-dots{text-align:center;color:var(--mut);font-size:12px;letter-spacing:8px;margin-top:3px}`;
+  document.head.insertAdjacentHTML("beforeend","<style>"+galleryStyle+"</style>");
+  if(typeof sessCard==="function"){
+    const original=sessCard;
+    sessCard=function(s){
+      const base=original(s),kk=Array.isArray(s&&s.kk)?s.kk:[],heat=postsHeatmap(kk);if(!heat)return base;
+      const first=kmap(kk),gallery=`<div class="rka-session-gallery"><div class="rka-session-slide">${first}</div><div class="rka-session-slide">${heat}</div></div><div class="rka-session-dots">●　●</div>`;
+      return first&&base.includes(first)?base.replace(first,gallery):base.replace(/<\/div>\s*$/,gallery+"</div>");
+    };
+  }
+  refresh();
 })();
 </script>
 
