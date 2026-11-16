@@ -1842,7 +1842,6 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
   if(typeof save==="function"){const oldSave=save;save=function(){oldSave();renderAnalytics();};}
   if(typeof render==="function"){const oldRender=render;render=function(){oldRender();renderAnalytics();};}
   if(typeof show==="function"){const oldShow=show;show=function(){oldShow();renderAnalytics();};}
-  if(typeof acct==="function"){const oldAcct=acct;acct=async function(){await oldAcct();const el=document.getElementById("acct");if(!el)return;let c=document.getElementById("rka-account");if(!c){c=document.createElement("div");c.id="rka-account";c.className="card";el.appendChild(c);}const ss=allKickSessions(),it=flat(ss),ks=it.map(x=>x.k),m=ks.filter(success).length,pp=postPoints(it);c.innerHTML=`<div class="eyebrow">KICKING PERFORMANCE</div><h3 style="margin:2px 0 10px">Your kicking snapshot</h3><div class="rka-grid">${metric(ks.length,"Total kicks")}${metric(ks.length?Math.round(m/ks.length*100)+"%":"–","Success rate")}${metric(ks.reduce((a,k)=>a+pointsK(k),0),"Kicking points")}${metric(it.filter(x=>success(x.k)).length?Math.max(...it.filter(x=>success(x.k)).map(x=>distK(x.k)))+"m":"–","Longest successful")}</div>`;};}
   renderAnalytics();
 })();
 </script>
@@ -2052,24 +2051,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
 
 
 
-<script>
-/* Keep Account kicking metrics in sync with Record. */
-(function(){
-  document.addEventListener('ruckly:kicks-updated',function(){
-    try{
-      const card=document.getElementById('rka-account');
-      if(!card||typeof S==='undefined')return;
-      const saved=(Array.isArray(S.sessions)?S.sessions:[]).filter(x=>!S.editId||x.id!=S.editId);
-      const kicks=[...saved.flatMap(x=>Array.isArray(x.kicks)?x.kicks:[]),...(Array.isArray(S.kicks)?S.kicks:[])];
-      const made=kicks.filter(k=>(k.res||(k.ok?'made':'miss'))==='made').length;
-      const points=kicks.reduce((n,k)=>n+((k.res||(k.ok?'made':'miss'))==='made'?({conv:2,pen:3,drop:3}[k.t||'pen']||0):0),0);
-      const longest=kicks.filter(k=>(k.res||(k.ok?'made':'miss'))==='made'&&Number.isFinite(+k.x)&&Number.isFinite(+k.y))
-        .reduce((best,k)=>Math.max(best,Math.round(Math.hypot(150-k.x,30-k.y)*70/300)),0);
-      card.innerHTML=`<div class="eyebrow">KICKING PERFORMANCE</div><h3 style="margin:2px 0 10px">Your kicking snapshot</h3><div class="rka-grid"><div class="rka-metric"><b>${kicks.length}</b><span>Total kicks</span></div><div class="rka-metric"><b>${kicks.length?Math.round(made/kicks.length*100)+'%':'–'}</b><span>Success rate</span></div><div class="rka-metric"><b>${points}</b><span>Kicking points</span></div><div class="rka-metric"><b>${longest?longest+'m':'–'}</b><span>Longest successful</span></div></div>`;
-    }catch(e){}
-  });
-})();
-</script>
+
 
 </body>
 </html>
