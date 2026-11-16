@@ -1711,8 +1711,17 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
   if(v2) v2.appendChild(root);
 
   const allKickSessions=()=> {
-    const arr=(Array.isArray(S.sessions)?S.sessions:[]).filter(x=>!S.editId||x.id!=S.editId).map(x=>({...x,kicks:Array.isArray(x.kicks)?x.kicks:[]}));
-    if(Array.isArray(S.kicks)&&S.kicks.length) arr.unshift({id:"__current",name:S.meta?.name||"Current session",type:S.meta?.type||"training",date:S.meta?.date||new Date().toISOString().slice(0,10),kicks:S.kicks,current:true});
+    // Include every saved session. While editing an older session, replace that
+    // saved entry with its live draft instead of counting it twice.
+    const arr=(Array.isArray(S.sessions)?S.sessions:[]).map(x=>{
+      if(S.editId && x.id==S.editId){
+        return {...x,name:S.meta?.name||x.name,type:S.meta?.type||x.type,date:S.meta?.date||x.date,kicks:Array.isArray(S.kicks)?S.kicks:[],current:true};
+      }
+      return {...x,kicks:Array.isArray(x.kicks)?x.kicks:[]};
+    });
+    if(!S.editId && Array.isArray(S.kicks) && S.kicks.length){
+      arr.unshift({id:"__current",name:S.meta?.name||"Current session",type:S.meta?.type||"training",date:S.meta?.date||new Date().toISOString().slice(0,10),kicks:S.kicks,current:true});
+    }
     return arr;
   };
   const seasonStart=()=>{
@@ -1780,6 +1789,9 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
   }
   function renderAnalytics(){
     const box=document.getElementById("rka");if(!box)return;
+    // Keep the general dashboard out of the way while a past session is open.
+    // It reappears automatically when the user exits session editing.
+    box.style.display=S.editId?"none":"";
     const ss=getFiltered(),items=flat(ss),ks=items.map(x=>x.k),made=ks.filter(success),miss=ks.length-made.length;
     const pts=ks.reduce((a,k)=>a+pointsK(k),0),dists=ks.filter(k=>!k.originUnknown).map(distK),avg=dists.length?Math.round(dists.reduce((a,b)=>a+b,0)/dists.length):0;
     const longest=items.filter(x=>success(x.k)&&!x.k.originUnknown).map(x=>({...x,d:distK(x.k)})).sort((a,b)=>b.d-a.d)[0];
