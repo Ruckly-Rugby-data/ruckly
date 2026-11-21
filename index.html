@@ -1821,7 +1821,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
     document.getElementById("rka-kick-map").innerHTML=heatSvg(ks.filter(k=>!k.originUnknown).map(k=>({x:+k.x,y:+k.y})) ,false)+`<div class="rka-legend"><span><i class="rka-dot" style="background:#168bff"></i>Low frequency</span><span><i class="rka-dot" style="background:#ff3028"></i>High frequency</span><span>${ks.length} kicks mapped</span></div>`;
     const pp=postPoints(items);
     document.getElementById("rka-post-map").innerHTML=heatSvg(pp.points,true)+`<div class="rka-legend"><span>${pp.exact} exact positions</span><span>${pp.estimated} estimated from legacy result</span></div><div class="rka-note">Older kicks without a recorded crossing point use the result-based visual estimate available in the original app. They are not presented as exact measurements.</div>`;
-    document.getElementById("rka-longest").innerHTML=longest?`<div class="big">${longest.d}m</div><div class="mut">${escA(typeName(typeK(longest.k)))} · ${escA(longest.s.name||"Session")} · ${escA(longest.s.date||"")}</div><svg viewBox="0 0 300 76" style="width:100%;margin-top:8px"><rect width="300" height="76" rx="5" fill="#176b37"/><path d="M150 68 Q${Math.max(10,Math.min(290,+longest.k.x))} 18 150 8" fill="none" stroke="#d9b75e" stroke-width="3" stroke-dasharray="5 4"/><circle cx="${Math.max(10,Math.min(290,+longest.k.x))}" cy="18" r="5" fill="#fff"/><circle cx="150" cy="8" r="5" fill="#d9b75e"/></svg>`:`<div class="mut">No successful kicks recorded yet.</div>`;
+    document.getElementById("rka-longest").innerHTML=longest?`<div class="big">${longest.d}m</div><div class="mut">${escA(typeName(typeK(longest.k)))} · ${escA(longest.s.name||"Session")} · ${escA(longest.s.date||"")}</div>`:`<div class="mut">No successful kicks recorded yet.</div>`;
     document.getElementById("rka-trend").innerHTML=trendSvg(ss);
   }
   document.getElementById("rka-filter").addEventListener("change",renderAnalytics);
@@ -2271,4 +2271,9 @@ input:focus,textarea:focus,select:focus{outline:1px solid #172bff!important;box-
 #rka-kick-panel #rka-kick-add{background:#fff!important;color:#12215a!important}
 @media(max-width:699px){#rka-kick-modal{align-items:flex-end!important;padding:0!important}#rka-kick-panel{width:100%!important;max-height:96dvh!important;border-radius:18px 18px 0 0!important}}
 </style>
+<style id="ruckly-counter-colors">
+.ctr .p,.ctr .m,.ctr .plus{background:#00c879!important;color:#002b1c!important}
+.ctr .u,.ctr .minus{background:#b8b8b8!important;color:#fff!important}
+</style>
+
 
