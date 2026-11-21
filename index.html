@@ -449,7 +449,7 @@ document.getElementById("spi").src=LOGO_F</script>
       <g id="dots"></g>
       <text x="298" y="297" text-anchor="end" fill="#fff" font-size="8" opacity=".85">Tap the pitch to place your kick</text>
     </svg>
-    <div class="row" style="margin-top:8px"><span class="mut">Last kick: <span id="last">–</span></span><button class="link" id="undo">Undo last</button></div>
+    <div class="row" style="margin-top:8px"><span class="mut">Last kick: <span id="last">–</span></span><span style="display:flex;gap:8px"><button class="link" id="undo">Undo last</button><button class="link" id="kdel">Delete a kick</button></span></div>
   </div>
   <div class="card">
     <div class="row"><div><div class="mut">Success rate</div><div class="big" id="pct">–</div></div><div><div class="mut">Kick points</div><div class="big" id="kpts">0</div></div><div class="mut" style="text-align:right"><div id="cnt">0 kicks</div><div id="miss"></div></div></div>
@@ -1725,7 +1725,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
       <div id="rka-legacy-map-targets" hidden><div id="rka-kick-map"></div><div id="rka-post-map"></div></div>
     </div>
     <div class="card"><h3>Longest successful kick</h3><div id="rka-longest"></div></div>
-    <div class="card"><h3>Performance over time</h3><div id="rka-trend"></div></div>
+    
   `;
   const v2=document.getElementById("v2");
   if(v2) v2.appendChild(root);
@@ -1822,7 +1822,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
     const pp=postPoints(items);
     document.getElementById("rka-post-map").innerHTML=heatSvg(pp.points,true)+`<div class="rka-legend"><span>${pp.exact} exact positions</span><span>${pp.estimated} estimated from legacy result</span></div><div class="rka-note">Older kicks without a recorded crossing point use the result-based visual estimate available in the original app. They are not presented as exact measurements.</div>`;
     document.getElementById("rka-longest").innerHTML=longest?`<div class="big">${longest.d}m</div><div class="mut">${escA(typeName(typeK(longest.k)))} · ${escA(longest.s.name||"Session")} · ${escA(longest.s.date||"")}</div>`:`<div class="mut">No successful kicks recorded yet.</div>`;
-    document.getElementById("rka-trend").innerHTML=trendSvg(ss);
+    
   }
   document.getElementById("rka-filter").addEventListener("change",renderAnalytics);
   document.addEventListener("ruckly:kicks-updated",renderAnalytics);
@@ -2090,6 +2090,26 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
 
 
 
+<script>
+/* Delete a kick: list of the kicks of the current session, one tap to delete each */
+(function(){
+ const ov=document.createElement("div");ov.id="kdl";ov.className="ov hide";
+ ov.innerHTML='<div class="card" id="kdl-p"><div class="row" style="margin-bottom:10px"><b>Kicks of this session</b><button type="button" id="kdl-x">Close ✕</button></div><div id="kdl-l"></div></div>';
+ document.body.appendChild(ov);
+ const L=document.getElementById("kdl-l");
+ function draw(){
+  if(!S.kicks.length){L.innerHTML='<div class="mut" style="padding:8px 0">No kicks recorded yet.</div>';return}
+  L.innerHTML=S.kicks.map((k,i)=>{
+   const r=res(k),d=k.originUnknown?"":" · "+Math.round(dist(k.x,k.y))+" m";
+   return '<div class="srow" style="border-top:1px solid #444"><b>#'+(i+1)+' · '+TS[kt(k)]+'</b><span class="mut" style="color:'+(COL[r]||"#fff")+'">'+(LBL[r]||r)+d+'</span><button type="button" data-kd="'+i+'">Delete</button></div>'}).join("")}
+ function open(){draw();ov.classList.remove("hide")}
+ function close(){ov.classList.add("hide")}
+ document.getElementById("kdel").onclick=open;
+ document.getElementById("kdl-x").onclick=close;
+ ov.addEventListener("click",e=>{if(e.target===ov)return close();const b=e.target.closest("button[data-kd]");if(!b)return;
+  S.kicks.splice(+b.dataset.kd,1);save();render();draw()});
+})();
+</script>
 </body>
 </html>
 
@@ -2275,5 +2295,19 @@ input:focus,textarea:focus,select:focus{outline:1px solid #172bff!important;box-
 .ctr .p,.ctr .m,.ctr .plus{background:#00c879!important;color:#002b1c!important}
 .ctr .u,.ctr .minus{background:#b8b8b8!important;color:#fff!important}
 </style>
+<style id="ruckly-uniform-buttons">
+button:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb):not(.tdel):not(.bdg){background:#fff!important;color:#07123f!important;border:1px solid #172bff!important;border-radius:0!important;box-shadow:none!important;
+ font:700 11px/1.2 Arial,Helvetica,sans-serif!important;text-transform:uppercase!important;letter-spacing:.04em!important;text-decoration:none!important;
+ padding:8px 12px!important;min-height:34px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .12s,color .12s}
+button.on:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb):not(.tdel):not(.bdg),button.save:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb):not(.tdel):not(.bdg),button.fb:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb):not(.tdel):not(.bdg){background:#172bff!important;color:#fff!important;border-color:#172bff!important}
+button:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb):not(.tdel):not(.bdg):hover{background:#172bff!important;color:#fff!important}
+button:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb):not(.tdel):not(.bdg) svg{stroke:currentColor}
+button:disabled:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb):not(.tdel):not(.bdg){opacity:.4;cursor:default}
+#rka-add-kick,#rka-kick-add,#foot .save,.save{background:#172bff!important;color:#fff!important;border:1px solid #172bff!important;border-radius:0!important;box-shadow:none!important;text-transform:uppercase!important;font:700 12px Arial,Helvetica,sans-serif!important;letter-spacing:.04em!important}
+#rka-kick-panel #rka-kick-add{background:#172bff!important;color:#fff!important}
+.ctr button{cursor:pointer}
+#kdl-p{width:min(100%,420px);max-height:80vh;overflow:auto;padding:14px!important}
+</style>
+
 
 
