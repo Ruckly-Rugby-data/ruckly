@@ -542,7 +542,8 @@ function render(){
     const cx=(+k.x+e[0])/2,cy=Math.max(8,Math.min(+k.y,e[1])-34),d=`M ${k.x} ${k.y} Q ${cx} ${cy} ${e[0]} ${e[1]}`;return`<g opacity="${o}"><path d="${d}" fill="none" stroke="#03130a" stroke-width="${w*2}" stroke-linecap="round" opacity=".5"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"${sel?"":` stroke-dasharray="${w*3} ${w*1.6}"`}/><circle cx="${e[0]}" cy="${e[1]}" r="${sel?7:4}" fill="${c}" stroke="#fff" stroke-width="1.6"/></g>`}).join("");
   const G={};S.kicks.forEach((k,i)=>{if(k.originUnknown)return;(G[k.x+","+k.y]=G[k.x+","+k.y]||[]).push(i)});
   $("dots").innerHTML=Object.values(G).map(ix=>{const k=S.kicks[ix[0]],rs=ix.map(i=>res(S.kicks[i])),c=rs.every(r=>r===rs[0])?COL[rs[0]]:"#9ab8ff",n=ix.length;
-    return`<circle cx="${k.x}" cy="${k.y}" r="${n>1?8:6}" fill="${c}" stroke="#fff" stroke-width="2"/>`+(n>1?`<text x="${k.x}" y="${k.y+3.2}" text-anchor="middle" font-size="9" font-weight="700" fill="#07132f">${n}</text>`:"")}).join("");
+    const lb=ix.map(i=>i+1).join(","),w=Math.max(18,lb.length*7+10);
+    return`<rect x="${k.x-w/2}" y="${k.y-9}" width="${w}" height="18" rx="9" fill="${c}" stroke="#fff" stroke-width="2"/><text x="${k.x}" y="${k.y+4.2}" text-anchor="middle" font-size="11" font-weight="800" fill="#07132f" style="pointer-events:none">${lb}</text>`}).join("");
   if(D){$("dots").innerHTML+=(D.ix?"":`<circle cx="${D.x}" cy="${D.y}" r="6" fill="#fff" opacity=".65"/>`)+`<circle cx="${D.x}" cy="${D.y}" r="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="4 3"/>`}
   const n=S.kicks.length,ok=S.kicks.filter(k=>res(k)==="made").length;
   $("pct").textContent=pc(ok,n);
@@ -2308,6 +2309,18 @@ button:disabled:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb
 .ctr button{cursor:pointer}
 #kdl-p{width:min(100%,420px);max-height:80vh;overflow:auto;padding:14px!important}
 </style>
+<style id="ruckly-kick-popup-buttons">
+#rka-kick-panel #rka-kick-close{background:#fff!important;color:#07123f!important;border:2px solid #172bff!important;min-height:40px;padding:8px 14px!important}
+#rka-kick-panel .rka-type-row button,#rka-kick-panel .rka-actions button{border-radius:0!important;min-height:48px!important;border:2px solid #172bff!important;background:#fff!important;color:#07123f!important;font:700 13px Arial,Helvetica,sans-serif!important;text-transform:uppercase!important;letter-spacing:.04em!important;cursor:pointer}
+#rka-kick-panel .rka-type-row button.on{background:#172bff!important;color:#fff!important}
+#rka-kick-panel .rka-type-row button.on::before{content:"✓ "}
+#rka-kick-panel .rka-actions #rka-kick-add{background:#172bff!important;color:#fff!important}
+#rka-kick-panel .rka-actions #rka-kick-add:disabled{background:#fff!important;color:#6b7390!important;border-style:dashed!important;opacity:1!important;cursor:not-allowed}
+#rka-kick-panel .rka-actions button:not(:disabled):hover,#rka-kick-panel .rka-type-row button:hover,#rka-kick-panel #rka-kick-close:hover{background:#172bff!important;color:#fff!important}
+#sheet .segs button,#sheet .acts button{border-radius:0!important;min-height:44px}
+#sheet .acts .del{color:#c1121f!important;border-color:#c1121f!important}
+</style>
+
 
 
 
