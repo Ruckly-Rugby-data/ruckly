@@ -384,6 +384,28 @@ svg[aria-label="Kick map"] text{pointer-events:none}
 </style>
 </head>
 <body>
+<script>
+const HEAT={items:[],f:"all"},posN=p=>p==="Centre"?"Center":p;
+function trajD(x,y,ex,ey){const dx=ex-x,dy=ey-y,len=Math.hypot(dx,dy)||1,b=Math.min(26,len*.14)*Math.min(1,Math.abs(x-150)/60)*(x<150?-1:1),mx=(x+ex)/2-dy/len*b,my=(y+ey)/2+dx/len*b;return`M ${x} ${y} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${ex} ${ey}`}
+function heatSvgKK(kk,id){const pts=[];(kk||[]).forEach(k=>{const x=+k[0],y=+k[1];if(k[0]!=null&&k[1]!=null&&isFinite(x)&&isFinite(y))pts.push([x,y])});
+ if(!pts.length)return'<div class="mut" style="padding:12px 0">No kick positions recorded.</div>';
+ const g={};pts.forEach(q=>{const key=Math.round(q[0]/4)*4+","+Math.round(q[1]/4)*4;g[key]=(g[key]||0)+1});
+ const mx=Math.max(...Object.values(g)),h=Math.round(Math.min(300,Math.max(150,Math.max(...pts.map(q=>q[1]))+50)));
+ const c=Object.entries(g).map(([k,n])=>{const xy=k.split(",");return`<circle cx="${xy[0]}" cy="${xy[1]}" r="${24+Math.min(10,n*2)}" fill="url(#${id})" opacity="${(.5+.4*n/mx).toFixed(2)}"/>`}).join("");
+ return`<svg viewBox="0 0 300 ${h}" role="img" aria-label="Kick heat map" style="width:100%;display:block;border-radius:8px"><rect width="300" height="300" fill="#176b37"/><g stroke="#f2f5ed" stroke-width="2" fill="none" opacity=".8"><rect x="2" y="30" width="296" height="268"/><line x1="0" y1="124" x2="300" y2="124"/><line x1="0" y1="201" x2="300" y2="201"/><line x1="0" y1="244" x2="300" y2="244"/><line x1="140" y1="30" x2="140" y2="12"/><line x1="160" y1="30" x2="160" y2="12"/><line x1="140" y1="21" x2="160" y2="21"/></g><defs><radialGradient id="${id}"><stop offset="0" stop-color="#ff3028" stop-opacity=".95"/><stop offset=".28" stop-color="#ffb52e" stop-opacity=".85"/><stop offset=".55" stop-color="#65e5a4" stop-opacity=".7"/><stop offset="1" stop-color="#168bff" stop-opacity="0"/></radialGradient></defs>${c}</svg>`}
+function rkCar(base,s,id){const kk=Array.isArray(s.kk)?s.kk:[];if(!kk.length)return base;
+ return`<div class="rk-car"><div class="rk-sl"><div class="rk-s">${base}</div><div class="rk-s"><div class="ruckly-session-stats"><div class="ruckly-session-title">Heat map <span>this session</span></div>${heatSvgKK(kk,"hs"+String(id).replace(/\W/g,""))}<div class="mut" style="font-size:11px;margin-top:6px">${kk.length} kicks · red = most frequent</div></div></div></div><div class="rk-dots"><i class="on" data-rkd="0"></i><i data-rkd="1"></i></div></div>`}
+const seasonOf=d=>{const t=new Date(d);if(isNaN(t))return"";const y=t.getFullYear(),m=t.getMonth();const a=m>=7?y:y-1;return a+"/"+String(a+1).slice(2)};
+function heatPanelHtml(){const it=HEAT.items,seas=[...new Set(it.map(x=>seasonOf(x.date)).filter(Boolean))].sort().reverse();let f=HEAT.f;
+ if(!(f==="all"||f==="training"||f==="match"||seas.includes(f)))f=HEAT.f="all";
+ const sel=it.filter(x=>f==="all"||x.type===f||seasonOf(x.date)===f),kk=sel.flatMap(x=>x.kk||[]);
+ const ch=[["all","All time"],["training","Training"],["match","Match"]].concat(seas.map(x=>[x,"Season "+x]));
+ return`<div class="card" id="heatp"><b>Heat map</b><div class="chips" style="margin:8px 0">${ch.map(c=>`<button class="chip ${c[0]===f?"on":""}" data-hf="${c[0]}">${c[1]}</button>`).join("")}</div>${heatSvgKK(kk,"hp")}<div class="mut" style="font-size:11px;margin-top:6px">${kk.length} kicks · ${sel.length} session${sel.length===1?"":"s"}</div></div>`}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-hf]");if(b){HEAT.f=b.dataset.hf;const p=document.getElementById("heatp");if(p)p.outerHTML=heatPanelHtml();return}
+ const d=e.target.closest("[data-rkd]");if(d){const c=d.closest(".rk-car"),sl=c.querySelector(".rk-sl");sl.scrollTo({left:sl.clientWidth*(+d.dataset.rkd),behavior:"smooth"})}});
+document.addEventListener("scroll",e=>{const t=e.target;if(t&&t.classList&&t.classList.contains("rk-sl")){const i=Math.round(t.scrollLeft/t.clientWidth);t.parentNode.querySelectorAll(".rk-dots i").forEach((x,j)=>x.classList.toggle("on",j===i))}},true);
+</script>
+
 <div id="splash" aria-label="Ruckly"><div class="sp-bg"></div>
 <svg class="sp-svg" viewBox="0 0 320 250" aria-hidden="true"><defs><linearGradient id="spg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbeec6"/><stop offset=".55" stop-color="#c9a24a"/><stop offset="1" stop-color="#8a6a22"/></linearGradient><radialGradient id="spb" cx=".4" cy=".35"><stop offset="0" stop-color="#d9a35a"/><stop offset="1" stop-color="#5a2c10"/></radialGradient></defs>
 <ellipse class="sp-ring" cx="160" cy="214" rx="132" ry="24" fill="none" stroke="url(#spg)" stroke-width="1.2"/><ellipse class="sp-ring r2" cx="160" cy="214" rx="86" ry="14" fill="none" stroke="url(#spg)" stroke-width="1"/>
@@ -519,7 +541,7 @@ const zone=d=>d<15?0:d<30?1:d<45?2:3;
 const ZN=["0–15 m","15–30 m","30–45 m","45 m+"];
 const pc=(a,b)=>b?Math.round(100*a/b)+"%":"–";
 // old saved kicks had only ok:true/false
-const res=k=>k.res||(k.ok?"made":"miss");
+const res=k=>{const r=k.res||(k.ok?"made":"miss");return r==="high"?"made":r};
 const COL={made:"#48f08f",left:"#ff6b5a",right:"#ff6b5a",short:"#ffb347",post:"#ff6b5a",miss:"#ff6b5a"};
 const LBL={made:"made",left:"wide left",right:"wide right",short:"short",post:"hit the post",miss:"missed"};
 const PTS={conv:2,pen:3,drop:3},TS={conv:"Conv",pen:"Pen",drop:"Drop"};
@@ -767,7 +789,7 @@ const dz=$("drop");$("fi").onchange=e=>{const f=e.target.files[0];e.target.value
 ["dragover","dragenter"].forEach(n=>dz.addEventListener(n,e=>{e.preventDefault();dz.classList.add("over")}));
 ["dragleave","drop"].forEach(n=>dz.addEventListener(n,e=>{e.preventDefault();dz.classList.remove("over")}));
 dz.addEventListener("drop",e=>{const f=[...e.dataTransfer.files].find(x=>/^(video|image)\//.test(x.type));if(f)routeFile(f);else toast("Please drop a photo or video.")});
-const POS=["Prop","Hooker","Lock","Flanker","No. 8","Scrum-half","Fly-half","Centre","Wing","Full-back"];
+const POS=["Prop","Hooker","Lock","Flanker","No. 8","Scrum-half","Fly-half","Center","Wing","Full-back"];
 const PRIV=[];
 const DEMO=[];
 function acct(){const m=S.me;
@@ -786,7 +808,7 @@ const cell=(t,v,x)=>`<div><span class="mut">${t}</span><b>${v}</b><span class="m
 const stH=a=>`<div class="zones" style="grid-template-columns:repeat(3,1fr)">${cell("Sessions",a.n)}${cell("Points",a.pts)}${cell("Goal kicks",pc(a.km,a.k),a.km+"/"+a.k)}</div><div class="zones" style="grid-template-columns:repeat(4,1fr)">${cell("Tackles",pc(a.tk,a.tkn))}${cell("Passes",pc(a.ps,a.psn))}${cell("Tries",a.tr)}${cell("Breaks",a.br)}</div>`;
 const ini2=n=>esc((n||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase());
 function pfH(o){return`<div class="card hl" style="padding:16px"><div style="display:flex;gap:16px;align-items:center"><div class="ring"><div class="ini" style="width:76px;height:76px;font-size:22px;overflow:hidden">${o.photo?`<img src="${o.photo}" alt="" style="width:100%;height:100%;object-fit:cover">`:ini2(o.name)}</div></div><div class="zones" style="grid-template-columns:repeat(3,1fr);flex:1;margin:0"><div><b>${fmtN(o.posts)}</b><span class="mut">Posts</span></div>${flCell(o,"followers")}${flCell(o,"following")}</div></div><div style="margin-top:10px"><b>${esc(o.name)}${vb(o.uid)}</b>${o.priv?" 🔒":""} <span class="pill">${esc(o.tag)}</span>${o.rel||""}<div class="mut">@${esc(o.handle)}</div><div style="margin-top:4px">${cap(o.bio)}</div>${o.mut||""}</div><div style="margin-top:10px">${o.btn}</div></div>${o.extra||""}<div class="tabs${o.locked||o.role==="fan"?" hide":""}"><button data-pt="hl" class="${pt==="hl"?"on":""}">Posts</button>${o.role==="coach"?"":`<button data-pt="stats" class="${pt==="stats"?"on":""}">Stats</button>`}${o.role==="fan"?"":`<button data-pt="career" class="${pt==="career"?"on":""}">${o.role==="coach"?"Coaching":"Career"}</button>`}</div>`
- +(o.locked?'<div class="card" style="text-align:center;padding:24px">🔒<br><b>This account is private</b><div class="mut">Follow this player to see their stats and highlights.</div></div>':pt==="career"&&o.role!=="fan"?(o.career||''):pt==="stats"&&o.role!=="coach"?`<div class="chips">${["all","match","training"].map(x=>`<button class="chip ${pf===x?"on":""}" data-pf="${x}">${x==="all"?"All":x==="match"?"Matches":"Training"}</button>`).join("")}</div><div class="card">${stH(o.st[pf])}</div>${o.list||""}`
+ +(o.locked?'<div class="card" style="text-align:center;padding:24px">🔒<br><b>This account is private</b><div class="mut">Follow this player to see their stats and highlights.</div></div>':pt==="career"&&o.role!=="fan"?(o.career||''):pt==="stats"&&o.role!=="coach"?`<div class="chips">${["all","match","training"].map(x=>`<button class="chip ${pf===x?"on":""}" data-pf="${x}">${x==="all"?"All":x==="match"?"Matches":"Training"}</button>`).join("")}</div><div class="card">${stH(o.st[pf])}</div>${typeof heatPanelHtml==="function"?heatPanelHtml():""}${o.list||""}`
  :`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">${o.tiles.join("")||'<div class="card mut" style="grid-column:1/4">No posts yet.</div>'}</div>`)}
 function openProf(h){if(nv==="prof"){if(h!=="me"&&pv&&h!==pv)PS.push(pv)}else{pback=nv;PS=[]}if(h==="me"){nv="acct"}else{pv=h;nv="prof"}pt="hl";pf="all";show();window.scrollTo(0,0)}
 const RL={player:"Player",coach:"Coach",fan:"Rugby fan"};
@@ -801,6 +823,7 @@ async function acct(){
  const list=weekCard(ss)+'<div class="card" style="padding:14px"><div class="row" style="margin-bottom:4px"><b>Sessions</b><button class="ib" data-add="1" aria-label="New session" style="color:var(--tx)"><svg viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M12 4v16M4 12h16"/></svg></button></div>'+(ss.filter(x=>pf==="all"||x.type===pf).map(x=>'<div class="srow"><b>'+esc(x.name)+'</b><span class="mut">'+fd(x.date)+'</span><span class="mut">'+(x.min?esc(x.min)+" min":"– min")+'</span><button class="ib" data-vs="'+x.id+'">'+(x.vis==="public"?"🌐":"🔒")+'</button><button class="ib" data-ed="'+x.id+'">'+pen+'</button><button class="ib" data-rm="'+x.id+'">'+bin+'</button></div>').join("")||'<div class="mut" style="padding:8px 0">No sessions yet.</div>')+'</div>';
  const inp='width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:#0a1839;color:var(--tx);font:inherit';
  const ed=pe?`<div class="card hl"><label class="ph"><div class="av2">${m.photo?'<img src="'+m.photo+'" alt="">':""}</div>Change photo<input type="file" id="ap" accept="image/*" hidden></label><label class="lab" for="an">Name</label><input id="an" value="${esc(m.name)}" maxlength="40"><label class="lab" for="ah">Username</label><input id="ah" value="${esc(m.handle)}" maxlength="20"><label class="lab" for="ar">Role</label><select id="ar" style="${inp}">${[["player","Player"],["coach","Coach"],["fan","Rugby fan"]].map(r=>`<option value="${r[0]}"${m.role===r[0]?" selected":""}>${r[1]}</option>`).join("")}</select><label class="lab" for="ab">Bio</label><textarea id="ab" maxlength="150" placeholder="Position, club, goals… #rugby">${esc(m.bio)}</textarea><label class="lab">Account privacy</label><div class="segs" style="grid-template-columns:1fr 1fr;margin:0"><button data-ap="0" class="${m.priv?"":"on"}">🌐 Public</button><button data-ap="1" class="${m.priv?"on":""}">🔒 Private</button></div><div class="mut" style="font-size:12px;margin-top:4px">Private: only approved followers see your stats and highlights.</div>${user?`<div class="mut" style="margin-top:8px">${esc(user.email||"")}</div><button class="link" data-lo="1">Log out</button>`:""}</div>`:"";
+ HEAT.items=S.sessions.map(x=>{let kk=[];try{kk=sj(x).kk||[]}catch(e){}return{type:x.type,date:x.date,kk}});
  $("acct").innerHTML=stBtn()+pfH({uid:user&&user.id,name:m.name||"Your name",handle:m.handle||"username",tag:({player:"Player",coach:"Coach",fan:"Rugby fan"}[m.role]||"Player")+(m.pos?" · "+m.pos:""),bio:m.bio||"",photo:avU({me:1}),posts:cl2.length,fr:fc?fc.fr:"–",fg:fc?fc.fg:(S.follow||[]).length,st,list,extra:ed,uid:user?user.id:null,priv:m.priv,role:m.role||"player",career:pt==="career"?cStats(S.sessions.map(sj),m.role==="coach")+(crs?cHtml(crs,m.role||"player",true):cSetup):"",btn:`<button class="fb on" data-pe="1">${pe?"Done":"Edit profile"}</button>`,tiles:tl});
  setAv();if(!pe)return;
  [["an","name"],["ah","handle"],["ab","bio"]].forEach(([i,k])=>{$(i).oninput=()=>{S.me[k]=k==="handle"?$(i).value.replace(/[^\w.]/g,""):$(i).value;save();setAv();push()}});
@@ -1013,7 +1036,7 @@ function renderFeed(){if(nv!=="feed")return;const fp=S.fpos||"",me=user.id;
  const heart=on=>`<svg viewBox="0 0 24 24" style="width:26px;height:26px;fill:${on?"#ff5c7a":"none"};stroke:${on?"#ff5c7a":"currentColor"};stroke-width:1.8"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>`;
  const fb=(u)=>{const s=FD.fol[u.id];return`<button class="fb ${s?"on":""}" data-fo="${u.id}" data-pv="${u.private?1:0}" style="margin:0;padding:5px 12px">${s==="accepted"?"✓ Following":s==="pending"?"Requested":u.private?"＋ Request":"＋ Follow"}</button>`};
  const card=p=>{const u=pr(p.user_id),mine=p.user_id===me,l=FD.lk[p.id]||{n:0,me:false},n=FD.cc[p.id]||0,s=p.session||{};
-  const statsCard=`
+  const statsBase=`
    <div class="ruckly-session-stats">
     <div class="ruckly-session-title">${esc(s.name||"Rugby session")} <span>${esc(s.type||"")}</span></div>
     <div class="ruckly-session-grid">
@@ -1024,11 +1047,12 @@ function renderFeed(){if(nv!=="feed")return;const fp=S.fpos||"",me=user.id;
       <div><small>Tries</small><b>${Number(s.tr)||0}</b></div>
       <div><small>Line breaks</small><b>${Number(s.br)||0}</b></div>
     </div>
-    ${Array.isArray(s.kk)&&s.kk.length?`<div class="ruckly-session-kicks">Goal kicks · ${s.kk.length} recorded</div>${kmap(s.kk)}`:""}${typeof kheatHtml==="function"?kheatHtml(p.user_id):""}
+    ${Array.isArray(s.kk)&&s.kk.length?`<div class="ruckly-session-kicks">Goal kicks · ${s.kk.length} recorded</div>${kmap(s.kk)}`:""}
    </div>`;
+  const statsCard=typeof rkCar==="function"?rkCar(statsBase,s,p.id):statsBase;
   const cm=FD.open[p.id]?`<div style="margin-top:8px">${(FD.cm[p.id]||[]).map(c=>cRow(c,pr(c.user_id),mine||ADM)).join("")}<div style="display:flex;gap:6px;margin-top:6px"><input data-ci="${p.id}" placeholder="Add a comment…" maxlength="300" style="margin:0"><button class="fb on" data-cs="${p.id}" style="margin:0">Post</button></div></div>`:"";
   return`<div class="card hl"><div class="row" style="margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><button class="ring av" data-u="${mine?"me":esc(u.handle)}"><div class="ini" style="width:34px;height:34px;font-size:12px">${avI(u)}</div></button><div><b>${esc(u.name)}${vb(u.id)}</b><div class="mut" style="font-size:12px">@${esc(u.handle)}${u.pos?" · "+esc(u.pos):""} · ${fd(p.created_at)}</div></div></div>${ADM&&!mine&&p.kind!=="session"?`<button class="link" data-aed="${p.id}">Edit</button>`:""}${mine||ADM?`<button class="link" data-dp="${p.id}" data-pp="${esc(p.media_path||"")}">Delete</button>`:`<button class="link" data-rp="p:${p.id}:${p.user_id}">Report</button>`}</div>${statsCard}<div class="act" style="margin-top:8px"><button data-lk="${p.id}" aria-label="Like">${heart(l.me)}</button><span class="mut">${l.n}</span><button class="link" data-cm="${p.id}" style="text-decoration:none">💬 ${n}</button></div>${p.caption?`<div><b>@${esc(u.handle)}</b> ${cap(p.caption)}</div>`:""}${tagLine(p.tags,"u")}${cm}</div>`};
- const posts=FD.pos.filter(p=>p.kind==="session"&&(!fp||pr(p.user_id).pos===fp));
+ const posts=FD.pos.filter(p=>p.kind==="session"&&(!fp||posN(pr(p.user_id).pos)===fp));
  $("feed").innerHTML=fHead()+`<div class="chips"><button class="chip ${fp?"":"on"}" data-pos="">All</button>${POS.map(p=>`<button class="chip ${fp===p?"on":""}" data-pos="${p}">${p}</button>`).join("")}</div>`
  +(FD.err?`<div class="card mut">${FD.err}</div>`:"")
 
@@ -1077,7 +1101,8 @@ async function prof(){if(!sb||!user){nv="feed";return show()}
  const st={all:mk("all"),match:mk("match"),training:mk("training")};
  const list="";let crs=null;if(pt==="career"&&!locked)crs=await cFetch(R.id);CRS=crs||[];
  pvReg(rows,R);const hidC=!!(R.settings&&R.settings.show_follow_counts===false),rl=await flRel(R.id,!locked&&!hidC);
-  $("prof").innerHTML='<button class="link" data-back="1">← Back</button>'+pfH({uid:R.id,photo:avU(R),name:R.name,handle:R.handle,tag:(RL[R.role]||"Player")+(R.pos?" · "+R.pos:""),bio:R.bio||"",posts:locked?"–":rows.length,fr:showC?c.followers:"–",fg:showC?c.following:"–",st,priv:!!R.private,locked,uid:R.id,role:R.role||"player",career:pt==="career"?cStats(ses,R.role==="coach")+(crs?cHtml(crs,R.role||"player",false):cSetup):"",flk:hidC?"hidden":(locked?"private":""),rel:rl.fm?'<span class="pill" style="margin-left:4px">Follows you</span>':"",mut:flMutLine(rl.mu,R.id),list:locked?"":list,
+  HEAT.items=(rows||[]).filter(r=>r.session&&Array.isArray(r.session.kk)).map(r=>({type:r.session.type,date:r.session.date,kk:r.session.kk}));
+ $("prof").innerHTML='<button class="link" data-back="1">← Back</button>'+pfH({uid:R.id,photo:avU(R),name:R.name,handle:R.handle,tag:(RL[R.role]||"Player")+(R.pos?" · "+R.pos:""),bio:R.bio||"",posts:locked?"–":rows.length,fr:showC?c.followers:"–",fg:showC?c.following:"–",st,priv:!!R.private,locked,uid:R.id,role:R.role||"player",career:pt==="career"?cStats(ses,R.role==="coach")+(crs?cHtml(crs,R.role||"player",false):cSetup):"",flk:hidC?"hidden":(locked?"private":""),rel:rl.fm?'<span class="pill" style="margin-left:4px">Follows you</span>':"",mut:flMutLine(rl.mu,R.id),list:locked?"":list,
   tiles:rows.map(pvTile),
   btn:`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="fb ${s?"on":""}" data-fo="${R.id}" data-pv="${R.private?1:0}">${s==="accepted"?"✓ Following":s==="pending"?"Requested":R.private?"＋ Request":rl.fm?"＋ Follow back":"＋ Follow"}</button><button class="fb" data-bl="${R.id}">Block</button><button class="fb" data-rp="u:${R.id}">Report</button></div>`})}
 $("prof").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!user)return;const d=b.dataset;
@@ -1331,8 +1356,11 @@ $("sr").addEventListener("click",async e=>{const b=e.target.closest("[data-sfo]"
 
 /* ===== TRAJECTORIES (feed, post page, grid tiles) ===== */
 function ktraj(kk,w){const col={m:"#6dffa6",l:"#ff6b5a",r:"#ff6b5a",s:"#ffb347"};
- return kk.map(k=>{const x=+k[0],y=+k[1],r=k[2],e=k[4]!=null&&k[5]!=null&&Number.isFinite(+k[4])&&Number.isFinite(+k[5])?[140+((Math.max(0,Math.min(300,+k[4]))-65)/170)*20,12+(Math.max(0,Math.min(285,+k[5]))/285)*18]:r==="m"?[150,16]:r==="l"?[118,14]:r==="r"?[182,14]:r==="s"?[x+(150-x)*.62,y+(21-y)*.62]:null;if(!e)return"";const c=col[r],cx=(x+e[0])/2,cy=Math.max(8,Math.min(y,e[1])-34),d=`M ${x} ${y} Q ${cx} ${cy} ${e[0]} ${e[1]}`;
-  return`<g class="tj" data-g="${x},${y}"><path d="${d}" fill="none" stroke="#03130a" stroke-width="${w*2.1}" opacity=".55"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-dasharray="${w*3} ${w*1.6}"/><circle cx="${e[0]}" cy="${e[1]}" r="${w*1.5}" fill="${c}" stroke="#fff" stroke-width="${w*.45}"/></g>`}).join("")}
+ return kk.map(k=>{const x=+k[0],y=+k[1],r=k[2];if(k[0]==null||k[1]==null||!isFinite(x)||!isFinite(y))return"";
+  const hx=k[4]!=null&&k[5]!=null&&isFinite(+k[4])&&isFinite(+k[5]);let e;
+  if(hx)e=[140+((Math.max(0,Math.min(300,+k[4]))-65)/170)*20,21];else if(r==="m")e=[150,21];else if(r==="l")e=[126,21];else if(r==="r")e=[174,21];else if(r==="s")e=[x+(150-x)*.62,y+(21-y)*.62];else return"";
+  const c=col[r]||"#ff6b5a",d=trajD(x,y,e[0],e[1]);
+  return`<g class="tj" data-g="${x},${y}"><path d="${d}" fill="none" stroke="#03130a" stroke-width="${w*2.6}" stroke-linecap="round" opacity=".35"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/><circle cx="${e[0]}" cy="${e[1]}" r="${w*1.4}" fill="${c}" stroke="#fff" stroke-width="${w*.45}"/></g>`}).join("")}
 function kmini(kk){const col={m:"#2ecc71",l:"#ff5a4a",r:"#ff5a4a",s:"#f0a030"},dots=kk.map(k=>`<circle cx="${+k[0]}" cy="${+k[1]}" r="7" fill="${col[k[2]]||"#ff5a4a"}" stroke="#fff" stroke-width="2"/>`).join("");
  return`<svg viewBox="0 0 300 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;border-radius:0"><rect width="300" height="300" fill="var(--fl)"/><g fill="#fff" opacity=".07"><rect y="30" width="300" height="42"/><rect y="114" width="300" height="42"/><rect y="198" width="300" height="42"/></g><rect width="300" height="30" fill="#000" opacity=".13"/><g stroke="var(--ln)" stroke-width="3" fill="none" opacity=".8"><line x1="0" y1="30" x2="300" y2="30"/><line x1="0" y1="124" x2="300" y2="124"/></g><g stroke="#fff" stroke-width="5"><line x1="140" y1="30" x2="140" y2="8"/><line x1="160" y1="30" x2="160" y2="8"/><line x1="140" y1="19" x2="160" y2="19"/></g>${ktraj(kk,4)}${dots}</svg>`}
 
@@ -1545,7 +1573,7 @@ Flanker:[["to","Turnovers won","c"],["ca","Carries","c"],["ru","Rucks cleaned","
 "No. 8":[["ca","Carries","c"],["dc","Dominant carries","c"],["of","Offloads","c"],["to","Turnovers won","c"]],
 "Scrum-half":[["bx","Box kicks retained","r"],["sn","Sniping breaks","c"],["ta","Try assists","c"]],
 "Fly-half":[["ta","Try assists","c"],["ak","Attacking kicks retained","r"],["lb","Line breaks created","c"]],
-Centre:[["lb","Line breaks","c"],["of","Offloads","c"],["ta","Try assists","c"],["dt","Dominant tackles","c"]],
+Center:[["lb","Line breaks","c"],["of","Offloads","c"],["ta","Try assists","c"],["dt","Dominant tackles","c"]],Centre:[["lb","Line breaks","c"],["of","Offloads","c"],["ta","Try assists","c"],["dt","Dominant tackles","c"]],
 Wing:[["hb","High balls caught","r"],["ca","Carries","c"],["ds","Defenders beaten","c"],["cr","Counter-attacks","c"]],
 "Full-back":[["hb","High balls caught","r"],["cr","Counter-attacks","c"],["kr","Kick returns","c"],["ds","Defenders beaten","c"]]};
 const pxv=v=>v&&(typeof v==="object"?v.ok+v.ko>0:v>0);
@@ -1990,7 +2018,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
   const $=id=>document.getElementById(id);
   const pitch=$("rka-origin-pitch"),posts=$("rka-posts-pitch");
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  const mapField=p=>({x:140+((p.x-65)/170)*20,y:12+(p.y/285)*18});
+  const mapField=p=>({x:140+((p.x-65)/170)*20,y:21});
 
   // Posts are centred at x=105 and x=195; the crossbar is y=96.
   // A 4px safety margin means contact with the upright/crossbar is always a miss.
@@ -2000,7 +2028,6 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
     if(p.x<65)return{res:"left",label:"Missed · wide left",made:false};
     if(p.x>235)return{res:"right",label:"Missed · wide right",made:false};
     if(p.y>195)return{res:"short",label:"Missed · below the crossbar",made:false};
-    if(p.y<18)return{res:"high",label:"Missed · above the target",made:false};
     return{res:"made",label:"Successful · cleanly between the posts",made:true};
   };
   const distance=()=>origin?Math.round(Math.hypot(150-origin.x,30-origin.y)*70/300):0;
@@ -2008,8 +2035,8 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
     const marker=$("rka-origin-marker"),crossMarker=$("rka-cross-marker"),arc=$("rka-preview-arc");
     if(origin){
       marker.setAttribute("cx",origin.x);marker.setAttribute("cy",origin.y);
-      const e=cross?mapField(cross):{x:150,y:16},cx=(origin.x+e.x)/2,cy=Math.max(8,Math.min(origin.y,e.y)-34);
-      arc.setAttribute("d",`M ${origin.x} ${origin.y} Q ${cx} ${cy} ${e.x} ${e.y}`);
+      const e=cross?mapField(cross):{x:150,y:21};
+      arc.setAttribute("d",trajD(origin.x,origin.y,e.x,e.y));
       arc.setAttribute("stroke",cross?(classify(cross).made?"#48f08f":"#ff6259"):"#12a8ff");
       const dx=origin.x-150,dy=origin.y-30,angle=Math.round(Math.atan2(Math.abs(dx),Math.max(1,dy))*180/Math.PI);
       $("rka-kick-distance").textContent=`Distance: ${distance()} m · Angle: ${angle}°`;
@@ -2112,13 +2139,6 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
 })();
 </script>
 <script>
-/* Heat map of every kick an author recorded (own account: public + private sessions) */
-function kheatHtml(uid){const pts=[];const add=kk=>(kk||[]).forEach(k=>{const x=+k[0],y=+k[1];if(k[0]!=null&&k[1]!=null&&isFinite(x)&&isFinite(y))pts.push([x,y])});
- try{if((user&&uid===user.id))S.sessions.forEach(x=>add(sj(x).kk));else FD.pos.filter(p=>p.user_id===uid).forEach(p=>add((p.session||{}).kk))}catch(e){}
- if(!pts.length)return"";const g={};pts.forEach(q=>{const key=Math.round(q[0]/6)*6+","+Math.round(q[1]/6)*6;g[key]=(g[key]||0)+1});const mx=Math.max(...Object.values(g));
- const id="hg"+String(uid).replace(/\W/g,"").slice(0,8);
- const c=Object.entries(g).map(([k,n])=>{const xy=k.split(",");return`<circle cx="${xy[0]}" cy="${xy[1]}" r="${20+Math.min(14,n*3)}" fill="url(#${id})" opacity="${(.35+.5*n/mx).toFixed(2)}"/>`}).join("");
- return`<div class="ruckly-heat"><div class="mut" style="font-size:11px;margin:12px 0 4px;text-transform:uppercase;letter-spacing:.06em">Heat map · ${pts.length} kicks${(user&&uid===user.id)?" (public + private)":""}</div><svg viewBox="0 0 300 300" role="img" aria-label="Kick heat map"><rect width="300" height="300" fill="#176b37"/><g stroke="#f2f5ed" stroke-width="2" fill="none" opacity=".8"><rect x="2" y="30" width="296" height="268"/><line x1="0" y1="124" x2="300" y2="124"/><line x1="0" y1="201" x2="300" y2="201"/><line x1="0" y1="244" x2="300" y2="244"/><line x1="140" y1="30" x2="140" y2="12"/><line x1="160" y1="30" x2="160" y2="12"/><line x1="140" y1="21" x2="160" y2="21"/></g><defs><radialGradient id="${id}"><stop offset="0" stop-color="#ff3028" stop-opacity=".95"/><stop offset=".28" stop-color="#ffb52e" stop-opacity=".85"/><stop offset=".55" stop-color="#65e5a4" stop-opacity=".7"/><stop offset="1" stop-color="#168bff" stop-opacity="0"/></radialGradient></defs>${c}</svg></div>`}
 /* Sign up / Log in only when nobody is logged in */
 setInterval(()=>{const lo=!!user;["nsu","nlg"].forEach(i=>{const e=document.getElementById(i);if(!e)return;if(lo)e.style.setProperty("display","none","important");else e.style.removeProperty("display")})},250);
 </script>
@@ -2359,6 +2379,14 @@ button.fc:hover{background:#172bff!important;border-color:#172bff!important}
 }
 @media(min-width:600px) and (max-width:899px){#feed{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 </style>
+<style id="ruckly-swipe-card">
+.rk-sl{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.rk-sl::-webkit-scrollbar{display:none}
+.rk-s{flex:0 0 100%;min-width:0;scroll-snap-align:start}
+.rk-dots{display:flex;gap:8px;justify-content:center;padding:8px 0 2px}
+.rk-dots i{width:8px;height:8px;border-radius:50%;background:#555;cursor:pointer}.rk-dots i.on{background:#fff}
+</style>
+
 
 
 
