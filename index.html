@@ -1024,7 +1024,7 @@ function renderFeed(){if(nv!=="feed")return;const fp=S.fpos||"",me=user.id;
       <div><small>Tries</small><b>${Number(s.tr)||0}</b></div>
       <div><small>Line breaks</small><b>${Number(s.br)||0}</b></div>
     </div>
-    ${Array.isArray(s.kk)&&s.kk.length?`<div class="ruckly-session-kicks">Goal kicks · ${s.kk.length} recorded</div>`:""}
+    ${Array.isArray(s.kk)&&s.kk.length?`<div class="ruckly-session-kicks">Goal kicks · ${s.kk.length} recorded</div>${kmap(s.kk)}`:""}${typeof kheatHtml==="function"?kheatHtml(p.user_id):""}
    </div>`;
   const cm=FD.open[p.id]?`<div style="margin-top:8px">${(FD.cm[p.id]||[]).map(c=>cRow(c,pr(c.user_id),mine||ADM)).join("")}<div style="display:flex;gap:6px;margin-top:6px"><input data-ci="${p.id}" placeholder="Add a comment…" maxlength="300" style="margin:0"><button class="fb on" data-cs="${p.id}" style="margin:0">Post</button></div></div>`:"";
   return`<div class="card hl"><div class="row" style="margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><button class="ring av" data-u="${mine?"me":esc(u.handle)}"><div class="ini" style="width:34px;height:34px;font-size:12px">${avI(u)}</div></button><div><b>${esc(u.name)}${vb(u.id)}</b><div class="mut" style="font-size:12px">@${esc(u.handle)}${u.pos?" · "+esc(u.pos):""} · ${fd(p.created_at)}</div></div></div>${ADM&&!mine&&p.kind!=="session"?`<button class="link" data-aed="${p.id}">Edit</button>`:""}${mine||ADM?`<button class="link" data-dp="${p.id}" data-pp="${esc(p.media_path||"")}">Delete</button>`:`<button class="link" data-rp="p:${p.id}:${p.user_id}">Report</button>`}</div>${statsCard}<div class="act" style="margin-top:8px"><button data-lk="${p.id}" aria-label="Like">${heart(l.me)}</button><span class="mut">${l.n}</span><button class="link" data-cm="${p.id}" style="text-decoration:none">💬 ${n}</button></div>${p.caption?`<div><b>@${esc(u.handle)}</b> ${cap(p.caption)}</div>`:""}${tagLine(p.tags,"u")}${cm}</div>`};
@@ -2111,6 +2111,17 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
   S.kicks.splice(+b.dataset.kd,1);save();render();draw()});
 })();
 </script>
+<script>
+/* Heat map of every kick an author recorded (own account: public + private sessions) */
+function kheatHtml(uid){const pts=[];const add=kk=>(kk||[]).forEach(k=>{const x=+k[0],y=+k[1];if(k[0]!=null&&k[1]!=null&&isFinite(x)&&isFinite(y))pts.push([x,y])});
+ try{if((user&&uid===user.id))S.sessions.forEach(x=>add(sj(x).kk));else FD.pos.filter(p=>p.user_id===uid).forEach(p=>add((p.session||{}).kk))}catch(e){}
+ if(!pts.length)return"";const g={};pts.forEach(q=>{const key=Math.round(q[0]/6)*6+","+Math.round(q[1]/6)*6;g[key]=(g[key]||0)+1});const mx=Math.max(...Object.values(g));
+ const id="hg"+String(uid).replace(/\W/g,"").slice(0,8);
+ const c=Object.entries(g).map(([k,n])=>{const xy=k.split(",");return`<circle cx="${xy[0]}" cy="${xy[1]}" r="${20+Math.min(14,n*3)}" fill="url(#${id})" opacity="${(.35+.5*n/mx).toFixed(2)}"/>`}).join("");
+ return`<div class="ruckly-heat"><div class="mut" style="font-size:11px;margin:12px 0 4px;text-transform:uppercase;letter-spacing:.06em">Heat map · ${pts.length} kicks${(user&&uid===user.id)?" (public + private)":""}</div><svg viewBox="0 0 300 300" role="img" aria-label="Kick heat map"><rect width="300" height="300" fill="#176b37"/><g stroke="#f2f5ed" stroke-width="2" fill="none" opacity=".8"><rect x="2" y="30" width="296" height="268"/><line x1="0" y1="124" x2="300" y2="124"/><line x1="0" y1="201" x2="300" y2="201"/><line x1="0" y1="244" x2="300" y2="244"/><line x1="140" y1="30" x2="140" y2="12"/><line x1="160" y1="30" x2="160" y2="12"/><line x1="140" y1="21" x2="160" y2="21"/></g><defs><radialGradient id="${id}"><stop offset="0" stop-color="#ff3028" stop-opacity=".95"/><stop offset=".28" stop-color="#ffb52e" stop-opacity=".85"/><stop offset=".55" stop-color="#65e5a4" stop-opacity=".7"/><stop offset="1" stop-color="#168bff" stop-opacity="0"/></radialGradient></defs>${c}</svg></div>`}
+/* Sign up / Log in only when nobody is logged in */
+setInterval(()=>{const lo=!!user;["nsu","nlg"].forEach(i=>{const e=document.getElementById(i);if(!e)return;if(lo)e.style.setProperty("display","none","important");else e.style.removeProperty("display")})},250);
+</script>
 </body>
 </html>
 
@@ -2297,7 +2308,7 @@ input:focus,textarea:focus,select:focus{outline:1px solid #172bff!important;box-
 .ctr .u,.ctr .minus{background:#b8b8b8!important;color:#fff!important}
 </style>
 <style id="ruckly-uniform-buttons">
-button:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb):not(.tdel):not(.bdg){background:#fff!important;color:#07123f!important;border:1px solid #172bff!important;border-radius:0!important;box-shadow:none!important;
+button:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb):not(.tdel):not(.bdg){background:transparent!important;color:#f4f4f4!important;border:1px solid #5a5a5a!important;border-radius:0!important;box-shadow:none!important;
  font:700 11px/1.2 Arial,Helvetica,sans-serif!important;text-transform:uppercase!important;letter-spacing:.04em!important;text-decoration:none!important;
  padding:8px 12px!important;min-height:34px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .12s,color .12s}
 button.on:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb):not(.tdel):not(.bdg),button.save:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb):not(.tdel):not(.bdg),button.fb:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb):not(.tdel):not(.bdg){background:#172bff!important;color:#fff!important;border-color:#172bff!important}
@@ -2320,6 +2331,35 @@ button:disabled:not(.ctr button):not(.nav button):not(.ring):not(.av):not(.thumb
 #sheet .segs button,#sheet .acts button{border-radius:0!important;min-height:44px}
 #sheet .acts .del{color:#c1121f!important;border-color:#c1121f!important}
 </style>
+<style id="ruckly-final-da">
+input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]),select,textarea,.meta input,.meta select,.hl input,.hl textarea,#st input,#st textarea,#mf input,.inp,.cf input,.cf select,.cf textarea,#postov input,#postov textarea,.pvi input{background:#0b0b0b!important;color:#f4f4f4!important;border:1px solid #3a3a3a!important;border-radius:0!important}
+input::placeholder,textarea::placeholder{color:#8a8a8a!important;opacity:1!important}
+input:focus,textarea:focus,select:focus{border-color:#172bff!important;outline:0!important}
+select option{background:#0b0b0b;color:#f4f4f4}
+.zones div,.zones button,button.fc{background:#141414!important;border:1px solid #333!important;color:#fff!important;text-align:center;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:62px}
+.zones b,button.fc b{font-size:22px!important;color:#fff!important;line-height:1.1}
+.zones span,button.fc span{color:#d0d0d0!important;font-size:11px!important;text-transform:uppercase;letter-spacing:.06em}
+button.fc:hover{background:#172bff!important;border-color:#172bff!important}
+.ruckly-heat svg{width:100%;display:block;border-radius:6px}
+@media(max-width:899px){
+ body{padding:14px 12px calc(84px + env(safe-area-inset-bottom,0px)) 12px!important}
+ #st{padding:14px 12px calc(84px + env(safe-area-inset-bottom,0px))!important}
+ .nav{top:auto!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:calc(58px + env(safe-area-inset-bottom,0px))!important;padding:0 0 env(safe-area-inset-bottom,0px)!important;flex-direction:row!important;justify-content:space-around!important;align-items:stretch!important;border-right:0!important;border-top:1px solid #777!important;background:#000!important}
+ .nav:before{display:none!important}
+ .nav button{flex:1 1 0!important;width:auto!important;height:58px!important;justify-content:center!important;padding:0!important;font-size:0!important;gap:0!important;background:#000!important}
+ .nav button.on,.nav button:hover{background:#000!important;box-shadow:inset 0 2px 0 #fff!important}
+ .nav button svg{width:26px!important;height:26px!important;flex:0 0 26px!important}
+ .nav .bdg{position:absolute!important;top:6px!important;right:calc(50% - 22px)!important;margin:0!important;font-size:10px!important}
+ .sheet.mv{left:0!important}
+ .meta{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #v1:not(.hide){grid-template-columns:minmax(0,1fr)!important}
+ #feed{grid-template-columns:minmax(0,1fr)!important}
+ .chips{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch}
+ .chips .chip{flex:none}
+}
+@media(min-width:600px) and (max-width:899px){#feed{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+</style>
+
 
 
 
