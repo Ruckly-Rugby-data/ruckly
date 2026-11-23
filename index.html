@@ -422,6 +422,16 @@ async function idMount(uid,own,info){const box=idg("idbox");if(!box)return;
   idRender()}catch(e){box.innerHTML='<div class="card mut">Couldn’t load the identity.</div>'}}
 function idVsel(k,cur){return`<select id="idv_${k}" style="width:auto;min-height:0;padding:4px 6px;font-size:11px" aria-label="Visibility">${ID_VIS.map(v=>`<option value="${v[0]}"${(cur||"public")===v[0]?" selected":""}>${v[1]}</option>`).join("")}</select>`}
 const ID_ABBR={Prop:"PR",Hooker:"HK",Lock:"LK",Flanker:"FL","No. 8":"N8","Scrum-half":"SH","Fly-half":"FH",Center:"CE",Centre:"CE",Wing:"WG","Full-back":"FB"};
+
+const ID_COUNTRY_CODES="AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS XK YE YT ZA ZM ZW".split(" ");
+const ID_COUNTRY_NAMES=new Intl.DisplayNames(["en"],{type:"region"});
+const idCountryName=c=>{try{return ID_COUNTRY_NAMES.of(c)||c}catch(e){return c}};
+const idCountryCode=v=>{const s=String(v||"").trim();if(/^[A-Z]{2}$/.test(s))return s;const q=s.toLocaleLowerCase();const hit=ID_COUNTRY_CODES.find(c=>idCountryName(c).toLocaleLowerCase()===q);return hit||""};
+
+const idFlag=c=>{if(c==="XK")return"🇽🇰";if(!/^[A-Z]{2}$/.test(c||""))return"";return String.fromCodePoint(...c.split("").map(x=>127397+x.charCodeAt(0)))};
+const idCountryOptions=()=>ID_COUNTRY_CODES.map(c=>({code:c,name:idCountryName(c)})).sort((a,b)=>a.name.localeCompare(b.name));
+const idSelectedCountries=()=>{const s=idg("id_nat");return s?[...s.selectedOptions].map(o=>o.value):[]};
+
 const ID_ED={black:{n:"Black",c:["#1b1b1b","#090909","#0a1448"],tx:"#ffffff",mu:"#aab2ff",ac:"#172bff"},
 white:{n:"White",c:["#ffffff","#eef0f6","#cdd5ee"],tx:"#0a0a0a",mu:"#4b5280",ac:"#172bff"},
 gold:{n:"Gold",c:["#fff1a8","#e2bb3c","#7d5a0c"],tx:"#1a1204",mu:"#5a4208",ac:"#1a1204"},
@@ -437,7 +447,7 @@ function idCard(){const D=idData(),k=idEd(),T=ID_ED[k],src=IDV.banner||(IDV.info
  return`<div class="rc" style="--c1:${T.c[0]};--c2:${T.c[1]};--c3:${T.c[2]};--tx:${T.tx};--mu:${T.mu};--ac:${T.ac}">
  <div class="rc-ph">${src?`<img src="${src}" alt="">`:`<div class="rc-ini">${ini}</div>`}</div>
  <img class="rc-logo" src="${ID_LOGO}" alt="Ruckly Rugby Data">
- <div class="rc-pos"><b>${esc(D.ab)}</b><span>${esc(D.pos||"Position")}</span><i>${esc(D.nat)}</i></div>
+ <div class="rc-pos"><b>${esc(D.ab)}</b><span>${esc(D.pos||"Position")}</span><i class="rc-flag" title="${esc(D.nat)}">${idFlag(idCountryCode((D.d.nationalities||[])[0]||""))}</i></div>
  <div class="rc-name" style="font-size:${fs}cqw">${esc(D.name)}<small>${esc(D.club)}</small></div>
  <div class="rc-at">${D.at.map(x=>`<div><b>${x[1]}</b><span>${x[0]}</span></div>`).join("")}</div>
  <div class="rc-bt">${D.bt.map(x=>`<div><span>${x[0]}</span><b>${x[1]}</b></div>`).join("")}</div>
@@ -453,7 +463,7 @@ async function idDraw(){const D=idData(),T=ID_ED[idEd()],W=1080,H=1620,u=W/100,c
  else{x.fillStyle=idRgba(T.ac,.14);x.fillRect(0,0,W,ph);x.fillStyle=idRgba(T.ac,.5);x.font=F("800",34);x.textAlign="center";x.fillText(((IDV.info||{}).name||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(),W/2,ph*.62)}
  g=x.createLinearGradient(0,ph*.55,0,ph);g.addColorStop(0,idRgba(T.c[1],0));g.addColorStop(1,T.c[1]);x.fillStyle=g;x.fillRect(0,ph*.55,W,ph*.45+2);
  x.shadowColor="rgba(0,0,0,.6)";x.shadowBlur=2*u;x.fillStyle="#fff";x.textAlign="left";
- x.font=F("800",14);x.fillText(D.ab,6*u,19*u);LS(".08em");x.font=F("400",4);x.fillText((D.pos||"").toUpperCase(),6*u,24.5*u);x.fillText(D.nat.toUpperCase(),6*u,29.5*u);
+ x.font=F("800",14);x.fillText(D.ab,6*u,19*u);LS(".08em");x.font=F("400",4);x.fillText((D.pos||"").toUpperCase(),6*u,24.5*u);x.font=F("400",7);x.fillText(idFlag(idCountryCode((D.d.nationalities||[])[0]||"")),6*u,31*u);
  LS("0px");const lg=await idImg(ID_LOGO);if(lg)x.drawImage(lg,66*u,3*u,27*u,27*u*ID_LOGO_R);x.shadowBlur=0;x.shadowColor="transparent";
  x.textAlign="center";x.fillStyle=T.tx;let fs=8.6*u;x.font=`800 ${fs}px Arial,Helvetica,sans-serif`;LS(".05em");while(x.measureText(D.name).width>88*u&&fs>4.5*u){fs-=.3*u;x.font=`800 ${fs}px Arial,Helvetica,sans-serif`}
  x.fillText(D.name,W/2,88.3*u);x.fillStyle=T.mu;x.font=F("400",3.9);LS(".14em");x.fillText(D.club,W/2,94.8*u);
@@ -475,6 +485,61 @@ async function idExport(share){const fmt=(idg("id_fmt")||{}).value||"2x3";
    if(b)b.innerHTML=`<div class="card" style="margin-top:10px"><div class="mut" style="font-size:12px;margin-bottom:8px">This browser can’t share the image directly. Download it, then post it, or share a link:</div><div class="row" style="gap:8px;flex-wrap:wrap"><button data-idact="dl">Download image</button><a class="fb" href="https://wa.me/?text=${t}%20${l}" target="_blank" rel="noopener">WhatsApp</a><a class="fb" href="https://twitter.com/intent/tweet?text=${t}&url=${l}" target="_blank" rel="noopener">X</a><a class="fb" href="https://www.facebook.com/sharer/sharer.php?u=${l}" target="_blank" rel="noopener">Facebook</a><button data-idact="copy">Copy link</button></div></div>`;
    return}
   idSaveBlob(r.blob,nm)}catch(e){toast("Couldn’t create the image")}}
+
+async function idLoadRanking(){
+ const el=idg("idrank");if(!el)return;
+ const d=IDV.d||{},pos=d.pos_main||"";
+ if(!pos){el.textContent="Set your main position to appear in a ranking.";return}
+ if(!sb){el.textContent="Sign in to load rankings.";return}
+ try{
+  const [postsR,profilesR,identityR]=await Promise.all([
+   sb.from("posts").select("user_id,session,created_at").eq("kind","session").limit(5000),
+   sb.from("profiles").select("id,name,handle,pos,role").eq("role","player").limit(2000),
+   sb.from("player_identity").select("user_id,pos_main,visibility").limit(2000)
+  ]);
+  if(postsR.error)throw postsR.error;
+  if(profilesR.error)throw profilesR.error;
+  if(identityR.error)throw identityR.error;
+  const prof=new Map((profilesR.data||[]).map(x=>[x.id,x]));
+  const ident=new Map((identityR.data||[]).map(x=>[x.user_id,x]));
+  const grouped=new Map();
+  for(const p of postsR.data||[]){
+   const s=p.session||{},pr=prof.get(p.user_id),di=ident.get(p.user_id);
+   if(!pr||!di||di.pos_main!==pos||s.type!=="match")continue;
+   const v=di.visibility||{};
+   if(v.pos==="private"||v.pos==="followers"&&p.user_id!==user.id)continue;
+   const a=grouped.get(p.user_id)||{id:p.user_id,name:pr.name||pr.handle||"Player",handle:pr.handle||"",n:0,pts:0,tr:0,k:0,km:0,tk:0,tkn:0,ps:0,psn:0,br:0};
+   a.n++;["pts","tr","k","km","tk","tkn","ps","psn","br"].forEach(k=>a[k]+=Number(s[k])||0);grouped.set(p.user_id,a);
+  }
+  const rows=[...grouped.values()].map(a=>{
+   const kick=a.k?100*a.km/a.k:0,tack=a.tkn?100*a.tk/a.tkn:0,pass=a.psn?100*a.ps/a.psn:0;
+   // Transparent composite: match points + tries + breaks + success rates.
+   a.score=a.pts+5*a.tr+2*a.br+.1*kick+.05*tack+.05*pass;
+   return a;
+  }).sort((a,b)=>b.score-a.score||b.n-a.n);
+  const mine=rows.findIndex(x=>x.id===user.id);
+  if(!rows.length){el.textContent="No public match statistics for this position yet.";return}
+  const fmt=x=>Number(x).toFixed(1).replace(/\.0$/,"");
+  el.innerHTML=`<div class="idrank-meta">Your position: <b>${esc(pos)}</b> · ${rows.length} ranked player${rows.length===1?"":"s"}</div>
+   ${mine>=0?`<div class="idrank-you"><b>#${mine+1}</b><span>Your ranking</span><strong>${fmt(rows[mine].score)} pts</strong></div>`:`<div class="mut" style="margin:8px 0">You need at least one public match session to enter this ranking.</div>`}
+   <div class="idrank-list">${rows.slice(0,10).map((x,i)=>`<div class="idrank-row"><b class="idrank-num">${i+1}</b><span><b>${esc(x.name)}</b><small>@${esc(x.handle)} · ${x.n} match${x.n===1?"":"es"}</small></span><strong>${fmt(x.score)}</strong></div>`).join("")}</div>
+   <details class="idrank-formula"><summary>How is the score calculated?</summary><p>Match points + (tries × 5) + (line breaks × 2) + goal-kick success % × 0.10 + tackle success % × 0.05 + pass success % × 0.05. Only public match sessions are counted.</p></details>`;
+ }catch(e){el.textContent="The ranking could not be loaded. Check that public session and player profile access is enabled in Supabase."}
+}
+
+
+function idSelectionGroups(){
+ const map=new Map();
+ (IDV.sel||[]).forEach(x=>{
+  const key=String(x.team_name||"Team").trim()||"Team";
+  const g=map.get(key)||{team:key,caps:0,hasCaps:false,rows:[],levels:new Set(),years:new Set()};
+  if(x.caps!==null&&x.caps!==undefined&&x.caps!==""){g.caps+=Number(x.caps)||0;g.hasCaps=true}
+  if(x.level)g.levels.add(x.level);
+  if(x.year)g.years.add(x.year);
+  g.rows.push(x);map.set(key,g);
+ });
+ return [...map.values()].sort((a,b)=>a.team.localeCompare(b.team));
+}
 function idRender(){const box=idg("idbox");if(!box)return;const d=IDV.d||{},own=IDV.own;
  if(IDV.edit&&own)return idEdit(box,d);
  const pill=v=>`<span class="pill">${v==="verified"?"Verified ✓":"Declared"}</span>`;
@@ -484,15 +549,16 @@ function idRender(){const box=idg("idbox");if(!box)return;const d=IDV.d||{},own=
  +`<div class="mut" style="font-size:11px;text-align:center;margin:-4px 0 12px">Card stats come from the match sessions posted by the player and update automatically with every new match post. They are declared by the player unless marked Verified.${IDV.d?"":own?" Tap “Edit my card” to fill in your details.":" This player hasn’t shared card details."}</div>`
  +(own?`<div class="card" style="margin-bottom:14px"><div class="row" style="gap:8px;flex-wrap:wrap;justify-content:center"><select id="id_fmt" style="width:auto;min-height:34px" aria-label="Format"><option value="2x3">2:3 card</option><option value="4x5">4:5 post</option></select><button data-idact="dl">Download PNG</button><button class="fb on" data-idact="sh">Share</button><button data-idact="edit">Edit my card</button></div><div id="idshare"></div></div>`:"")
  +(d.about?`<div class="card" style="margin-bottom:12px">${esc(d.about)}</div>`:"")
- +`<div class="card"><b>Selections</b>${IDV.sel.map(x=>`<div class="srow"><b>${esc(x.team_name)}</b><span class="mut">${esc(x.level)}${x.year?" · "+x.year:""}${x.caps!=null?" · "+x.caps+" caps":""}</span>${pill(x.verification)}${own?`<button class="ib" data-idact="delsel" data-id="${x.id}" aria-label="Delete selection">✕</button>`:""}</div>`).join("")||'<div class="mut" style="padding:6px 0">None yet.</div>'}${own?selForm:""}</div>`
+ +`<div class="card id-selections"><div class="id-section-head"><div><b>Selections</b><div class="mut" style="font-size:11px;margin-top:3px">${IDV.sel.length} selection record${IDV.sel.length===1?"":"s"} · ${idSelectionGroups().length} team${idSelectionGroups().length===1?"":"s"}</div></div></div>${idSelectionGroups().map(g=>`<div class="id-selection-team"><div class="id-selection-main"><b>${esc(g.team)}</b><strong>${g.hasCaps?g.caps+" cap"+(g.caps===1?"":"s"):g.rows.length+" selection"+(g.rows.length===1?"":"s")}</strong></div><div class="mut id-selection-meta">${[...g.levels].map(esc).join(" · ")}${g.years.size?" · "+[...g.years].sort().join(", "):""}</div>${own?g.rows.map(x=>`<div class="id-selection-entry"><span>${esc(x.year||"")}${x.level?" · "+esc(x.level):""}${x.caps!=null?" · "+x.caps+" cap"+(x.caps===1?"":"s"):""}</span>${pill(x.verification)}<button class="ib" data-idact="delsel" data-id="${x.id}" aria-label="Delete selection">✕</button></div>`).join(""):""}</div>`).join("")||'<div class="mut" style="padding:8px 0">No selections added yet.</div>'}${own?selForm:""}</div>`
+ +`<div class="card" style="margin-top:12px"><b>Position ranking</b><div class="mut" style="font-size:11px;margin:4px 0 8px">Players are compared only with others in the same main position. Rankings use public match sessions and refresh from match statistics.</div><div id="idrank" class="mut">Loading ranking…</div></div>`
  +`<div class="card" style="margin-top:12px"><b>Awards</b>${IDV.aw.map(a=>`<div class="srow"><b>${esc(a.title)}</b><span class="mut">${a.award_year||""}</span><span class="pill">RUCKLY</span>${ADM?`<button class="ib" data-idact="delaw" data-id="${a.id}" aria-label="Delete award">✕</button>`:""}</div>`).join("")||'<div class="mut" style="padding:6px 0">No awards yet.</div>'}${ADM&&!own?awForm:""}</div>`;
- box.onclick=idClick}
+ box.onclick=idClick;idLoadRanking()}
 function idEdit(box,d){const v=d.visibility||{},pos=(typeof POS!=="undefined"?POS:[]),pm=d.pos_main||(S.me&&S.me.pos)||"";
  const opt=(arr,cur,blank)=>(blank?`<option value="">${blank}</option>`:"")+arr.map(x=>`<option${x===cur?" selected":""}>${x}</option>`).join("");
  const lab=(t,k)=>`<div class="row" style="margin:10px 0 4px;justify-content:space-between"><label class="lab" style="margin:0">${t}</label>${idVsel(k,v[k])}</div>`;
  const hf=(id,cur)=>`<select id="${id}"><option value="">–</option>${[["right","Right"],["left","Left"],["both","Both"]].map(x=>`<option value="${x[0]}"${cur===x[0]?" selected":""}>${x[1]}</option>`).join("")}</select>`;
  box.innerHTML=`${idCard()}<div class="card" style="margin-bottom:12px"><b>Edition</b><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px">${Object.keys(ID_ED).map(k=>`<button class="${idEd()===k?"on":""}" data-idact="ped" data-ed="${k}"><i class="rc-sw" style="background:linear-gradient(135deg,${ID_ED[k].c[0]},${ID_ED[k].c[2]})"></i>${ID_ED[k].n}</button>`).join("")}</div></div><div class="card"><b>Edit my card</b>
- ${lab("Nationalities (up to 3, comma separated)","nationalities")}<input id="id_nat" value="${esc((d.nationalities||[]).join(", "))}" maxlength="80">
+ ${lab("Nationality (up to 3 countries)","nationalities")}<input id="id_nat_search" type="search" placeholder="Search a country…" autocomplete="off"><select id="id_nat" multiple size="6" aria-label="Choose up to three nationalities">${idCountryOptions().map(c=>`<option value="${c.code}"${(d.nationalities||[]).some(n=>idCountryCode(n)===c.code)?" selected":""}>${idFlag(c.code)} ${esc(c.name)}</option>`).join("")}</select><div class="mut" id="id_nat_count" style="font-size:11px;margin-top:4px">Choose up to 3 countries. The first one appears on your card.</div>
  ${lab("Height (cm)","height")}<input id="id_h" type="number" min="100" max="250" value="${d.height_cm||""}">
  ${lab("Weight (kg)","weight")}<input id="id_w" type="number" min="30" max="250" value="${d.weight_kg||""}">
  ${lab("Positions","pos")}<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><select id="id_p1">${opt(pos,pm,"Main position…")}</select><select id="id_p2">${opt(pos,d.pos_secondary||"","Secondary…")}</select></div>
@@ -502,12 +568,16 @@ function idEdit(box,d){const v=d.visibility||{},pos=(typeof POS!=="undefined"?PO
  ${lab("About","about")}<textarea id="id_ab" maxlength="600" rows="4">${esc(d.about||"")}</textarea>
  ${lab("Card photo (JPG, PNG or WebP)","banner")}<input id="id_bn" type="file" accept="image/jpeg,image/png,image/webp">
  <div class="mut" style="font-size:11px;margin-top:10px">Your card photo is cropped automatically to fit the card (the top of the picture is kept, so keep your face high). Without one, the card uses your profile photo. Your date of birth is never shown. Each field follows the visibility you choose.</div>
- <div class="row" style="margin-top:12px;gap:8px"><button class="fb on" data-idact="save">Save</button><button class="fb" data-idact="cancel">Cancel</button></div></div>`;box.onclick=idClick}
+ <div class="row" style="margin-top:12px;gap:8px"><button class="fb on" data-idact="save">Save</button><button class="fb" data-idact="cancel">Cancel</button></div></div>`;box.onclick=idClick;
+ const ns=idg("id_nat_search"),nsel=idg("id_nat"),ncount=idg("id_nat_count");
+ if(ns&&nsel){ns.oninput=()=>{const q=ns.value.trim().toLowerCase();[...nsel.options].forEach(o=>{o.hidden=!!q&&!o.textContent.toLowerCase().includes(q)})};
+ nsel.onchange=()=>{const chosen=[...nsel.selectedOptions];if(chosen.length>3){chosen[chosen.length-1].selected=false;toast("Choose up to 3 nationalities")}if(ncount)ncount.textContent=`${nsel.selectedOptions.length}/3 selected. The first one appears on your card.`}}
+} 
 async function idResize(file){const bmp=await createImageBitmap(file),W=1000,H=860,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d"),r=Math.max(W/bmp.width,H/bmp.height),w=bmp.width*r,h=bmp.height*r;x.drawImage(bmp,(W-w)/2,-(h-H)*.18,w,h);return new Promise(res=>c.toBlob(res,"image/jpeg",.85))}
 async function idSave(){const num=(i,a,b)=>{const t=idg(i).value;if(t==="")return null;const n=+t;return n>=a&&n<=b?Math.round(n):NaN};
  const h=num("id_h",100,250),w=num("id_w",30,250);
  if([h,w].some(Number.isNaN))return toast("Check height and weight");
- const nat=idg("id_nat").value.split(",").map(x=>x.trim()).filter(Boolean).slice(0,3);
+ const nat=idSelectedCountries().slice(0,3);
  const vis={};["nationalities","height","weight","pos","club","hand","foot","about","banner"].forEach(k=>vis[k]=idg("idv_"+k).value);
  const old=(IDV.d&&IDV.d.banner_path)||null;let bp=old;const f=idg("id_bn").files[0];
  try{if(f){if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>10485760)return toast("Banner must be a JPG, PNG or WebP under 10 MB");
@@ -617,7 +687,8 @@ document.getElementById("spi").src=LOGO_F</script>
 <section id="search" class="hide"><div class="card hl"><input id="sq" placeholder="Search players, coaches, fans, clubs or @username…" autocomplete="off" style="margin:0"></div><div id="sr"></div></section>
 <section id="hl" class="hide"><div id="drop" class="hide"><input type="file" id="fi" accept="" hidden></div><div id="hlist"></div></section>
 <section id="notif" class="hide"></section><section id="acct" class="hide"></section><section id="prof" class="hide"></section>
-<nav class="nav"><button data-n="feed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Feed</button><button data-n="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button><button data-n="rec" class="on"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Record</button><button data-n="notif" id="nnt"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Activity<span class="bdg nbd hide">0</span></button><button data-n="acct"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg>Account</button></nav>
+<section id="insights" class="hide"></section>
+<nav class="nav"><button data-n="feed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Feed</button><button data-n="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button><button data-n="rec" class="on"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Record</button><button data-n="insights"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h17M8 15l3-4 3 2 5-7"/></svg>Insights</button><button data-n="notif" id="nnt"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Activity<span class="bdg nbd hide">0</span></button><button data-n="acct"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg>Account</button></nav>
 <div id="foot"><button class="save" id="save">Save session</button>
 <div style="text-align:center"><button class="link" id="reset">Reset current session</button></div></div>
 
@@ -764,13 +835,67 @@ $("undo").onclick=()=>{closeSheet();S.kicks.pop();save();render()};
 $("stats").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.k,d=b.dataset.d;if(typeof S[k]==="number")S[k]=Math.max(0,S[k]+(d?-1:1));else{const o=S[k],f=b.dataset.f;o[f]=d?Math.max(0,o[f]-1):o[f]+1}save();render()});
 $("reset").onclick=()=>{if(confirm("Reset the current session?")){S.kicks=[];S.tk={ok:0,ko:0};S.ps={ok:0,ko:0};S.kg={ok:0,ko:0};S.br=0;S.tr=0;save();render()}};
 let nv="feed",cur=2;
+
+let insightFilter="all",insightQuery="";
+function insightStreak(){
+ const days=[...new Set((S.sessions||[]).map(x=>String(x.date||"").slice(0,10)).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)))].sort();
+ if(!days.length)return{current:0,best:0};
+ const dayMs=86400000,nums=days.map(x=>{const [y,m,d]=x.split("-").map(Number);return Math.floor(Date.UTC(y,m-1,d)/dayMs)});
+ let best=1,run=1;for(let i=1;i<nums.length;i++){if(nums[i]===nums[i-1]+1)run++;else run=1;best=Math.max(best,run)}
+ const now=new Date(),today=Math.floor(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())/dayMs),last=nums[nums.length-1];
+ let current=0;if(last===today||last===today-1){current=1;for(let i=nums.length-2;i>=0&&nums[i+1]===nums[i]+1;i--)current++}
+ return{current,best};
+}
+function renderInsights(){
+ const root=$("insights");if(!root)return;
+ const sessions=Array.isArray(S.sessions)?S.sessions:[];
+ const filtered=sessions.filter(x=>(insightFilter==="all"||(insightFilter==="public"?(x.vis==="public"):(x.vis!=="public")))&&(!insightQuery||[x.name,x.notes,x.date,x.type].join(" ").toLowerCase().includes(insightQuery.toLowerCase()))).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+ const totals={match:sessions.filter(x=>x.type==="match").length,training:sessions.filter(x=>x.type!=="match").length,public:sessions.filter(x=>x.vis==="public").length};
+ const streak=insightStreak();
+ const dateFmt=d=>{if(!d)return"Date not set";const p=String(d).split("-");return p.length===3?new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}):esc(d)};
+ const cards=filtered.map(x=>{
+  const kicks=Array.isArray(x.kicks)?x.kicks:[],made=kicks.filter(k=>res(k)==="made").length,tk=x.tk||{ok:0,ko:0},ps=x.ps||{ok:0,ko:0},kg=x.kg||{ok:0,ko:0};
+  const points=kicks.reduce((a,k)=>a+kp(k),0)+5*(x.tr||0);
+  return `<article class="card ins-session">
+   <div class="ins-head"><div><div class="ins-kicker">${x.type==="match"?"MATCH":"TRAINING"} · ${dateFmt(x.date)}</div><h3>${esc(x.name||"Untitled session")}</h3></div>
+   <span class="ins-privacy ${x.vis==="public"?"is-public":"is-private"}">${x.vis==="public"?"PUBLIC":"PRIVATE"}</span></div>
+   ${x.notes?`<p class="ins-notes">${esc(x.notes)}</p>`:""}
+   <div class="ins-metrics">
+    <div><b>${points}</b><small>Points</small></div><div><b>${made}/${kicks.length}</b><small>Goal kicks</small></div><div><b>${tk.ok||0}/${(tk.ok||0)+(tk.ko||0)}</b><small>Tackles</small></div><div><b>${ps.ok||0}/${(ps.ok||0)+(ps.ko||0)}</b><small>Passes</small></div>
+   </div>
+   <div class="ins-actions">
+    <button class="ins-edit" data-ins-edit="${x.id}">Edit session</button>
+    <button data-ins-vis="${x.id}">${x.vis==="public"?"Make private":"Share publicly"}</button>
+    <button class="ins-delete" data-ins-del="${x.id}" aria-label="Delete session">Delete</button>
+   </div>
+  </article>`;
+ }).join("");
+ root.innerHTML=`<div class="ins-wrap">
+  <div class="ins-title"><div><div class="ins-eyebrow">RUCKLY / PERFORMANCE</div><h1>Insights</h1><p>All your sessions, in one place.</p></div><button class="ins-new" data-ins-new>+ New session</button></div>
+  <div class="ins-summary">
+   <div><small>TOTAL SESSIONS</small><b>${sessions.length}</b></div><div><small>MATCHES</small><b>${totals.match}</b></div><div><small>TRAINING</small><b>${totals.training}</b></div><div><small>PUBLIC</small><b>${totals.public}</b></div>
+  </div>
+  <div class="ins-streak"><div><small>ACTIVITY STREAK</small><b>${streak.current} day${streak.current===1?"":"s"}</b><span>Best: ${streak.best} day${streak.best===1?"":"s"}</span></div><div class="ins-streak-mark">↗</div></div>
+  <div class="ins-toolbar"><input id="ins-search" type="search" placeholder="Search sessions…" value="${esc(insightQuery)}"><div class="ins-filters">
+   <button data-ins-filter="all" class="${insightFilter==="all"?"active":""}">All</button><button data-ins-filter="public" class="${insightFilter==="public"?"active":""}">Public</button><button data-ins-filter="private" class="${insightFilter==="private"?"active":""}">Private</button>
+  </div></div>
+  <div class="ins-list">${cards||`<div class="card ins-empty"><b>${sessions.length?"No sessions match this filter":"No sessions yet"}</b><p>${sessions.length?"Try another filter or search.":"Save a match or training session and it will appear here."}</p></div>`}</div>
+ </div>`;
+ const q=$("ins-search");if(q)q.addEventListener("input",()=>{insightQuery=q.value;const pos=q.selectionStart;renderInsights();const nq=$("ins-search");nq.focus();nq.setSelectionRange(pos,pos)});
+ root.querySelectorAll("[data-ins-filter]").forEach(b=>b.onclick=()=>{insightFilter=b.dataset.insFilter;renderInsights()});
+ root.querySelectorAll("[data-ins-edit]").forEach(b=>b.onclick=()=>startEdit(b.dataset.insEdit));
+ root.querySelectorAll("[data-ins-vis]").forEach(b=>b.onclick=()=>{const x=sessions.find(y=>String(y.id)===b.dataset.insVis);if(!x)return;x.vis=x.vis==="public"?"private":"public";save();renderInsights();schedSync()});
+ root.querySelectorAll("[data-ins-del]").forEach(b=>b.onclick=()=>delAsk(b.dataset.insDel,renderInsights));
+ const nb=root.querySelector("[data-ins-new]");if(nb)nb.onclick=()=>{nv="rec";cur=2;show();window.scrollTo(0,0)};
+}
+
 function show(){closeSheet();setAv();const r=nv==="rec";
  $("meta").classList.toggle("hide",!r||cur===3);$("foot").classList.toggle("hide",!r||cur===3);
  document.querySelector(".tabs").classList.toggle("hide",!r);
  [1,2,3].forEach(i=>{$("v"+i).classList.toggle("hide",!r||cur!==i);const tb=$("t"+i);if(tb)tb.classList.toggle("on",cur===i)});
- ["feed","search","hl","acct","prof","notif"].forEach(k=>$(k).classList.toggle("hide",nv!==k));
+ ["feed","search","hl","acct","prof","notif","insights"].forEach(k=>$(k).classList.toggle("hide",nv!==k));
  document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.n===nv));
- if(r&&cur===3)hist();if(nv==="feed")feed();if(nv==="hl")hlv();if(nv==="acct")acct();if(nv==="prof")prof();if(nv==="search")srch();if(nv==="notif")notifs()}
+ if(r&&cur===3)hist();if(nv==="feed")feed();if(nv==="hl")hlv();if(nv==="acct")acct();if(nv==="prof")prof();if(nv==="search")srch();if(nv==="notif")notifs();if(nv==="insights")renderInsights()}
 function tab(n){cur=n;show()}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{if(b.dataset.n==="rec"&&nv!=="rec")cur=2;nv=b.dataset.n;show()});$("t1").onclick=()=>tab(1);$("t2").onclick=()=>tab(2);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -936,7 +1061,7 @@ function fake(h,t){const c=hc(h),r=(i,a,b)=>a+(c*(i+3)+i*17)%(b-a+1),m=t==="matc
 const cell=(t,v,x)=>`<div><span class="mut">${t}</span><b>${v}</b><span class="mut">${x||"&nbsp;"}</span></div>`;
 const stH=a=>`<div class="zones" style="grid-template-columns:repeat(3,1fr)">${cell("Sessions",a.n)}${cell("Points",a.pts)}${cell("Goal kicks",pc(a.km,a.k),a.km+"/"+a.k)}</div><div class="zones" style="grid-template-columns:repeat(4,1fr)">${cell("Tackles",pc(a.tk,a.tkn))}${cell("Passes",pc(a.ps,a.psn))}${cell("Tries",a.tr)}${cell("Breaks",a.br)}</div>`;
 const ini2=n=>esc((n||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase());
-function pfH(o){return`<div class="card hl" style="padding:16px"><div style="display:flex;gap:16px;align-items:center"><div class="ring"><div class="ini" style="width:76px;height:76px;font-size:22px;overflow:hidden">${o.photo?`<img src="${o.photo}" alt="" style="width:100%;height:100%;object-fit:cover">`:ini2(o.name)}</div></div><div class="zones" style="grid-template-columns:repeat(3,1fr);flex:1;margin:0"><div><b>${fmtN(o.posts)}</b><span class="mut">Posts</span></div>${flCell(o,"followers")}${flCell(o,"following")}</div></div><div style="margin-top:10px"><b>${esc(o.name)}${vb(o.uid)}</b>${o.priv?" 🔒":""} <span class="pill">${esc(o.tag)}</span>${o.rel||""}<div class="mut">@${esc(o.handle)}</div><div style="margin-top:4px">${cap(o.bio)}</div>${o.mut||""}</div><div style="margin-top:10px">${o.btn}</div></div>${o.extra||""}<div class="tabs${o.locked||o.role==="fan"?" hide":""}"><button data-pt="hl" class="${pt==="hl"?"on":""}">Posts</button>${o.role==="player"?`<button data-pt="identity" class="${pt==="identity"?"on":""}">${user&&o.uid===user.id?"My Ruckly card":"Ruckly card"}</button>`:""}${o.role==="coach"?"":`<button data-pt="stats" class="${pt==="stats"?"on":""}">Stats</button>`}${o.role==="fan"?"":`<button data-pt="career" class="${pt==="career"?"on":""}">${o.role==="coach"?"Coaching":"Career"}</button>`}</div>`
+function pfH(o){return`<div class="card hl" style="padding:16px"><div style="display:flex;gap:16px;align-items:center"><div class="ring"><div class="ini" style="width:76px;height:76px;font-size:22px;overflow:hidden">${o.photo?`<img src="${o.photo}" alt="" style="width:100%;height:100%;object-fit:cover">`:ini2(o.name)}</div></div><div class="zones" style="grid-template-columns:repeat(3,1fr);flex:1;margin:0"><div><b>${fmtN(o.posts)}</b><span class="mut">Posts</span></div>${flCell(o,"followers")}${flCell(o,"following")}</div></div><div style="margin-top:10px"><b>${esc(o.name)}${vb(o.uid)}</b>${o.priv?" 🔒":""} <span class="pill">${esc(o.tag)}</span>${o.rel||""}<div class="mut">@${esc(o.handle)}</div><div style="margin-top:4px">${cap(o.bio)}</div>${o.mut||""}</div><div style="margin-top:10px">${o.btn}</div></div>${o.extra||""}<div class="tabs${o.locked||o.role==="fan"?" hide":""}"><button data-pt="hl" class="${pt==="hl"?"on":""}">Posts</button>${o.role==="player"?`<button data-pt="identity" class="${pt==="identity"?"on":""}">${user&&o.uid===user.id?"My RUCKLY Card":"Player Card"}</button>`:""}${o.role==="coach"?"":`<button data-pt="stats" class="${pt==="stats"?"on":""}">Stats</button>`}${o.role==="fan"?"":`<button data-pt="career" class="${pt==="career"?"on":""}">${o.role==="coach"?"Coaching":"Career"}</button>`}</div>`
  +(o.locked?'<div class="card" style="text-align:center;padding:24px">🔒<br><b>This account is private</b><div class="mut">Follow this player to see their stats and highlights.</div></div>':pt==="identity"&&o.role==="player"?(IDV.st=o.cst||(o.st&&o.st.match),'<div id="idbox"></div>'):pt==="career"&&o.role!=="fan"?(o.career||''):pt==="stats"&&o.role!=="coach"?`<div class="chips">${["all","match","training"].map(x=>`<button class="chip ${pf===x?"on":""}" data-pf="${x}">${x==="all"?"All":x==="match"?"Matches":"Training"}</button>`).join("")}</div><div class="card">${stH(o.st[pf])}</div>${typeof heatPanelHtml==="function"?heatPanelHtml():""}${o.list||""}`
  :`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">${o.tiles.join("")||'<div class="card mut" style="grid-column:1/4">No posts yet.</div>'}</div>`)}
 function openProf(h){if(nv==="prof"){if(h!=="me"&&pv&&h!==pv)PS.push(pv)}else{pback=nv;PS=[]}if(h==="me"){nv="acct"}else{pv=h;nv="prof"}pt="hl";pf="all";show();window.scrollTo(0,0)}
@@ -974,7 +1099,7 @@ function loadMeta(){const m=S.meta;$("ty").value=m.type||"training";$("dt").valu
 function ask(h,t,lbl,fn){$("cfh").textContent=h;$("cft").textContent=t;$("cfy").textContent=lbl;$("cf").classList.remove("hide");$("cfy").onclick=()=>{$("cf").classList.add("hide");fn()};$("cfn").onclick=()=>$("cf").classList.add("hide")}
 $("cf").addEventListener("click",e=>{if(e.target===$("cf"))$("cf").classList.add("hide")});
 function delAsk(id,after){const x=S.sessions.find(y=>y.id==id);if(!x)return;ask("Delete this session?","“"+x.name+"” will be permanently deleted. This can’t be undone.","Delete",()=>{if(x.postId)unpost(x.postId);S.sessions=S.sessions.filter(y=>y.id!=id);if(S.editId==id)endEdit();save();after()})}
-function startEdit(id){const x=S.sessions.find(y=>y.id==id);if(!x)return;
+function startEdit(id){const x=S.sessions.find(y=>y.id==id);if(!x)return;S.editReturnPage=nv==="insights"?"insights":"acct";
  if(!S.editId)S.draft=JSON.parse(JSON.stringify({kicks:S.kicks,tk:S.tk,ps:S.ps,kg:S.kg,br:S.br,tr:S.tr,meta:S.meta,hl:S.hl}));
  const c=JSON.parse(JSON.stringify(x));
  S.kicks=c.kicks||[];S.tk=c.tk||{ok:0,ko:0};S.ps=c.ps||{ok:0,ko:0};S.kg=c.kg||{ok:0,ko:0};S.br=c.br||0;S.tr=c.tr||0;S.hl=c.hl||[];
@@ -982,8 +1107,8 @@ function startEdit(id){const x=S.sessions.find(y=>y.id==id);if(!x)return;
  S.editId=x.id;loadMeta();save();render();nv="rec";cur=2;show();window.scrollTo(0,0)}
 function endEdit(){const d=S.draft||{kicks:[],tk:{ok:0,ko:0},ps:{ok:0,ko:0},kg:{ok:0,ko:0},br:0,tr:0,hl:[],meta:{type:"training",name:"",date:new Date().toLocaleDateString("sv")}};Object.assign(S,d);S.editId=null;S.draft=null;loadMeta();save();render()}
 const baseSave=$("save").onclick;
-$("save").onclick=()=>{if(!S.editId)return baseSave();const x=S.sessions.find(y=>y.id==S.editId);if(x){const m=S.meta;Object.assign(x,{type:m.type,name:m.name||(m.type==="match"?"Match":"Training"),date:m.date,min:m.min,notes:m.notes,vis:m.vis||"private",kicks:S.kicks,tk:S.tk,ps:S.ps,kg:S.kg,br:S.br,tr:S.tr,hl:S.hl})}endEdit();nv="acct";show()};
-$("ecancel").onclick=()=>{endEdit();nv="acct";show()};
+$("save").onclick=()=>{if(!S.editId)return baseSave();const x=S.sessions.find(y=>y.id==S.editId);if(x){const m=S.meta;Object.assign(x,{type:m.type,name:m.name||(m.type==="match"?"Match":"Training"),date:m.date,min:m.min,notes:m.notes,vis:m.vis||"private",kicks:S.kicks,tk:S.tk,ps:S.ps,kg:S.kg,br:S.br,tr:S.tr,hl:S.hl})}const dest=S.editReturnPage||"acct";endEdit();nv=dest;show()};
+$("ecancel").onclick=()=>{const dest=S.editReturnPage||"acct";endEdit();nv=dest;show()};
 $("reset").onclick=()=>ask("Reset this session?","All the data currently on screen will be cleared.","Reset",()=>{S.kicks=[];S.tk={ok:0,ko:0};S.ps={ok:0,ko:0};S.kg={ok:0,ko:0};S.br=0;S.tr=0;save();render()});
 const _show=show;show=function(){_show();const e=!!S.editId;$("eb").classList.toggle("hide",!e||nv!=="rec");$("ebn").textContent=e?(S.meta.name||"session"):"";$("save").textContent=e?"Update session":"Save session"};
 let obr="";
@@ -1235,7 +1360,7 @@ async function prof(){if(!sb||!user){nv="feed";return show()}
  $("prof").innerHTML='<button class="link" data-back="1">← Back</button>'+pfH({uid:R.id,photo:avU(R),name:R.name,handle:R.handle,tag:(RL[R.role]||"Player")+(R.pos?" · "+R.pos:""),bio:R.bio||"",posts:locked?"–":rows.length,fr:showC?c.followers:"–",fg:showC?c.following:"–",st,priv:!!R.private,locked,uid:R.id,role:R.role||"player",career:pt==="career"?cStats(ses,R.role==="coach")+(crs?cHtml(crs,R.role||"player",false):cSetup):"",flk:hidC?"hidden":(locked?"private":""),rel:rl.fm?'<span class="pill" style="margin-left:4px">Follows you</span>':"",mut:flMutLine(rl.mu,R.id),list:locked?"":list,
   tiles:rows.map(pvTile),
   btn:`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="fb ${s?"on":""}" data-fo="${R.id}" data-pv="${R.private?1:0}">${s==="accepted"?"✓ Following":s==="pending"?"Requested":R.private?"＋ Request":rl.fm?"＋ Follow back":"＋ Follow"}</button><button class="fb" data-bl="${R.id}">Block</button><button class="fb" data-rp="u:${R.id}">Report</button></div>`})}
-if(pt==="identity")idMount(R.id,false,{name:R.name,photo:avU(R),handle:R.handle});
+if(pt==="identity"){idMount(R.id,false,{name:R.name,photo:avU(R),handle:R.handle});}
 $("prof").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!user)return;const d=b.dataset;
  if(d.fo)followToggle(d.fo,d.pv==="1");
  else if(d.bl)ask("Block this player?","They won’t see your posts or be able to follow you, and you won’t see theirs.","Block",async()=>{const{error}=await sb.rpc("block_user",{target:d.bl});if(error)return toast("Couldn’t block: "+error.message);delete FD.fol[d.bl];toast("Player blocked");nv="feed";show()});
@@ -1544,7 +1669,7 @@ async function pubFeed(){const el=$("feed"),hd=fHead()+`<div class="card hl" sty
  el.innerHTML=hd+(PF.map(p=>`<div class="card hl"><div class="row" style="margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><button class="ring av" data-su="1" aria-label="Sign up to see profiles"><div class="ini" style="width:34px;height:34px;font-size:12px">${p.avatar&&sb?`<img src="${esc(pubUrl(p.avatar))}" alt="">`:ini2(p.name)}</div></button><div><b>${esc(p.name)}</b><div class="mut" style="font-size:12px">@${esc(p.handle)} · ${esc(RL[p.role]||"Player")}${p.pos?" · "+esc(p.pos):""} · ${fd(p.created_at)}</div></div></div></div>${pMedia(p)}<div class="act" style="margin-top:8px"><button data-su="1" aria-label="Like">${pvHeart(false)}</button><span class="mut">${p.likes||0}</span><button class="link" data-su="1" style="text-decoration:none">💬 ${p.comments||0}</button></div>${p.caption?`<div><b>@${esc(p.handle)}</b> ${cap(p.caption)}</div>`:""}${tagLine(p.tags)}</div>`).join("")||'<div class="card mut">No posts yet.</div>')+'<div class="mut" style="text-align:center;font-size:12px;padding:8px"><a href="#" data-lg="terms" style="color:#79a7f9">Terms</a> · <a href="#" data-lg="privacy" style="color:#79a7f9">Privacy</a></div>'}
 $("feed").addEventListener("click",e=>{if(e.target.closest("[data-lo2]"))openAu("l")});
 const nlg=document.createElement("button");nlg.id="nlg";nlg.innerHTML='<svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>Log in';nlg.onclick=()=>openAu("l");document.querySelector(".nav").appendChild(nlg);
-const _s5=show;show=function(){if(!user&&nv!=="feed")nv="feed";_s5();const a=!user;document.querySelectorAll(".nav button[data-n]").forEach(b=>{if(b.dataset.n!=="feed")b.classList.toggle("hide",a)});nlg.classList.toggle("hide",!a);if(!a)applyRole()};
+const _s5=show;show=function(){if(!user&&nv!=="feed"&&nv!=="insights")nv="feed";_s5();const a=!user;document.querySelectorAll(".nav button[data-n]").forEach(b=>{if(b.dataset.n!=="feed"&&b.dataset.n!=="insights")b.classList.toggle("hide",a)});nlg.classList.toggle("hide",!a);if(!a)applyRole()};
 
 /* sign-up questionnaire */
 const GEN=["Woman","Man","Non-binary","Trans woman","Trans man","Genderqueer","Genderfluid","Agender","Two-Spirit","Questioning","Prefer to self-describe","Prefer not to say"];let ast=1,agd="";
@@ -2273,6 +2398,97 @@ if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.s
 /* Sign up / Log in only when nobody is logged in */
 setInterval(()=>{const lo=!!user;["nsu","nlg"].forEach(i=>{const e=document.getElementById(i);if(!e)return;if(lo)e.style.setProperty("display","none","important");else e.style.removeProperty("display")})},250);
 </script>
+
+<style id="ruckly-insights">
+#insights{width:100%;max-width:1120px;margin:0 auto;color:var(--tx)}
+.ins-wrap{max-width:1120px;margin:0 auto}
+.ins-title{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:4px 0 22px}
+.ins-eyebrow,.ins-kicker{font-size:10px;letter-spacing:.16em;color:var(--mut);font-weight:700}
+.ins-title h1{font-size:28px!important;font-weight:700;margin:5px 0 2px!important}
+.ins-title p,.ins-empty p{margin:0;color:var(--mut);font-size:13px}
+.ins-new,.ins-actions button,.ins-filters button{border:1px solid var(--bd);background:#080808;color:var(--tx);border-radius:8px;padding:9px 12px;font:inherit;font-size:12px;cursor:pointer}
+.ins-new{background:#f4f4f4;color:#050505;border-color:#f4f4f4;font-weight:700}
+.ins-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:#333;border:1px solid #333;margin-bottom:12px}
+.ins-summary>div{background:#050505;padding:14px;min-width:0}
+.ins-summary small,.ins-streak small{display:block;color:var(--mut);font-size:9px;letter-spacing:.12em;font-weight:700}
+.ins-summary b{display:block;font-size:25px;font-weight:600;margin-top:5px}
+.ins-streak{display:flex;justify-content:space-between;align-items:center;border:1px solid #555;background:#050505;padding:14px 16px;margin-bottom:22px}
+.ins-streak b{display:block;font-size:20px;margin:3px 0}
+.ins-streak span{font-size:11px;color:var(--mut)}
+.ins-streak-mark{font-size:25px;color:#f4f4f4}
+.ins-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
+.ins-toolbar input{flex:1;min-width:120px;background:#050505;border:1px solid #555;border-radius:8px;padding:10px 12px;color:#f4f4f4;font:inherit;font-size:13px}
+.ins-filters{display:flex;gap:5px}.ins-filters button{padding:8px 11px;color:var(--mut)}
+.ins-filters button.active{background:#f4f4f4;color:#050505;border-color:#f4f4f4}
+.ins-session{background:#050505!important;border:1px solid #444!important;box-shadow:none!important;border-radius:10px!important;padding:15px!important;margin-bottom:9px!important}
+.ins-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.ins-head h3{font-size:16px;margin:4px 0 0;font-weight:650}
+.ins-privacy{font-size:9px;letter-spacing:.12em;font-weight:700;border:1px solid #666;border-radius:20px;padding:4px 7px;white-space:nowrap}
+.ins-privacy.is-public{border-color:#f4f4f4;color:#f4f4f4}
+.ins-privacy.is-private{color:#aaa}
+.ins-notes{font-size:12px;color:var(--mut);margin:9px 0 0}
+.ins-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:14px 0}
+.ins-metrics>div{background:#0b0b0b;border:1px solid #292929;padding:9px;border-radius:6px;min-width:0}
+.ins-metrics b{display:block;font-size:18px;font-weight:650}
+.ins-metrics small{display:block;color:var(--mut);font-size:10px;margin-top:2px}
+.ins-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.ins-actions button{padding:7px 10px;font-size:11px}
+.ins-actions .ins-edit{background:#f4f4f4;color:#050505;border-color:#f4f4f4;font-weight:700}
+.ins-actions .ins-delete{color:#aaa}
+.ins-empty{text-align:center;padding:36px 15px!important;background:#050505!important;border:1px solid #444!important;box-shadow:none!important}
+.ins-empty b{font-size:15px}
+@media(max-width:700px){
+ body{padding-left:16px!important;padding-right:16px!important;padding-top:16px!important}
+ .ins-title h1{font-size:24px!important}
+ .ins-summary>div{padding:10px}.ins-summary b{font-size:21px}
+ .ins-toolbar{align-items:stretch;flex-direction:column}
+ .ins-filters button{flex:1}
+}
+@media(max-width:600px){.ins-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+
+
+<style id="ruckly-card-polish">
+#idbox{display:flex;flex-direction:column;gap:12px}
+#idbox>.card{border:1px solid var(--bd);border-radius:14px;box-shadow:none}
+#idbox .rc{margin:0 auto 4px;max-width:430px;border-radius:14px;overflow:hidden;box-shadow:0 18px 48px rgba(0,0,0,.32)}
+#idbox .rc-flag{display:block;font-style:normal;font-size:21px;line-height:1.1;margin-top:5px;min-height:23px}
+#idbox #id_nat_search,#idbox #id_nat{width:100%;background:#080808;color:#f5f5f5;border:1px solid #555;border-radius:9px;padding:10px 12px;font:inherit;font-size:13px}
+#idbox #id_nat{margin-top:7px;padding:6px;height:160px}
+#idbox #id_nat option{padding:5px}
+#idbox .lab{font-size:11px;letter-spacing:.04em}
+#idbox input,#idbox textarea,#idbox select{box-sizing:border-box}
+#idbox [data-idact="save"],#idbox [data-idact="edit"]{font-weight:700}
+@media(max-width:600px){#idbox .rc{width:100%}#idbox .row{flex-wrap:wrap}}
+</style>
+
+
+<style id="ruckly-card-ranking">
+.idrank-meta{font-size:11px;color:var(--mut);margin-bottom:8px}
+.idrank-you{display:flex;align-items:center;gap:10px;border:1px solid #777;background:#080808;border-radius:9px;padding:10px;margin:8px 0 12px}
+.idrank-you>b{font-size:22px}.idrank-you span{font-size:12px;flex:1}.idrank-you strong{font-size:12px}
+.idrank-list{display:flex;flex-direction:column;gap:5px}
+.idrank-row{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd);padding:8px 2px}
+.idrank-num{width:25px;height:25px;border:1px solid #555;border-radius:50%;display:grid;place-items:center;font-size:11px}
+.idrank-row span{flex:1;min-width:0}.idrank-row span b{display:block;font-size:12px}.idrank-row small{display:block;color:var(--mut);font-size:10px}
+.idrank-row strong{font-size:12px}
+.idrank-formula{margin-top:10px;font-size:11px;color:var(--mut)}.idrank-formula summary{cursor:pointer}.idrank-formula p{line-height:1.5}
+</style>
+
+
+<style id="ruckly-selection-summary">
+#idbox .id-selections{padding:15px}
+#idbox .id-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+#idbox .id-selection-team{border-top:1px solid var(--bd);padding:11px 0 8px}
+#idbox .id-selection-main{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#idbox .id-selection-main b{font-size:14px}
+#idbox .id-selection-main strong{font-size:13px;font-weight:700;white-space:nowrap}
+#idbox .id-selection-meta{font-size:10px;margin-top:3px}
+#idbox .id-selection-entry{display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-top:5px;font-size:10px;color:var(--mut)}
+#idbox .id-selection-entry span{margin-right:auto}
+#prof .tabs button[data-pt="identity"]{font-weight:700}
+</style>
+
 </body>
 </html>
 
