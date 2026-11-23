@@ -404,6 +404,73 @@ function heatPanelHtml(){const it=HEAT.items,seas=[...new Set(it.map(x=>seasonOf
 document.addEventListener("click",e=>{const b=e.target.closest("[data-hf]");if(b){HEAT.f=b.dataset.hf;const p=document.getElementById("heatp");if(p)p.outerHTML=heatPanelHtml();return}
  const d=e.target.closest("[data-rkd]");if(d){const c=d.closest(".rk-car"),sl=c.querySelector(".rk-sl");sl.scrollTo({left:sl.clientWidth*(+d.dataset.rkd),behavior:"smooth"})}});
 document.addEventListener("scroll",e=>{const t=e.target;if(t&&t.classList&&t.classList.contains("rk-sl")){const i=Math.round(t.scrollLeft/t.clientWidth);t.parentNode.querySelectorAll(".rk-dots i").forEach((x,j)=>x.classList.toggle("on",j===i))}},true);
+
+/* ===== PLAYER IDENTITY (phase 1a) ===== */
+const IDV={uid:null,own:false,edit:false,d:null,sel:[],aw:[],banner:""};
+const ID_VIS=[["public","Public"],["followers","Followers"],["private","Only me"]];
+const ID_LEVELS=[["national","National"],["regional","Regional"],["age_group","Age group"],["other","Other"]];
+const idg=i=>document.getElementById(i);
+async function idMount(uid,own){const box=idg("idbox");if(!box)return;
+ if(!sb||!user){box.innerHTML='<div class="card mut">Log in to see player identities.</div>';return}
+ Object.assign(IDV,{uid,own,edit:false,banner:""});box.innerHTML='<div class="card mut">Loading…</div>';
+ try{const[r,s1,a1]=await Promise.all([sb.rpc("get_player_identity",{p_user:uid}),sb.from("player_selections").select("*").eq("user_id",uid).order("year",{ascending:false}),sb.from("player_awards").select("*").eq("user_id",uid).order("award_year",{ascending:false})]);
+  if(r.error||s1.error||a1.error){box.innerHTML='<div class="card"><b>Player Identity isn’t available yet</b><div class="mut" style="margin-top:4px">The database setup for this feature hasn’t been applied.</div></div>';return}
+  IDV.d=r.data||null;IDV.sel=s1.data||[];IDV.aw=a1.data||[];
+  const bp=IDV.d&&IDV.d.banner_path;if(bp){const u=await sb.storage.from("identity").createSignedUrl(bp,3600);if(u.data)IDV.banner=u.data.signedUrl}
+  idRender()}catch(e){box.innerHTML='<div class="card mut">Couldn’t load the identity.</div>'}}
+function idVsel(k,cur){return`<select id="idv_${k}" style="width:auto;min-height:0;padding:4px 6px;font-size:11px" aria-label="Visibility">${ID_VIS.map(v=>`<option value="${v[0]}"${(cur||"public")===v[0]?" selected":""}>${v[1]}</option>`).join("")}</select>`}
+function idRender(){const box=idg("idbox");if(!box)return;const d=IDV.d||{},own=IDV.own;
+ if(IDV.edit&&own)return idEdit(box,d);
+ const row=(l,v)=>v===undefined||v===null||v===""?"":`<div class="srow"><span class="mut">${l}</span><b>${esc(String(v))}</b></div>`;
+ const pill=v=>`<span class="pill">${v==="verified"?"Verified ✓":"Declared"}</span>`;
+ const selForm=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><select id="sl_level">${ID_LEVELS.map(l=>`<option value="${l[0]}">${l[1]}</option>`).join("")}</select><input id="sl_team" placeholder="Team (e.g. France U20)" maxlength="80"><input id="sl_caps" type="number" min="0" max="500" placeholder="Caps"><input id="sl_year" type="number" min="1950" max="2100" placeholder="Year"><button class="fb on" data-idact="addsel" style="grid-column:1/3">Add selection</button></div>`;
+ const awForm=`<div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:10px"><input id="aw_title" placeholder="Award title" maxlength="100"><input id="aw_year" type="number" min="1950" max="2100" placeholder="Year"><input id="aw_note" placeholder="Note (optional)" maxlength="300" style="grid-column:1/3"><button class="fb on" data-idact="addaw" style="grid-column:1/3">Grant award</button></div>`;
+ box.innerHTML=(IDV.banner?`<img src="${IDV.banner}" alt="" style="width:100%;aspect-ratio:3/1;object-fit:cover;display:block;margin-bottom:10px">`:"")
+ +`<div class="card"><div class="row" style="margin-bottom:6px"><b>Player Identity</b>${own?'<button class="fb on" data-idact="edit">Edit identity</button>':""}</div>`
+ +(IDV.d?row("Nationalities",(d.nationalities||[]).join(", "))+row("Height",d.height_cm?d.height_cm+" cm":"")+row("Weight",d.weight_kg?d.weight_kg+" kg":"")+row("Main position",d.pos_main)+row("Secondary position",d.pos_secondary)+row("Club",d.club_name)+row("Jersey",d.jersey_number!=null?"#"+d.jersey_number:"")+row("Preferred hand",{right:"Right",left:"Left",both:"Both"}[d.preferred_hand])+(d.about?`<div style="margin-top:8px">${esc(d.about)}</div>`:""):`<div class="mut">${own?"No identity yet. Tap “Edit identity” to create yours.":"This player hasn’t shared an identity."}</div>`)
+ +`<div class="mut" style="font-size:11px;margin-top:8px">Stats on RUCKLY are declared by the player unless marked Verified.</div></div>`
+ +`<div class="card" style="margin-top:12px"><b>Selections</b>${IDV.sel.map(x=>`<div class="srow"><b>${esc(x.team_name)}</b><span class="mut">${esc(x.level)}${x.year?" · "+x.year:""}${x.caps!=null?" · "+x.caps+" caps":""}</span>${pill(x.verification)}${own?`<button class="ib" data-idact="delsel" data-id="${x.id}" aria-label="Delete selection">✕</button>`:""}</div>`).join("")||'<div class="mut" style="padding:6px 0">None yet.</div>'}${own?selForm:""}</div>`
+ +`<div class="card" style="margin-top:12px"><b>Awards</b>${IDV.aw.map(a=>`<div class="srow"><b>${esc(a.title)}</b><span class="mut">${a.award_year||""}</span><span class="pill">RUCKLY</span>${ADM?`<button class="ib" data-idact="delaw" data-id="${a.id}" aria-label="Delete award">✕</button>`:""}</div>`).join("")||'<div class="mut" style="padding:6px 0">No awards yet.</div>'}${ADM&&!own?awForm:""}</div>`;
+ box.onclick=idClick}
+function idEdit(box,d){const v=d.visibility||{},pos=(typeof POS!=="undefined"?POS:[]),pm=d.pos_main||(S.me&&S.me.pos)||"";
+ const opt=(arr,cur,blank)=>(blank?`<option value="">${blank}</option>`:"")+arr.map(x=>`<option${x===cur?" selected":""}>${x}</option>`).join("");
+ const lab=(t,k)=>`<div class="row" style="margin:10px 0 4px;justify-content:space-between"><label class="lab" style="margin:0">${t}</label>${idVsel(k,v[k])}</div>`;
+ box.innerHTML=`<div class="card"><b>Edit identity</b>
+ ${lab("Nationalities (up to 3, comma separated)","nationalities")}<input id="id_nat" value="${esc((d.nationalities||[]).join(", "))}" maxlength="80">
+ ${lab("Height (cm)","height")}<input id="id_h" type="number" min="100" max="250" value="${d.height_cm||""}">
+ ${lab("Weight (kg)","weight")}<input id="id_w" type="number" min="30" max="250" value="${d.weight_kg||""}">
+ ${lab("Positions","pos")}<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><select id="id_p1">${opt(pos,pm,"Main position…")}</select><select id="id_p2">${opt(pos,d.pos_secondary||"","Secondary…")}</select></div>
+ ${lab("Club","club")}<input id="id_club" value="${esc(d.club_name||"")}" maxlength="80">
+ ${lab("Jersey number","jersey")}<input id="id_jn" type="number" min="0" max="99" value="${d.jersey_number!=null?d.jersey_number:""}">
+ ${lab("Preferred hand","hand")}<select id="id_hand"><option value="">–</option>${[["right","Right"],["left","Left"],["both","Both"]].map(x=>`<option value="${x[0]}"${d.preferred_hand===x[0]?" selected":""}>${x[1]}</option>`).join("")}</select>
+ ${lab("About","about")}<textarea id="id_ab" maxlength="600" rows="4">${esc(d.about||"")}</textarea>
+ ${lab("Banner (JPG, PNG or WebP)","banner")}<input id="id_bn" type="file" accept="image/jpeg,image/png,image/webp">
+ <div class="mut" style="font-size:11px;margin-top:10px">Your date of birth is never shown here. Each field follows the visibility you choose.</div>
+ <div class="row" style="margin-top:12px;gap:8px"><button class="fb on" data-idact="save">Save</button><button class="fb" data-idact="cancel">Cancel</button></div></div>`;box.onclick=idClick}
+async function idResize(file){const bmp=await createImageBitmap(file),W=1200,H=400,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d"),r=Math.max(W/bmp.width,H/bmp.height),w=bmp.width*r,h=bmp.height*r;x.drawImage(bmp,(W-w)/2,(H-h)/2,w,h);return new Promise(res=>c.toBlob(res,"image/jpeg",.85))}
+async function idSave(){const num=(i,a,b)=>{const t=idg(i).value;if(t==="")return null;const n=+t;return n>=a&&n<=b?Math.round(n):NaN};
+ const h=num("id_h",100,250),w=num("id_w",30,250),jn=num("id_jn",0,99);
+ if([h,w,jn].some(Number.isNaN))return toast("Check height, weight and jersey number");
+ const nat=idg("id_nat").value.split(",").map(x=>x.trim()).filter(Boolean).slice(0,3);
+ const vis={};["nationalities","height","weight","pos","club","jersey","hand","about","banner"].forEach(k=>vis[k]=idg("idv_"+k).value);
+ const old=(IDV.d&&IDV.d.banner_path)||null;let bp=old;const f=idg("id_bn").files[0];
+ try{if(f){if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>10485760)return toast("Banner must be a JPG, PNG or WebP under 10 MB");
+   const blob=await idResize(f);bp=user.id+"/banner-"+Date.now()+".jpg";const up=await sb.storage.from("identity").upload(bp,blob,{contentType:"image/jpeg"});if(up.error)return toast("Couldn’t upload the banner: "+up.error.message)}
+  const row={user_id:user.id,nationalities:nat,height_cm:h,weight_kg:w,pos_main:idg("id_p1").value||null,pos_secondary:idg("id_p2").value||null,club_name:idg("id_club").value.trim()||null,jersey_number:jn,preferred_hand:idg("id_hand").value||null,about:idg("id_ab").value.trim()||null,banner_path:bp,visibility:vis};
+  const r=await sb.from("player_identity").upsert(row,{onConflict:"user_id"});if(r.error)return toast("Couldn’t save: "+r.error.message);
+  if(f&&old&&old!==bp)try{await sb.storage.from("identity").remove([old])}catch(e){}
+  toast("Identity saved ✓");idMount(user.id,true)}catch(e){toast("Couldn’t save the identity")}}
+async function idClick(e){const b=e.target.closest("[data-idact]");if(!b)return;const a=b.dataset.idact,id=b.dataset.id;
+ if(a==="edit"){IDV.edit=true;return idRender()}if(a==="cancel"){IDV.edit=false;return idRender()}if(a==="save")return idSave();
+ let r;
+ if(a==="addsel"){const t=idg("sl_team").value.trim();if(!t)return toast("Enter a team name");const c=idg("sl_caps").value,y=idg("sl_year").value;
+  r=await sb.from("player_selections").insert({user_id:user.id,level:idg("sl_level").value,team_name:t,caps:c===""?null:+c,year:y===""?null:+y})}
+ else if(a==="delsel")r=await sb.from("player_selections").delete().eq("id",id).eq("user_id",user.id);
+ else if(a==="addaw"){const t=idg("aw_title").value.trim();if(!t)return toast("Enter an award title");const y=idg("aw_year").value,n=idg("aw_note").value.trim();
+  r=await sb.from("player_awards").insert({user_id:IDV.uid,title:t,award_year:y===""?null:+y,note:n||null})}
+ else if(a==="delaw")r=await sb.from("player_awards").delete().eq("id",id);
+ else return;
+ if(r&&r.error)return toast("Couldn’t save: "+r.error.message);idMount(IDV.uid,IDV.own)}
 </script>
 
 <div id="splash" aria-label="Ruckly"><div class="sp-bg"></div>
@@ -807,8 +874,8 @@ function fake(h,t){const c=hc(h),r=(i,a,b)=>a+(c*(i+3)+i*17)%(b-a+1),m=t==="matc
 const cell=(t,v,x)=>`<div><span class="mut">${t}</span><b>${v}</b><span class="mut">${x||"&nbsp;"}</span></div>`;
 const stH=a=>`<div class="zones" style="grid-template-columns:repeat(3,1fr)">${cell("Sessions",a.n)}${cell("Points",a.pts)}${cell("Goal kicks",pc(a.km,a.k),a.km+"/"+a.k)}</div><div class="zones" style="grid-template-columns:repeat(4,1fr)">${cell("Tackles",pc(a.tk,a.tkn))}${cell("Passes",pc(a.ps,a.psn))}${cell("Tries",a.tr)}${cell("Breaks",a.br)}</div>`;
 const ini2=n=>esc((n||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase());
-function pfH(o){return`<div class="card hl" style="padding:16px"><div style="display:flex;gap:16px;align-items:center"><div class="ring"><div class="ini" style="width:76px;height:76px;font-size:22px;overflow:hidden">${o.photo?`<img src="${o.photo}" alt="" style="width:100%;height:100%;object-fit:cover">`:ini2(o.name)}</div></div><div class="zones" style="grid-template-columns:repeat(3,1fr);flex:1;margin:0"><div><b>${fmtN(o.posts)}</b><span class="mut">Posts</span></div>${flCell(o,"followers")}${flCell(o,"following")}</div></div><div style="margin-top:10px"><b>${esc(o.name)}${vb(o.uid)}</b>${o.priv?" 🔒":""} <span class="pill">${esc(o.tag)}</span>${o.rel||""}<div class="mut">@${esc(o.handle)}</div><div style="margin-top:4px">${cap(o.bio)}</div>${o.mut||""}</div><div style="margin-top:10px">${o.btn}</div></div>${o.extra||""}<div class="tabs${o.locked||o.role==="fan"?" hide":""}"><button data-pt="hl" class="${pt==="hl"?"on":""}">Posts</button>${o.role==="coach"?"":`<button data-pt="stats" class="${pt==="stats"?"on":""}">Stats</button>`}${o.role==="fan"?"":`<button data-pt="career" class="${pt==="career"?"on":""}">${o.role==="coach"?"Coaching":"Career"}</button>`}</div>`
- +(o.locked?'<div class="card" style="text-align:center;padding:24px">🔒<br><b>This account is private</b><div class="mut">Follow this player to see their stats and highlights.</div></div>':pt==="career"&&o.role!=="fan"?(o.career||''):pt==="stats"&&o.role!=="coach"?`<div class="chips">${["all","match","training"].map(x=>`<button class="chip ${pf===x?"on":""}" data-pf="${x}">${x==="all"?"All":x==="match"?"Matches":"Training"}</button>`).join("")}</div><div class="card">${stH(o.st[pf])}</div>${typeof heatPanelHtml==="function"?heatPanelHtml():""}${o.list||""}`
+function pfH(o){return`<div class="card hl" style="padding:16px"><div style="display:flex;gap:16px;align-items:center"><div class="ring"><div class="ini" style="width:76px;height:76px;font-size:22px;overflow:hidden">${o.photo?`<img src="${o.photo}" alt="" style="width:100%;height:100%;object-fit:cover">`:ini2(o.name)}</div></div><div class="zones" style="grid-template-columns:repeat(3,1fr);flex:1;margin:0"><div><b>${fmtN(o.posts)}</b><span class="mut">Posts</span></div>${flCell(o,"followers")}${flCell(o,"following")}</div></div><div style="margin-top:10px"><b>${esc(o.name)}${vb(o.uid)}</b>${o.priv?" 🔒":""} <span class="pill">${esc(o.tag)}</span>${o.rel||""}<div class="mut">@${esc(o.handle)}</div><div style="margin-top:4px">${cap(o.bio)}</div>${o.mut||""}</div><div style="margin-top:10px">${o.btn}</div></div>${o.extra||""}<div class="tabs${o.locked||o.role==="fan"?" hide":""}"><button data-pt="hl" class="${pt==="hl"?"on":""}">Posts</button>${o.role==="player"?`<button data-pt="identity" class="${pt==="identity"?"on":""}">Identity</button>`:""}${o.role==="coach"?"":`<button data-pt="stats" class="${pt==="stats"?"on":""}">Stats</button>`}${o.role==="fan"?"":`<button data-pt="career" class="${pt==="career"?"on":""}">${o.role==="coach"?"Coaching":"Career"}</button>`}</div>`
+ +(o.locked?'<div class="card" style="text-align:center;padding:24px">🔒<br><b>This account is private</b><div class="mut">Follow this player to see their stats and highlights.</div></div>':pt==="identity"&&o.role==="player"?'<div id="idbox"></div>':pt==="career"&&o.role!=="fan"?(o.career||''):pt==="stats"&&o.role!=="coach"?`<div class="chips">${["all","match","training"].map(x=>`<button class="chip ${pf===x?"on":""}" data-pf="${x}">${x==="all"?"All":x==="match"?"Matches":"Training"}</button>`).join("")}</div><div class="card">${stH(o.st[pf])}</div>${typeof heatPanelHtml==="function"?heatPanelHtml():""}${o.list||""}`
  :`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">${o.tiles.join("")||'<div class="card mut" style="grid-column:1/4">No posts yet.</div>'}</div>`)}
 function openProf(h){if(nv==="prof"){if(h!=="me"&&pv&&h!==pv)PS.push(pv)}else{pback=nv;PS=[]}if(h==="me"){nv="acct"}else{pv=h;nv="prof"}pt="hl";pf="all";show();window.scrollTo(0,0)}
 const RL={player:"Player",coach:"Coach",fan:"Rugby fan"};
@@ -825,6 +892,7 @@ async function acct(){
  const ed=pe?`<div class="card hl"><label class="ph"><div class="av2">${m.photo?'<img src="'+m.photo+'" alt="">':""}</div>Change photo<input type="file" id="ap" accept="image/*" hidden></label><label class="lab" for="an">Name</label><input id="an" value="${esc(m.name)}" maxlength="40"><label class="lab" for="ah">Username</label><input id="ah" value="${esc(m.handle)}" maxlength="20"><label class="lab" for="ar">Role</label><select id="ar" style="${inp}">${[["player","Player"],["coach","Coach"],["fan","Rugby fan"]].map(r=>`<option value="${r[0]}"${m.role===r[0]?" selected":""}>${r[1]}</option>`).join("")}</select><label class="lab" for="ab">Bio</label><textarea id="ab" maxlength="150" placeholder="Position, club, goals… #rugby">${esc(m.bio)}</textarea><label class="lab">Account privacy</label><div class="segs" style="grid-template-columns:1fr 1fr;margin:0"><button data-ap="0" class="${m.priv?"":"on"}">🌐 Public</button><button data-ap="1" class="${m.priv?"on":""}">🔒 Private</button></div><div class="mut" style="font-size:12px;margin-top:4px">Private: only approved followers see your stats and highlights.</div>${user?`<div class="mut" style="margin-top:8px">${esc(user.email||"")}</div><button class="link" data-lo="1">Log out</button>`:""}</div>`:"";
  HEAT.items=S.sessions.map(x=>{let kk=[];try{kk=sj(x).kk||[]}catch(e){}return{type:x.type,date:x.date,kk}});
  $("acct").innerHTML=stBtn()+pfH({uid:user&&user.id,name:m.name||"Your name",handle:m.handle||"username",tag:({player:"Player",coach:"Coach",fan:"Rugby fan"}[m.role]||"Player")+(m.pos?" · "+m.pos:""),bio:m.bio||"",photo:avU({me:1}),posts:cl2.length,fr:fc?fc.fr:"–",fg:fc?fc.fg:(S.follow||[]).length,st,list,extra:ed,uid:user?user.id:null,priv:m.priv,role:m.role||"player",career:pt==="career"?cStats(S.sessions.map(sj),m.role==="coach")+(crs?cHtml(crs,m.role||"player",true):cSetup):"",btn:`<button class="fb on" data-pe="1">${pe?"Done":"Edit profile"}</button>`,tiles:tl});
+ if(pt==="identity")idMount(user&&user.id,true);
  setAv();if(!pe)return;
  [["an","name"],["ah","handle"],["ab","bio"]].forEach(([i,k])=>{$(i).oninput=()=>{S.me[k]=k==="handle"?$(i).value.replace(/[^\w.]/g,""):$(i).value;save();setAv();push()}});
  $("ar").onchange=e=>{S.me.role=e.target.value;save();applyRole();push()};
@@ -1105,6 +1173,7 @@ async function prof(){if(!sb||!user){nv="feed";return show()}
  $("prof").innerHTML='<button class="link" data-back="1">← Back</button>'+pfH({uid:R.id,photo:avU(R),name:R.name,handle:R.handle,tag:(RL[R.role]||"Player")+(R.pos?" · "+R.pos:""),bio:R.bio||"",posts:locked?"–":rows.length,fr:showC?c.followers:"–",fg:showC?c.following:"–",st,priv:!!R.private,locked,uid:R.id,role:R.role||"player",career:pt==="career"?cStats(ses,R.role==="coach")+(crs?cHtml(crs,R.role||"player",false):cSetup):"",flk:hidC?"hidden":(locked?"private":""),rel:rl.fm?'<span class="pill" style="margin-left:4px">Follows you</span>':"",mut:flMutLine(rl.mu,R.id),list:locked?"":list,
   tiles:rows.map(pvTile),
   btn:`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="fb ${s?"on":""}" data-fo="${R.id}" data-pv="${R.private?1:0}">${s==="accepted"?"✓ Following":s==="pending"?"Requested":R.private?"＋ Request":rl.fm?"＋ Follow back":"＋ Follow"}</button><button class="fb" data-bl="${R.id}">Block</button><button class="fb" data-rp="u:${R.id}">Report</button></div>`})}
+if(pt==="identity")idMount(R.id,false);
 $("prof").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!user)return;const d=b.dataset;
  if(d.fo)followToggle(d.fo,d.pv==="1");
  else if(d.bl)ask("Block this player?","They won’t see your posts or be able to follow you, and you won’t see theirs.","Block",async()=>{const{error}=await sb.rpc("block_user",{target:d.bl});if(error)return toast("Couldn’t block: "+error.message);delete FD.fol[d.bl];toast("Player blocked");nv="feed";show()});
