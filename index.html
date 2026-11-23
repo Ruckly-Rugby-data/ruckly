@@ -382,6 +382,10 @@ svg[aria-label="Kick map"] text{pointer-events:none}
 #rka-posts-pitch{aspect-ratio:300/285;max-height:65vh;object-fit:contain;background:#2d7549}
 @media(max-width:560px){.ruckly-session-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
+<style id="ruckly-country-picker-ranking">
+.id-country-picker{position:relative}.id-country-top{border:1px solid var(--bd);background:#0b0b0b;padding:8px;display:flex;flex-direction:column;gap:8px}.id-country-selected{display:flex;gap:6px;flex-wrap:wrap;min-height:28px;align-items:center}.id-country-chip{border:1px solid var(--bd);background:#171717;color:var(--tx);padding:6px 9px;font:inherit;font-size:12px}.id-country-chip span{margin-left:5px;color:var(--mut)}.id-country-top input{border:0!important;background:transparent!important;padding:7px 4px!important;outline:none}.id-country-results{display:none;max-height:220px;overflow:auto;border:1px solid var(--bd);border-top:0;background:#090909}.id-country-results.open{display:block}.id-country-option{width:100%;display:flex;align-items:center;gap:10px;text-align:left;padding:10px 12px;border:0;border-bottom:1px solid #222;background:transparent;color:var(--tx);font:inherit}.id-country-option[hidden]{display:none}.id-country-option small{margin-left:auto;color:var(--mut)}.id-country-option.selected{background:#202020}.idrank-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd)}.idrank-row>span{flex:1;min-width:0}.idrank-row small{display:block;color:var(--mut);font-size:11px;margin-top:3px}.idrank-row strong{font-variant-numeric:tabular-nums}.idrank-num{width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--bd)}#rankings .chips{scrollbar-width:thin}#rankings .chip{white-space:nowrap}
+@media(max-width:520px){.id-country-results{max-height:190px}.id-country-option{padding:12px 10px}}
+</style>
 </head>
 <body>
 <script>
@@ -425,12 +429,12 @@ const ID_ABBR={Prop:"PR",Hooker:"HK",Lock:"LK",Flanker:"FL","No. 8":"N8","Scrum-
 
 const ID_COUNTRY_CODES="AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS XK YE YT ZA ZM ZW".split(" ");
 const ID_COUNTRY_NAMES=new Intl.DisplayNames(["en"],{type:"region"});
-const idCountryName=c=>{try{return ID_COUNTRY_NAMES.of(c)||c}catch(e){return c}};
-const idCountryCode=v=>{const s=String(v||"").trim();if(/^[A-Z]{2}$/.test(s))return s;const q=s.toLocaleLowerCase();const hit=ID_COUNTRY_CODES.find(c=>idCountryName(c).toLocaleLowerCase()===q);return hit||""};
-
-const idFlag=c=>{if(c==="XK")return"🇽🇰";if(!/^[A-Z]{2}$/.test(c||""))return"";return String.fromCodePoint(...c.split("").map(x=>127397+x.charCodeAt(0)))};
-const idCountryOptions=()=>ID_COUNTRY_CODES.map(c=>({code:c,name:idCountryName(c)})).sort((a,b)=>a.name.localeCompare(b.name));
-const idSelectedCountries=()=>{const s=idg("id_nat");return s?[...s.selectedOptions].map(o=>o.value):[]};
+const ID_HOME_NATIONS=[{code:"GB-ENG",name:"England",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},{code:"GB-SCT",name:"Scotland",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"},{code:"GB-WLS",name:"Wales",flag:"🏴󠁧󠁢󠁷󠁬󠁳󠁿"},{code:"GB-NIR",name:"Northern Ireland",flag:"🇬🇧"}];
+const idCountryName=c=>{const h=ID_HOME_NATIONS.find(x=>x.code===c);if(h)return h.name;try{return ID_COUNTRY_NAMES.of(c)||c}catch(e){return c}};
+const idCountryCode=v=>{const s=String(v||"").trim();if(ID_HOME_NATIONS.some(x=>x.code===s))return s;if(/^[A-Z]{2}$/.test(s))return s;const q=s.toLocaleLowerCase();const h=ID_HOME_NATIONS.find(x=>x.name.toLowerCase()===q);if(h)return h.code;const hit=ID_COUNTRY_CODES.find(c=>idCountryName(c).toLocaleLowerCase()===q);return hit||""};
+const idFlag=c=>{const h=ID_HOME_NATIONS.find(x=>x.code===c);if(h)return h.flag;if(c==="XK")return"🇽🇰";if(!/^[A-Z]{2}$/.test(c||""))return"";return String.fromCodePoint(...c.split("").map(x=>127397+x.charCodeAt(0)))};
+const idCountryOptions=()=>ID_COUNTRY_CODES.filter(c=>c!=="GB").map(c=>({code:c,name:idCountryName(c),flag:idFlag(c)})).concat(ID_HOME_NATIONS).sort((a,b)=>a.name.localeCompare(b.name));
+const idSelectedCountries=()=>[...(idg("id_nat_selected")?.querySelectorAll("[data-nat-code]")||[])].map(x=>x.dataset.natCode);
 
 const ID_ED={black:{n:"Black",c:["#1b1b1b","#090909","#0a1448"],tx:"#ffffff",mu:"#aab2ff",ac:"#172bff"},
 white:{n:"White",c:["#ffffff","#eef0f6","#cdd5ee"],tx:"#0a0a0a",mu:"#4b5280",ac:"#172bff"},
@@ -558,7 +562,7 @@ function idEdit(box,d){const v=d.visibility||{},pos=(typeof POS!=="undefined"?PO
  const lab=(t,k)=>`<div class="row" style="margin:10px 0 4px;justify-content:space-between"><label class="lab" style="margin:0">${t}</label>${idVsel(k,v[k])}</div>`;
  const hf=(id,cur)=>`<select id="${id}"><option value="">–</option>${[["right","Right"],["left","Left"],["both","Both"]].map(x=>`<option value="${x[0]}"${cur===x[0]?" selected":""}>${x[1]}</option>`).join("")}</select>`;
  box.innerHTML=`${idCard()}<div class="card" style="margin-bottom:12px"><b>Edition</b><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px">${Object.keys(ID_ED).map(k=>`<button class="${idEd()===k?"on":""}" data-idact="ped" data-ed="${k}"><i class="rc-sw" style="background:linear-gradient(135deg,${ID_ED[k].c[0]},${ID_ED[k].c[2]})"></i>${ID_ED[k].n}</button>`).join("")}</div></div><div class="card"><b>Edit my card</b>
- ${lab("Nationality (up to 3 countries)","nationalities")}<input id="id_nat_search" type="search" placeholder="Search a country…" autocomplete="off"><select id="id_nat" multiple size="6" aria-label="Choose up to three nationalities">${idCountryOptions().map(c=>`<option value="${c.code}"${(d.nationalities||[]).some(n=>idCountryCode(n)===c.code)?" selected":""}>${idFlag(c.code)} ${esc(c.name)}</option>`).join("")}</select><div class="mut" id="id_nat_count" style="font-size:11px;margin-top:4px">Choose up to 3 countries. The first one appears on your card.</div>
+ ${lab("Nationality (up to 3 countries)","nationalities")}<div class="id-country-picker"><div class="id-country-top"><div id="id_nat_selected" class="id-country-selected">${(d.nationalities||[]).slice(0,3).map(n=>{const c=idCountryCode(n),o=idCountryOptions().find(x=>x.code===c);return c?`<button type="button" class="id-country-chip" data-nat-code="${c}">${o?.flag||idFlag(c)} ${esc(o?.name||n)} <span>×</span></button>`:""}).join("")||'<span class="mut">Choose up to 3 countries</span>'}</div><input id="id_nat_search" type="search" placeholder="Search a country…" autocomplete="off" aria-label="Search countries"></div><div id="id_nat_results" class="id-country-results">${idCountryOptions().map(c=>`<button type="button" class="id-country-option" data-nat-option="${c.code}">${c.flag} <span>${esc(c.name)}</span><small>${(d.nationalities||[]).some(n=>idCountryCode(n)===c.code)?"✓":"+"}</small></button>`).join("")}</div><div class="mut" id="id_nat_count" style="font-size:11px;margin-top:6px">Choose up to 3 countries. The first one appears on your card.</div></div>
  ${lab("Height (cm)","height")}<input id="id_h" type="number" min="100" max="250" value="${d.height_cm||""}">
  ${lab("Weight (kg)","weight")}<input id="id_w" type="number" min="30" max="250" value="${d.weight_kg||""}">
  ${lab("Positions","pos")}<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><select id="id_p1">${opt(pos,pm,"Main position…")}</select><select id="id_p2">${opt(pos,d.pos_secondary||"","Secondary…")}</select></div>
@@ -568,13 +572,18 @@ function idEdit(box,d){const v=d.visibility||{},pos=(typeof POS!=="undefined"?PO
  ${lab("About","about")}<textarea id="id_ab" maxlength="600" rows="4">${esc(d.about||"")}</textarea>
  ${lab("Card photo (JPG, PNG or WebP)","banner")}<input id="id_bn" type="file" accept="image/jpeg,image/png,image/webp">
  <div class="mut" style="font-size:11px;margin-top:10px">Your card photo is cropped automatically to fit the card (the top of the picture is kept, so keep your face high). Without one, the card uses your profile photo. Your date of birth is never shown. Each field follows the visibility you choose.</div>
- <div class="row" style="margin-top:12px;gap:8px"><button class="fb on" data-idact="save">Save</button><button class="fb" data-idact="cancel">Cancel</button></div></div>`;box.onclick=idClick;
- const ns=idg("id_nat_search"),nsel=idg("id_nat"),ncount=idg("id_nat_count");
- if(ns&&nsel){ns.oninput=()=>{const q=ns.value.trim().toLowerCase();[...nsel.options].forEach(o=>{o.hidden=!!q&&!o.textContent.toLowerCase().includes(q)})};
- nsel.onchange=()=>{const chosen=[...nsel.selectedOptions];if(chosen.length>3){chosen[chosen.length-1].selected=false;toast("Choose up to 3 nationalities")}if(ncount)ncount.textContent=`${nsel.selectedOptions.length}/3 selected. The first one appears on your card.`}}
+ <div class="row" style="margin-top:12px;gap:8px"><button class="fb on" data-idact="save">Save changes</button><button class="fb" data-idact="publish">Update my card</button><button class="fb" data-idact="cancel">Cancel</button></div></div>`;box.onclick=idClick;
+ const ns=idg("id_nat_search"),nr=idg("id_nat_results"),ncount=idg("id_nat_count"),nsbox=idg("id_nat_selected");
+ const selected=(d.nationalities||[]).map(idCountryCode).filter(Boolean).slice(0,3);
+ const paintCountries=()=>{if(nsbox)nsbox.innerHTML=selected.map(code=>{const c=idCountryOptions().find(x=>x.code===code);return `<button type="button" class="id-country-chip" data-nat-code="${code}">${c?.flag||idFlag(code)} ${esc(c?.name||code)} <span>×</span></button>`}).join("")||'<span class="mut">Choose up to 3 countries</span>';if(ncount)ncount.textContent=`${selected.length}/3 selected. The first one appears on your card.`;if(nr)nr.querySelectorAll('[data-nat-option]').forEach(b=>{const yes=selected.includes(b.dataset.natOption);b.classList.toggle('selected',yes);b.querySelector('small').textContent=yes?'✓':'+'})};
+ const filterCountries=()=>{const q=(ns?.value||'').trim().toLocaleLowerCase();if(nr)nr.querySelectorAll('[data-nat-option]').forEach(b=>{b.hidden=!!q&&!b.textContent.toLocaleLowerCase().includes(q)})};
+ if(ns){ns.oninput=filterCountries;ns.onfocus=()=>nr?.classList.add('open')};
+ if(nr)nr.onclick=e=>{const b=e.target.closest('[data-nat-option]');if(!b)return;const code=b.dataset.natOption,i=selected.indexOf(code);if(i>=0)selected.splice(i,1);else if(selected.length<3)selected.push(code);else{toast('Choose up to 3 countries');return}paintCountries();filterCountries()};
+ if(nsbox)nsbox.onclick=e=>{const b=e.target.closest('[data-nat-code]');if(!b)return;const i=selected.indexOf(b.dataset.natCode);if(i>=0)selected.splice(i,1);paintCountries()};
+ paintCountries();filterCountries();
 } 
 async function idResize(file){const bmp=await createImageBitmap(file),W=1000,H=860,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d"),r=Math.max(W/bmp.width,H/bmp.height),w=bmp.width*r,h=bmp.height*r;x.drawImage(bmp,(W-w)/2,-(h-H)*.18,w,h);return new Promise(res=>c.toBlob(res,"image/jpeg",.85))}
-async function idSave(){const num=(i,a,b)=>{const t=idg(i).value;if(t==="")return null;const n=+t;return n>=a&&n<=b?Math.round(n):NaN};
+async function idSave(publish=false){const num=(i,a,b)=>{const t=idg(i).value;if(t==="")return null;const n=+t;return n>=a&&n<=b?Math.round(n):NaN};
  const h=num("id_h",100,250),w=num("id_w",30,250);
  if([h,w].some(Number.isNaN))return toast("Check height and weight");
  const nat=idSelectedCountries().slice(0,3);
@@ -582,13 +591,14 @@ async function idSave(){const num=(i,a,b)=>{const t=idg(i).value;if(t==="")retur
  const old=(IDV.d&&IDV.d.banner_path)||null;let bp=old;const f=idg("id_bn").files[0];
  try{if(f){if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>10485760)return toast("Banner must be a JPG, PNG or WebP under 10 MB");
    const blob=await idResize(f);bp=user.id+"/banner-"+Date.now()+".jpg";const up=await sb.storage.from("identity").upload(bp,blob,{contentType:"image/jpeg"});if(up.error)return toast("Couldn’t upload the banner: "+up.error.message)}
+  if(publish){["nationalities","height","weight","pos","club","hand","foot","about","banner"].forEach(k=>vis[k]="public")}
   const row={user_id:user.id,nationalities:nat,height_cm:h,weight_kg:w,pos_main:idg("id_p1").value||null,pos_secondary:idg("id_p2").value||null,club_name:idg("id_club").value.trim()||null,preferred_hand:idg("id_hand").value||null,preferred_foot:idg("id_foot").value||null,about:idg("id_ab").value.trim()||null,banner_path:bp,card_edition:idEd(),visibility:vis};
   const r=await sb.from("player_identity").upsert(row,{onConflict:"user_id"});if(r.error)return toast("Couldn’t save: "+r.error.message);
   if(f&&old&&old!==bp)try{await sb.storage.from("identity").remove([old])}catch(e){}
-  toast("Identity saved ✓");idMount(user.id,true)}catch(e){toast("Couldn’t save the identity")}}
+  toast(publish?"Card updated and shared ✓":"Identity saved ✓");idMount(user.id,true)}catch(e){toast("Couldn’t save the identity")}}
 async function idClick(e){const b=e.target.closest("[data-idact]");if(!b)return;const a=b.dataset.idact,id=b.dataset.id;
  if(a==="edit"){IDV.edit=true;IDV.pend=null;return idRender()}if(a==="cancel"){IDV.edit=false;IDV.pend=null;return idRender()}
- if(a==="ped"){IDV.pend=b.dataset.ed;const rc=document.querySelector("#idbox .rc");if(rc)rc.outerHTML=idCard();document.querySelectorAll("#idbox [data-idact=ped]").forEach(x=>x.classList.toggle("on",x.dataset.ed===IDV.pend));return}if(a==="save")return idSave();
+ if(a==="ped"){IDV.pend=b.dataset.ed;const rc=document.querySelector("#idbox .rc");if(rc)rc.outerHTML=idCard();document.querySelectorAll("#idbox [data-idact=ped]").forEach(x=>x.classList.toggle("on",x.dataset.ed===IDV.pend));return}if(a==="save")return idSave();if(a==="publish"){["nationalities","height","weight","pos","club","hand","foot","about","banner"].forEach(k=>{const x=idg("idv_"+k);if(x)x.value="public"});return idSave(true)}
  if(a==="dl")return idExport(false);
  if(a==="sh")return idExport(true);
  if(a==="copy"){try{await navigator.clipboard.writeText(location.origin+location.pathname);toast("Link copied")}catch(e){toast("Couldn’t copy the link")}return}
@@ -687,8 +697,8 @@ document.getElementById("spi").src=LOGO_F</script>
 <section id="search" class="hide"><div class="card hl"><input id="sq" placeholder="Search players, coaches, fans, clubs or @username…" autocomplete="off" style="margin:0"></div><div id="sr"></div></section>
 <section id="hl" class="hide"><div id="drop" class="hide"><input type="file" id="fi" accept="" hidden></div><div id="hlist"></div></section>
 <section id="notif" class="hide"></section><section id="acct" class="hide"></section><section id="prof" class="hide"></section>
-<section id="insights" class="hide"></section>
-<nav class="nav"><button data-n="feed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Feed</button><button data-n="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button><button data-n="rec" class="on"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Record</button><button data-n="insights"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h17M8 15l3-4 3 2 5-7"/></svg>Insights</button><button data-n="notif" id="nnt"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Activity<span class="bdg nbd hide">0</span></button><button data-n="acct"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg>Account</button></nav>
+<section id="insights" class="hide"></section><section id="rankings" class="hide"></section>
+<nav class="nav"><button data-n="feed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Feed</button><button data-n="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button><button data-n="rec" class="on"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Record</button><button data-n="rankings"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/></svg>Rankings</button><button data-n="insights"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h17M8 15l3-4 3 2 5-7"/></svg>Insights</button><button data-n="notif" id="nnt"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Activity<span class="bdg nbd hide">0</span></button><button data-n="acct"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg>Account</button></nav>
 <div id="foot"><button class="save" id="save">Save session</button>
 <div style="text-align:center"><button class="link" id="reset">Reset current session</button></div></div>
 
@@ -889,13 +899,22 @@ function renderInsights(){
  const nb=root.querySelector("[data-ins-new]");if(nb)nb.onclick=()=>{nv="rec";cur=2;show();window.scrollTo(0,0)};
 }
 
+let rankingPosition="All";
+async function renderRankings(){const root=$("rankings");if(!root)return;const positions=(typeof POS!=="undefined"?POS:[]);root.innerHTML=`<div class="card"><div class="mut" style="font-size:10px;letter-spacing:.16em">RUCKLY / PERFORMANCE</div><h2 style="margin:6px 0 12px">Rankings</h2><div class="chips" style="display:flex;gap:7px;overflow:auto;flex-wrap:nowrap;padding-bottom:8px">${["All",...positions].map(p=>`<button class="chip ${rankingPosition===p?"on":""}" data-rank-pos="${esc(p)}">${esc(p)}</button>`).join("")}</div><div id="ranking-results" class="mut">Loading rankings…</div></div>`;
+ root.querySelectorAll('[data-rank-pos]').forEach(b=>b.onclick=()=>{rankingPosition=b.dataset.rankPos;renderRankings()});const out=$("ranking-results");if(!sb||!user){out.textContent="Sign in to view player rankings.";return}
+ try{const [postsR,profilesR,identityR]=await Promise.all([sb.from("posts").select("user_id,session,created_at").eq("kind","session").limit(5000),sb.from("profiles").select("id,name,handle,pos,role").eq("role","player").limit(2000),sb.from("player_identity").select("user_id,pos_main,visibility").limit(2000)]);if(postsR.error)throw postsR.error;if(profilesR.error)throw profilesR.error;if(identityR.error)throw identityR.error;
+ const prof=new Map((profilesR.data||[]).map(x=>[x.id,x])),ident=new Map((identityR.data||[]).map(x=>[x.user_id,x])),grouped=new Map();for(const p of postsR.data||[]){const s=p.session||{},pr=prof.get(p.user_id),di=ident.get(p.user_id),pos=di?.pos_main;if(!pr||!di||!pos||(rankingPosition!=="All"&&pos!==rankingPosition)||s.type!=="match")continue;const v=di.visibility||{};if(v.pos==="private"||(v.pos==="followers"&&p.user_id!==user.id))continue;const a=grouped.get(p.user_id)||{id:p.user_id,name:pr.name||pr.handle||"Player",handle:pr.handle||"",pos,n:0,pts:0,tr:0,k:0,km:0,tk:0,tkn:0,ps:0,psn:0,br:0};a.n++;["pts","tr","k","km","tk","tkn","ps","psn","br"].forEach(k=>a[k]+=Number(s[k])||0);grouped.set(p.user_id,a)}
+ const rows=[...grouped.values()].map(a=>{const kick=a.k?100*a.km/a.k:0,tack=a.tkn?100*a.tk/a.tkn:0,pass=a.psn?100*a.ps/a.psn:0;a.score=a.pts+5*a.tr+2*a.br+.1*kick+.05*tack+.05*pass;return a}).sort((a,b)=>b.score-a.score||b.n-a.n);if(!rows.length){out.textContent="No public match statistics for this position yet.";return}
+ const fmt=x=>Number(x).toFixed(1).replace(/\.0$/,'');out.innerHTML=rows.map((x,i)=>`<div class="idrank-row"><b class="idrank-num">${i+1}</b><span><b>${esc(x.name)} ${x.id===user.id?"(You)":""}</b><small>${esc(x.pos)} · @${esc(x.handle)} · ${x.n} matches</small></span><strong>${fmt(x.score)}</strong></div>`).join("")+`<details class="idrank-formula"><summary>How is the score calculated?</summary><p>Match points + tries × 5 + line breaks × 2 + goal-kick success % × 0.10 + tackle success % × 0.05 + pass success % × 0.05. Only public match sessions are counted.</p></details>`;
+ }catch(e){out.textContent="Rankings could not be loaded. Check Supabase access policies for public sessions and player profiles."}}
+
 function show(){closeSheet();setAv();const r=nv==="rec";
  $("meta").classList.toggle("hide",!r||cur===3);$("foot").classList.toggle("hide",!r||cur===3);
  document.querySelector(".tabs").classList.toggle("hide",!r);
  [1,2,3].forEach(i=>{$("v"+i).classList.toggle("hide",!r||cur!==i);const tb=$("t"+i);if(tb)tb.classList.toggle("on",cur===i)});
- ["feed","search","hl","acct","prof","notif","insights"].forEach(k=>$(k).classList.toggle("hide",nv!==k));
+ ["feed","search","hl","acct","prof","notif","insights","rankings"].forEach(k=>$(k).classList.toggle("hide",nv!==k));
  document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.n===nv));
- if(r&&cur===3)hist();if(nv==="feed")feed();if(nv==="hl")hlv();if(nv==="acct")acct();if(nv==="prof")prof();if(nv==="search")srch();if(nv==="notif")notifs();if(nv==="insights")renderInsights()}
+ if(r&&cur===3)hist();if(nv==="feed")feed();if(nv==="hl")hlv();if(nv==="acct")acct();if(nv==="prof")prof();if(nv==="search")srch();if(nv==="notif")notifs();if(nv==="insights")renderInsights();if(nv==="rankings")renderRankings()}
 function tab(n){cur=n;show()}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{if(b.dataset.n==="rec"&&nv!=="rec")cur=2;nv=b.dataset.n;show()});$("t1").onclick=()=>tab(1);$("t2").onclick=()=>tab(2);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
