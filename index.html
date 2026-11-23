@@ -419,11 +419,13 @@ const idg=i=>document.getElementById(i);
 async function idMount(uid,own,info){const box=idg("idbox");if(!box)return;
  if(!sb||!user){box.innerHTML='<div class="card mut">Log in to see player identities.</div>';return}
  Object.assign(IDV,{uid,own,edit:false,banner:"",pend:null,info:info||{}});box.innerHTML='<div class="card mut">Loading…</div>';
- try{const[r,s1,a1]=await Promise.all([sb.rpc("get_player_identity",{p_user:uid}),sb.from("player_selections").select("*").eq("user_id",uid).order("year",{ascending:false}),sb.from("player_awards").select("*").eq("user_id",uid).order("award_year",{ascending:false})]);
+ try{const[r,s1,a1,st0]=await Promise.all([sb.rpc("get_player_identity",{p_user:uid}),sb.from("player_selections").select("*").eq("user_id",uid).order("year",{ascending:false}),sb.from("player_awards").select("*").eq("user_id",uid).order("award_year",{ascending:false}),sb.rpc("get_player_card_stats",{p_user:uid})]);
   if(r.error){box.innerHTML='<div class="card"><b>Player Card isn’t available</b><div class="mut" style="margin-top:4px">The card could not be loaded. Check the get_player_identity RPC and its access rules.</div></div>';return}
   IDV.d=r.data||null;IDV.sel=s1.error?[]:(s1.data||[]);IDV.aw=a1.error?[]:(a1.data||[]);
+  IDV.st=st0.error?null:(st0.data||null);
+  if(own&&Array.isArray(S.sessions)){IDV.st=idAgg(S.sessions.map(x=>sj(x)),"match")}
   const bp=IDV.d&&IDV.d.banner_path;if(bp){const u=await sb.storage.from("identity").createSignedUrl(bp,3600);if(u.data)IDV.banner=u.data.signedUrl}
-  idRender()}catch(e){box.innerHTML='<div class="card mut">Couldn’t load the identity.</div>'}}
+  idRender()}catch(e){console.error("Player Card load",e);box.innerHTML='<div class="card mut">Couldn’t load the identity.</div>'}}
 function idVsel(k,cur){return`<select id="idv_${k}" style="width:auto;min-height:0;padding:4px 6px;font-size:11px" aria-label="Visibility">${ID_VIS.map(v=>`<option value="${v[0]}"${(cur||"public")===v[0]?" selected":""}>${v[1]}</option>`).join("")}</select>`}
 const ID_ABBR={Prop:"PR",Hooker:"HK",Lock:"LK",Flanker:"FL","No. 8":"N8","Scrum-half":"SH","Fly-half":"FH",Center:"CE",Centre:"CE",Wing:"WG","Full-back":"FB"};
 
@@ -573,7 +575,7 @@ async function idSave(publish=false){const num=(i,a,b)=>{const t=idg(i).value;if
   const row={user_id:user.id,is_published:publish?true:!!(IDV.d&&IDV.d.is_published),nationalities:nat,height_cm:h,weight_kg:w,pos_main:idg("id_p1").value||null,pos_secondary:idg("id_p2").value||null,club_name:idg("id_club").value.trim()||null,preferred_hand:idg("id_hand").value||null,preferred_foot:idg("id_foot").value||null,about:idg("id_ab").value.trim()||null,banner_path:bp,card_edition:idEd(),visibility:vis};
   const r=await sb.from("player_identity").upsert(row,{onConflict:"user_id"});if(r.error)return toast("Couldn’t save: "+r.error.message);
   if(f&&old&&old!==bp)try{await sb.storage.from("identity").remove([old])}catch(e){}
-  toast(publish?"Card published on your profile ✓":"Identity saved ✓");await idMount(user.id,true);if(publish){if(typeof renderRankings==="function")renderRankings();if(nv==="prof")prof()}}catch(e){toast("Couldn’t save the identity")}}
+  toast(publish?"Card published on your profile ✓":"Identity saved ✓");if(publish){try{await syncAll()}catch(e){console.warn("Session sync after publication",e)}}await idMount(user.id,true);if(publish){if(typeof renderRankings==="function")renderRankings();if(nv==="prof")prof()}}catch(e){console.error("idSave",e);toast("Couldn’t save the identity: "+(e&&e.message?e.message:"Check Supabase"))}}
 async function idPublishCard(){
  if(!user||!IDV.own)return toast("Only the card owner can publish it");
  const base=IDV.d||{},visibility={...(base.visibility||{})};
@@ -581,6 +583,8 @@ async function idPublishCard(){
  const {error}=await sb.from("player_identity").upsert({user_id:user.id,is_published:true,visibility},{onConflict:"user_id"});
  if(error)return toast("Couldn’t publish card: "+error.message);
  toast("RUCKLY Card published on your profile ✓");
+ // Sync all previously recorded sessions that the player has marked public.
+ try{await syncAll()}catch(e){console.warn("Session sync after card publication",e)}
  await idMount(user.id,true,IDV.info);
  if(typeof renderRankings==="function")renderRankings();
 }
