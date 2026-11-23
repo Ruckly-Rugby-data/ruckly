@@ -420,18 +420,59 @@ async function idMount(uid,own,info){const box=idg("idbox");if(!box)return;
   idRender()}catch(e){box.innerHTML='<div class="card mut">Couldn’t load the identity.</div>'}}
 function idVsel(k,cur){return`<select id="idv_${k}" style="width:auto;min-height:0;padding:4px 6px;font-size:11px" aria-label="Visibility">${ID_VIS.map(v=>`<option value="${v[0]}"${(cur||"public")===v[0]?" selected":""}>${v[1]}</option>`).join("")}</select>`}
 const ID_ABBR={Prop:"PR",Hooker:"HK",Lock:"LK",Flanker:"FL","No. 8":"N8","Scrum-half":"SH","Fly-half":"FH",Center:"CE",Centre:"CE",Wing:"WG","Full-back":"FB"};
-function idCard(){const d=IDV.d||{},I=IDV.info||{},a=IDV.st||{},ok=!!(a&&a.n>0),P=(x,y)=>y?Math.round(x/y*100)+"%":"–";
- const at=[["PTS",ok?a.pts:"–"],["TRY",ok?a.tr:"–"],["KICK",ok?P(a.km,a.k):"–"],["TACKLE",ok?P(a.tk,a.tkn):"–"],["PASS",ok?P(a.ps,a.psn):"–"],["BREAKS",ok?a.br:"–"]];
- const pos=d.pos_main||"",ab=ID_ABBR[pos]||(pos?pos.slice(0,2).toUpperCase():"–"),H=x=>({right:"Right",left:"Left",both:"Both"}[x]||"–");
- const ini=esc((I.name||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase());
- return`<div class="rc">${IDV.banner?`<div class="rc-bg" style="background-image:url('${IDV.banner}')"></div>`:""}
+const ID_ED={black:{n:"Black",c:["#1b1b1b","#090909","#0a1448"],tx:"#ffffff",mu:"#aab2ff",ac:"#172bff"},
+white:{n:"White",c:["#ffffff","#eef0f6","#cdd5ee"],tx:"#0a0a0a",mu:"#4b5280",ac:"#172bff"},
+gold:{n:"Gold",c:["#fff1a8","#e2bb3c","#7d5a0c"],tx:"#1a1204",mu:"#5a4208",ac:"#1a1204"},
+red:{n:"Red",c:["#ff5a5a","#c4161c","#5e0508"],tx:"#ffffff",mu:"#ffd6d6",ac:"#ffffff"},
+pink:{n:"Pink",c:["#ffb3e1","#f0509f","#8a1457"],tx:"#ffffff",mu:"#ffe3f2",ac:"#ffffff"}};
+const idEd=()=>ID_ED[(IDV.d&&IDV.d.card_edition)||"black"]?((IDV.d&&IDV.d.card_edition)||"black"):"black";
+function idData(){const d=IDV.d||{},I=IDV.info||{},a=IDV.st||{},ok=!!(a&&a.n>0),P=(x,y)=>y?Math.round(x/y*100)+"%":"–",pos=d.pos_main||"";
+ return{d,I,pos,ab:ID_ABBR[pos]||(pos?pos.slice(0,2).toUpperCase():"–"),nat:((d.nationalities||[])[0]||""),name:(I.name||"Player").toUpperCase(),club:(d.club_name||"No club").toUpperCase(),
+  at:[["POINTS",ok?a.pts:"–"],["TRIES",ok?a.tr:"–"],["KICKING",ok?P(a.km,a.k):"–"],["TACKLES",ok?P(a.tk,a.tkn):"–"],["PASSING",ok?P(a.ps,a.psn):"–"],["BREAKS",ok?a.br:"–"]],
+  bt:[["HAND",{right:"Right",left:"Left",both:"Both"}[d.preferred_hand]||"–"],["FOOT",{right:"Right",left:"Left",both:"Both"}[d.preferred_foot]||"–"],["HEIGHT",d.height_cm?d.height_cm+" cm":"–"],["WEIGHT",d.weight_kg?d.weight_kg+" kg":"–"]]}}
+function idCard(){const D=idData(),k=idEd(),T=ID_ED[k],src=IDV.banner||(IDV.info||{}).photo,ini=esc(((IDV.info||{}).name||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase());
+ const fs=D.name.length>20?5.6:D.name.length>15?6.6:D.name.length>11?7.6:8.6;
+ return`<div class="rc" style="--c1:${T.c[0]};--c2:${T.c[1]};--c3:${T.c[2]};--tx:${T.tx};--mu:${T.mu};--ac:${T.ac}">
+ <div class="rc-ph">${src?`<img src="${src}" alt="">`:`<div class="rc-ini">${ini}</div>`}</div>
  <div class="rc-brand">RUCKLY</div>
- <div class="rc-pos"><b>${esc(ab)}</b><span>${esc(pos||"Position")}</span><i>${esc((d.nationalities||[])[0]||"")}</i></div>
- <div class="rc-ph">${I.photo?`<img src="${I.photo}" alt="">`:`<div class="rc-ini">${ini}</div>`}</div>
- <div class="rc-name">${esc(I.name||"Player")}<small>${esc(d.club_name||"No club")}</small></div>
- <div class="rc-at">${at.map(x=>`<div><b>${x[1]}</b><span>${x[0]}</span></div>`).join("")}</div>
- <div class="rc-bt"><div><span>Hand</span><b>${H(d.preferred_hand)}</b></div><div><span>Foot</span><b>${H(d.preferred_foot)}</b></div><div><span>Height</span><b>${d.height_cm?d.height_cm+" cm":"–"}</b></div><div><span>Weight</span><b>${d.weight_kg?d.weight_kg+" kg":"–"}</b></div></div>
- <div class="rc-ed">Black Edition</div></div>`}
+ <div class="rc-pos"><b>${esc(D.ab)}</b><span>${esc(D.pos||"Position")}</span><i>${esc(D.nat)}</i></div>
+ <div class="rc-name" style="font-size:${fs}cqw">${esc(D.name)}<small>${esc(D.club)}</small></div>
+ <div class="rc-at">${D.at.map(x=>`<div><b>${x[1]}</b><span>${x[0]}</span></div>`).join("")}</div>
+ <div class="rc-bt">${D.bt.map(x=>`<div><span>${x[0]}</span><b>${x[1]}</b></div>`).join("")}</div>
+ <div class="rc-ed">${T.n} Edition</div></div>`}
+/* ---- PNG export (canvas) ---- */
+const idRgba=(h,a)=>{const n=parseInt(h.slice(1),16);return`rgba(${n>>16},${n>>8&255},${n&255},${a})`};
+function idImg(u){return new Promise(r=>{if(!u)return r(null);const i=new Image();i.crossOrigin="anonymous";i.onload=()=>r(i);i.onerror=()=>r(null);i.src=u})}
+async function idDraw(){const D=idData(),T=ID_ED[idEd()],W=1080,H=1620,u=W/100,cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d"),F=(w,s)=>`${w} ${s*u}px Arial,Helvetica,sans-serif`,LS=v=>{try{x.letterSpacing=v}catch(e){}};
+ x.save();x.beginPath();x.moveTo(0,0);x.lineTo(W*.88,0);x.lineTo(W,H*.05);x.lineTo(W,H);x.lineTo(0,H);x.closePath();x.clip();
+ let g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,T.c[0]);g.addColorStop(.6,T.c[1]);g.addColorStop(1,T.c[2]);x.fillStyle=g;x.fillRect(0,0,W,H);
+ const ph=86*u,src=IDV.banner||(IDV.info||{}).photo,img=await idImg(src);
+ if(img){const sc=Math.max(W/img.width,ph/img.height),sw=W/sc,sh=ph/sc;x.drawImage(img,(img.width-sw)/2,(img.height-sh)*.18,sw,sh,0,0,W,ph)}
+ else{x.fillStyle=idRgba(T.ac,.14);x.fillRect(0,0,W,ph);x.fillStyle=idRgba(T.ac,.5);x.font=F("800",34);x.textAlign="center";x.fillText(((IDV.info||{}).name||"?").split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(),W/2,ph*.62)}
+ g=x.createLinearGradient(0,ph*.55,0,ph);g.addColorStop(0,idRgba(T.c[1],0));g.addColorStop(1,T.c[1]);x.fillStyle=g;x.fillRect(0,ph*.55,W,ph*.45+2);
+ x.shadowColor="rgba(0,0,0,.6)";x.shadowBlur=2*u;x.fillStyle="#fff";x.textAlign="left";
+ x.font=F("800",14);x.fillText(D.ab,6*u,19*u);LS(".08em");x.font=F("400",4);x.fillText((D.pos||"").toUpperCase(),6*u,24.5*u);x.fillText(D.nat.toUpperCase(),6*u,29.5*u);
+ x.textAlign="right";x.font=F("italic 900",5.5);x.fillText("RUCKLY",88*u,9*u);LS("0px");x.shadowBlur=0;x.shadowColor="transparent";
+ x.textAlign="center";x.fillStyle=T.tx;let fs=8.6*u;x.font=`800 ${fs}px Arial,Helvetica,sans-serif`;LS(".05em");while(x.measureText(D.name).width>88*u&&fs>4.5*u){fs-=.3*u;x.font=`800 ${fs}px Arial,Helvetica,sans-serif`}
+ x.fillText(D.name,W/2,88.3*u);x.fillStyle=T.mu;x.font=F("400",3.9);LS(".14em");x.fillText(D.club,W/2,94.8*u);
+ x.fillStyle=T.ac;x.globalAlpha=.9;x.fillRect(6*u,97.5*u,88*u,.5*u);x.globalAlpha=1;
+ D.at.forEach((c,i)=>{const cx=(20+30*(i%3))*u,top=(100+16*((i/3)|0))*u;x.fillStyle=T.tx;LS("0px");x.font=F("800",9.5);x.fillText(String(c[1]),cx,top+9.5*u);x.fillStyle=T.mu;LS(".1em");x.font=F("400",3.4);x.fillText(c[0],cx,top+13.8*u)});
+ x.fillStyle=T.ac;x.globalAlpha=.5;x.fillRect(6*u,132.3*u,88*u,.3*u);x.globalAlpha=1;
+ D.bt.forEach((c,i)=>{const cx=(17+22*i)*u;x.fillStyle=T.mu;LS(".1em");x.font=F("400",3);x.fillText(c[0],cx,136.3*u);x.fillStyle=T.tx;LS("0px");x.font=F("700",4.4);x.fillText(c[1],cx,141.8*u)});
+ x.fillStyle=T.mu;LS(".3em");x.font=F("400",2.8);x.fillText((T.n+" Edition").toUpperCase(),W/2,147.4*u);x.restore();return{cv,missing:!!src&&!img}}
+async function idPng(fmt){const r=await idDraw();let cv=r.cv;
+ if(fmt==="4x5"){const c=document.createElement("canvas");c.width=1080;c.height=1350;const x=c.getContext("2d");x.fillStyle="#000";x.fillRect(0,0,1080,1350);const g=x.createRadialGradient(540,675,100,540,675,800);g.addColorStop(0,"#0d1030");g.addColorStop(1,"#000");x.fillStyle=g;x.fillRect(0,0,1080,1350);const h=1270,w=h*2/3;x.drawImage(cv,(1080-w)/2,40,w,h);cv=c}
+ const blob=await new Promise(res=>cv.toBlob(res,"image/png"));return{blob,missing:r.missing}}
+function idSaveBlob(blob,nm){const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=nm;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+async function idExport(share){const fmt=(idg("id_fmt")||{}).value||"2x3";
+ try{toast("Preparing your card…");const r=await idPng(fmt),nm="ruckly-card-"+((IDV.info||{}).handle||"player")+"-"+idEd()+"-"+fmt+".png";
+  if(r.missing)toast("The photo couldn’t be included (browser security). Card exported without it.");
+  if(share){const f=new File([r.blob],nm,{type:"image/png"});
+   if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:"My RUCKLY card",text:"My RUCKLY player card"});return}catch(e){if(e&&e.name==="AbortError")return}}
+   const t=encodeURIComponent("My RUCKLY player card"),l=encodeURIComponent(location.origin+location.pathname),b=idg("idshare");
+   if(b)b.innerHTML=`<div class="card" style="margin-top:10px"><div class="mut" style="font-size:12px;margin-bottom:8px">This browser can’t share the image directly. Download it, then post it, or share a link:</div><div class="row" style="gap:8px;flex-wrap:wrap"><button data-idact="dl">Download image</button><a class="fb" href="https://wa.me/?text=${t}%20${l}" target="_blank" rel="noopener">WhatsApp</a><a class="fb" href="https://twitter.com/intent/tweet?text=${t}&url=${l}" target="_blank" rel="noopener">X</a><a class="fb" href="https://www.facebook.com/sharer/sharer.php?u=${l}" target="_blank" rel="noopener">Facebook</a><button data-idact="copy">Copy link</button></div></div>`;
+   return}
+  idSaveBlob(r.blob,nm)}catch(e){toast("Couldn’t create the image")}}
 function idRender(){const box=idg("idbox");if(!box)return;const d=IDV.d||{},own=IDV.own;
  if(IDV.edit&&own)return idEdit(box,d);
  const pill=v=>`<span class="pill">${v==="verified"?"Verified ✓":"Declared"}</span>`;
@@ -439,7 +480,8 @@ function idRender(){const box=idg("idbox");if(!box)return;const d=IDV.d||{},own=
  const awForm=`<div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:10px"><input id="aw_title" placeholder="Award title" maxlength="100"><input id="aw_year" type="number" min="1950" max="2100" placeholder="Year"><input id="aw_note" placeholder="Note (optional)" maxlength="300" style="grid-column:1/3"><button class="fb on" data-idact="addaw" style="grid-column:1/3">Grant award</button></div>`;
  box.innerHTML=idCard()
  +`<div class="mut" style="font-size:11px;text-align:center;margin:-4px 0 12px">Card stats are declared by the player (all recorded sessions) unless marked Verified.${IDV.d?"":own?" Tap “Edit my card” to fill in your details.":" This player hasn’t shared card details."}</div>`
- +(own?'<div style="text-align:center;margin-bottom:14px"><button class="fb on" data-idact="edit">Edit my card</button></div>':"")
+ +(own?`<div class="card" style="margin-bottom:14px"><div class="mut" style="font-size:11px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em">Edition</div><div class="row" style="gap:6px;flex-wrap:wrap">${Object.keys(ID_ED).map(k=>`<button class="${idEd()===k?"on":""}" data-idact="ed" data-ed="${k}"><i class="rc-sw" style="background:linear-gradient(135deg,${ID_ED[k].c[0]},${ID_ED[k].c[2]})"></i>${ID_ED[k].n}</button>`).join("")}</div>
+ <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:12px"><select id="id_fmt" style="width:auto;min-height:34px" aria-label="Format"><option value="2x3">2:3 card</option><option value="4x5">4:5 post</option></select><button data-idact="dl">Download PNG</button><button class="fb on" data-idact="sh">Share</button><button data-idact="edit">Edit my card</button></div><div id="idshare"></div></div>`:"")
  +(d.about?`<div class="card" style="margin-bottom:12px">${esc(d.about)}</div>`:"")
  +`<div class="card"><b>Selections</b>${IDV.sel.map(x=>`<div class="srow"><b>${esc(x.team_name)}</b><span class="mut">${esc(x.level)}${x.year?" · "+x.year:""}${x.caps!=null?" · "+x.caps+" caps":""}</span>${pill(x.verification)}${own?`<button class="ib" data-idact="delsel" data-id="${x.id}" aria-label="Delete selection">✕</button>`:""}</div>`).join("")||'<div class="mut" style="padding:6px 0">None yet.</div>'}${own?selForm:""}</div>`
  +`<div class="card" style="margin-top:12px"><b>Awards</b>${IDV.aw.map(a=>`<div class="srow"><b>${esc(a.title)}</b><span class="mut">${a.award_year||""}</span><span class="pill">RUCKLY</span>${ADM?`<button class="ib" data-idact="delaw" data-id="${a.id}" aria-label="Delete award">✕</button>`:""}</div>`).join("")||'<div class="mut" style="padding:6px 0">No awards yet.</div>'}${ADM&&!own?awForm:""}</div>`;
@@ -457,10 +499,10 @@ function idEdit(box,d){const v=d.visibility||{},pos=(typeof POS!=="undefined"?PO
  ${lab("Preferred hand","hand")}${hf("id_hand",d.preferred_hand)}
  ${lab("Preferred foot","foot")}${hf("id_foot",d.preferred_foot)}
  ${lab("About","about")}<textarea id="id_ab" maxlength="600" rows="4">${esc(d.about||"")}</textarea>
- ${lab("Card background (JPG, PNG or WebP)","banner")}<input id="id_bn" type="file" accept="image/jpeg,image/png,image/webp">
- <div class="mut" style="font-size:11px;margin-top:10px">The card uses your profile photo (change it in Edit profile). Your date of birth is never shown. Each field follows the visibility you choose.</div>
+ ${lab("Card photo (JPG, PNG or WebP)","banner")}<input id="id_bn" type="file" accept="image/jpeg,image/png,image/webp">
+ <div class="mut" style="font-size:11px;margin-top:10px">Your card photo is cropped automatically to fit the card (the top of the picture is kept, so keep your face high). Without one, the card uses your profile photo. Your date of birth is never shown. Each field follows the visibility you choose.</div>
  <div class="row" style="margin-top:12px;gap:8px"><button class="fb on" data-idact="save">Save</button><button class="fb" data-idact="cancel">Cancel</button></div></div>`;box.onclick=idClick}
-async function idResize(file){const bmp=await createImageBitmap(file),W=1200,H=400,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d"),r=Math.max(W/bmp.width,H/bmp.height),w=bmp.width*r,h=bmp.height*r;x.drawImage(bmp,(W-w)/2,(H-h)/2,w,h);return new Promise(res=>c.toBlob(res,"image/jpeg",.85))}
+async function idResize(file){const bmp=await createImageBitmap(file),W=1000,H=860,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d"),r=Math.max(W/bmp.width,H/bmp.height),w=bmp.width*r,h=bmp.height*r;x.drawImage(bmp,(W-w)/2,-(h-H)*.18,w,h);return new Promise(res=>c.toBlob(res,"image/jpeg",.85))}
 async function idSave(){const num=(i,a,b)=>{const t=idg(i).value;if(t==="")return null;const n=+t;return n>=a&&n<=b?Math.round(n):NaN};
  const h=num("id_h",100,250),w=num("id_w",30,250);
  if([h,w].some(Number.isNaN))return toast("Check height and weight");
@@ -469,12 +511,17 @@ async function idSave(){const num=(i,a,b)=>{const t=idg(i).value;if(t==="")retur
  const old=(IDV.d&&IDV.d.banner_path)||null;let bp=old;const f=idg("id_bn").files[0];
  try{if(f){if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>10485760)return toast("Banner must be a JPG, PNG or WebP under 10 MB");
    const blob=await idResize(f);bp=user.id+"/banner-"+Date.now()+".jpg";const up=await sb.storage.from("identity").upload(bp,blob,{contentType:"image/jpeg"});if(up.error)return toast("Couldn’t upload the banner: "+up.error.message)}
-  const row={user_id:user.id,nationalities:nat,height_cm:h,weight_kg:w,pos_main:idg("id_p1").value||null,pos_secondary:idg("id_p2").value||null,club_name:idg("id_club").value.trim()||null,preferred_hand:idg("id_hand").value||null,preferred_foot:idg("id_foot").value||null,about:idg("id_ab").value.trim()||null,banner_path:bp,visibility:vis};
+  const row={user_id:user.id,nationalities:nat,height_cm:h,weight_kg:w,pos_main:idg("id_p1").value||null,pos_secondary:idg("id_p2").value||null,club_name:idg("id_club").value.trim()||null,preferred_hand:idg("id_hand").value||null,preferred_foot:idg("id_foot").value||null,about:idg("id_ab").value.trim()||null,banner_path:bp,card_edition:(IDV.d&&IDV.d.card_edition)||"black",visibility:vis};
   const r=await sb.from("player_identity").upsert(row,{onConflict:"user_id"});if(r.error)return toast("Couldn’t save: "+r.error.message);
   if(f&&old&&old!==bp)try{await sb.storage.from("identity").remove([old])}catch(e){}
   toast("Identity saved ✓");idMount(user.id,true)}catch(e){toast("Couldn’t save the identity")}}
 async function idClick(e){const b=e.target.closest("[data-idact]");if(!b)return;const a=b.dataset.idact,id=b.dataset.id;
  if(a==="edit"){IDV.edit=true;return idRender()}if(a==="cancel"){IDV.edit=false;return idRender()}if(a==="save")return idSave();
+ if(a==="dl")return idExport(false);
+ if(a==="sh")return idExport(true);
+ if(a==="copy"){try{await navigator.clipboard.writeText(location.origin+location.pathname);toast("Link copied")}catch(e){toast("Couldn’t copy the link")}return}
+ if(a==="ed"){const k=b.dataset.ed;if(!ID_ED[k])return;const r0=await sb.from("player_identity").upsert({user_id:user.id,card_edition:k},{onConflict:"user_id"});
+  if(r0.error)return toast("Couldn’t save the edition: "+r0.error.message);IDV.d=Object.assign(IDV.d||{},{card_edition:k});return idRender()}
  let r;
  if(a==="addsel"){const t=idg("sl_team").value.trim();if(!t)return toast("Enter a team name");const c=idg("sl_caps").value,y=idg("sl_year").value;
   r=await sb.from("player_selections").insert({user_id:user.id,level:idg("sl_level").value,team_name:t,caps:c===""?null:+c,year:y===""?null:+y})}
@@ -2469,24 +2516,28 @@ button.fc:hover{background:#172bff!important;border-color:#172bff!important}
 .rk-dots i{width:8px;height:8px;border-radius:50%;background:#555;cursor:pointer}.rk-dots i.on{background:#fff}
 </style>
 <style id="ruckly-player-card">
-.rc{container-type:inline-size;position:relative;width:min(100%,340px);aspect-ratio:2/3;margin:0 auto 14px;color:#fff;overflow:hidden;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(165deg,#101010 0%,#050505 52%,#0a1448 100%);box-shadow:inset 0 0 0 1px #2b3270,0 10px 30px rgba(23,43,255,.18);clip-path:polygon(0 0,88% 0,100% 5%,100% 100%,0 100%)}
-.rc-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.28}
-.rc:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85) 66%);pointer-events:none}
-.rc>*{position:absolute;z-index:1}.rc:after{z-index:0}
-.rc-brand{top:4cqw;right:12cqw;font:italic 900 5.5cqw Arial;letter-spacing:.08em;color:#9aa6ff}
-.rc-pos{top:6cqw;left:6cqw;display:flex;flex-direction:column;gap:1cqw;z-index:3}
-.rc-pos b{font-size:15cqw;line-height:1;font-weight:800}.rc-pos span{font-size:4cqw;text-transform:uppercase;letter-spacing:.08em;color:#cfd4ff}.rc-pos i{font-style:normal;font-size:4cqw;color:#9aa0c8;text-transform:uppercase}
-.rc-ph{right:0;top:7cqw;width:68cqw;height:74cqw;-webkit-mask-image:linear-gradient(180deg,#000 62%,transparent);mask-image:linear-gradient(180deg,#000 62%,transparent)}
-.rc-ph img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
-.rc-ini{width:100%;height:100%;display:grid;place-items:center;font-size:30cqw;font-weight:800;color:#26308a}
-.rc-name{left:0;right:0;top:78cqw;text-align:center;font-size:8.2cqw;font-weight:800;text-transform:uppercase;letter-spacing:.06em;line-height:1.1;padding:0 6cqw}
-.rc-name small{display:block;font-size:3.8cqw;font-weight:400;color:#aab2ff;letter-spacing:.14em;margin-top:1.2cqw}
-.rc-at{left:8cqw;right:8cqw;top:96cqw;display:grid;grid-template-columns:1fr 1fr;gap:1.5cqw 10cqw;border-top:1px solid #172bff;padding-top:3cqw}
-.rc-at div{display:flex;align-items:baseline;gap:2.5cqw}.rc-at b{font-size:8cqw;min-width:15cqw;text-align:right}.rc-at span{font-size:4cqw;letter-spacing:.1em;color:#cfd4ff}
-.rc-bt{left:6cqw;right:6cqw;bottom:9cqw;display:grid;grid-template-columns:repeat(4,1fr);gap:2cqw;border-top:1px solid #333;padding-top:3cqw;text-align:center}
-.rc-bt span{display:block;font-size:3cqw;text-transform:uppercase;letter-spacing:.1em;color:#9aa0c8}.rc-bt b{font-size:4.2cqw}
-.rc-ed{bottom:3cqw;left:0;right:0;text-align:center;font-size:2.8cqw;letter-spacing:.3em;text-transform:uppercase;color:#6b74c8}
+.rc{container-type:inline-size;position:relative;width:min(100%,420px);aspect-ratio:2/3;margin:0 auto 14px;color:var(--tx);overflow:hidden;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,var(--c1) 0%,var(--c2) 60%,var(--c3) 100%);box-shadow:0 12px 34px rgba(0,0,0,.5);clip-path:polygon(0 0,88% 0,100% 5%,100% 100%,0 100%)}
+.rc>*{position:absolute}
+.rc-ph{left:0;top:0;width:100%;height:86cqw;overflow:hidden}
+.rc-ph img{width:100%;height:100%;object-fit:cover;object-position:center 18%;display:block}
+.rc-ph:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,var(--c2) 100%)}
+.rc-ini{width:100%;height:100%;display:grid;place-items:center;font-size:34cqw;font-weight:800;color:var(--ac);opacity:.5}
+.rc-brand{top:3.2cqw;right:12cqw;font:italic 900 max(11px,5.5cqw) Arial;letter-spacing:.08em;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.rc-pos{top:4cqw;left:6cqw;display:flex;flex-direction:column;gap:.8cqw;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.65)}
+.rc-pos b{font-size:14cqw;line-height:1;font-weight:800}.rc-pos span,.rc-pos i{font-size:max(11px,4cqw);text-transform:uppercase;letter-spacing:.08em;font-style:normal}
+.rc-name{left:0;right:0;top:80cqw;text-align:center;font-weight:800;letter-spacing:.05em;line-height:1.1;padding:0 6cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-name small{display:block;font-size:max(11px,3.9cqw);font-weight:400;color:var(--mu);letter-spacing:.14em;margin-top:1.4cqw}
+.rc-at{left:6cqw;right:6cqw;top:97.5cqw;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5cqw 0;border-top:1px solid var(--ac);padding-top:1.6cqw}
+.rc-at div{display:flex;flex-direction:column;align-items:center;line-height:1}
+.rc-at b{font-size:9.5cqw;font-weight:800}.rc-at span{font-size:max(10px,3.4cqw);letter-spacing:.1em;color:var(--mu);margin-top:.8cqw}
+.rc-bt{left:6cqw;right:6cqw;top:132.3cqw;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid color-mix(in srgb,var(--ac) 50%,transparent);padding-top:1.6cqw;text-align:center}
+.rc-bt span{display:block;font-size:max(9px,3cqw);letter-spacing:.1em;color:var(--mu)}.rc-bt b{display:block;font-size:max(12px,4.4cqw);margin-top:.6cqw}
+.rc-ed{left:0;right:0;bottom:1.6cqw;text-align:center;font-size:max(9px,2.8cqw);letter-spacing:.3em;text-transform:uppercase;color:var(--mu)}
+.rc-sw{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid #fff;margin-right:6px}
+a.fb{display:inline-flex;align-items:center;text-decoration:none}
+@media(min-width:900px){#idbox{display:flow-root}}
 </style>
+
 
 
 
