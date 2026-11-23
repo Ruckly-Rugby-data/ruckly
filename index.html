@@ -494,43 +494,20 @@ async function idLoadRanking(){
  const el=idg("idrank");if(!el)return;
  const d=IDV.d||{},pos=d.pos_main||"";
  if(!pos){el.textContent="Set your main position to appear in a ranking.";return}
- if(!sb){el.textContent="Sign in to load rankings.";return}
+ if(!sb||!user){el.textContent="Sign in to load rankings.";return}
  try{
-  const [postsR,profilesR,identityR]=await Promise.all([
-   sb.from("posts").select("user_id,session,created_at").eq("kind","session").limit(5000),
-   sb.from("profiles").select("id,name,handle,pos,role").eq("role","player").limit(2000),
-   sb.from("player_identity").select("user_id,pos_main,visibility").limit(2000)
-  ]);
-  if(postsR.error)throw postsR.error;
-  if(profilesR.error)throw profilesR.error;
-  if(identityR.error)throw identityR.error;
-  const prof=new Map((profilesR.data||[]).map(x=>[x.id,x]));
-  const ident=new Map((identityR.data||[]).map(x=>[x.user_id,x]));
-  const grouped=new Map();
-  for(const p of postsR.data||[]){
-   const s=p.session||{},pr=prof.get(p.user_id),di=ident.get(p.user_id);
-   if(!pr||!di||di.pos_main!==pos||s.type!=="match")continue;
-   const v=di.visibility||{};
-   if(v.pos==="private"||v.pos==="followers"&&p.user_id!==user.id)continue;
-   const a=grouped.get(p.user_id)||{id:p.user_id,name:pr.name||pr.handle||"Player",handle:pr.handle||"",n:0,pts:0,tr:0,k:0,km:0,tk:0,tkn:0,ps:0,psn:0,br:0};
-   a.n++;["pts","tr","k","km","tk","tkn","ps","psn","br"].forEach(k=>a[k]+=Number(s[k])||0);grouped.set(p.user_id,a);
-  }
-  const rows=[...grouped.values()].map(a=>{
-   const kick=a.k?100*a.km/a.k:0,tack=a.tkn?100*a.tk/a.tkn:0,pass=a.psn?100*a.ps/a.psn:0;
-   // Transparent composite: match points + tries + breaks + success rates.
-   a.score=a.pts+5*a.tr+2*a.br+.1*kick+.05*tack+.05*pass;
-   return a;
-  }).sort((a,b)=>b.score-a.score||b.n-a.n);
-  const mine=rows.findIndex(x=>x.id===user.id);
+  const r=await sb.rpc("get_player_rankings",{p_position:pos});
+  if(r.error)throw r.error;
+  const rows=r.data||[];
+  const mine=rows.findIndex(x=>x.user_id===user.id);
+  const fmt=x=>Number(x).toFixed(1).replace(/\.0$/,'');
   if(!rows.length){el.textContent="No public match statistics for this position yet.";return}
-  const fmt=x=>Number(x).toFixed(1).replace(/\.0$/,"");
   el.innerHTML=`<div class="idrank-meta">Your position: <b>${esc(pos)}</b> · ${rows.length} ranked player${rows.length===1?"":"s"}</div>
-   ${mine>=0?`<div class="idrank-you"><b>#${mine+1}</b><span>Your ranking</span><strong>${fmt(rows[mine].score)} pts</strong></div>`:`<div class="mut" style="margin:8px 0">You need at least one public match session to enter this ranking.</div>`}
-   <div class="idrank-list">${rows.slice(0,10).map((x,i)=>`<div class="idrank-row"><b class="idrank-num">${i+1}</b><span><b>${esc(x.name)}</b><small>@${esc(x.handle)} · ${x.n} match${x.n===1?"":"es"}</small></span><strong>${fmt(x.score)}</strong></div>`).join("")}</div>
-   <details class="idrank-formula"><summary>How is the score calculated?</summary><p>Match points + (tries × 5) + (line breaks × 2) + goal-kick success % × 0.10 + tackle success % × 0.05 + pass success % × 0.05. Only public match sessions are counted.</p></details>`;
- }catch(e){el.textContent="The ranking could not be loaded. Check that public session and player profile access is enabled in Supabase."}
+   ${mine>=0?`<div class="idrank-you"><b>#${mine+1}</b><span>Your ranking</span><strong>${fmt(rows[mine].score)} pts</strong></div>`:`<div class="mut" style="margin:8px 0">You need at least one visible match session to enter this ranking.</div>`}
+   <div class="idrank-list">${rows.slice(0,10).map((x,i)=>`<div class="idrank-row"><b class="idrank-num">${i+1}</b><span><b>${esc(x.display_name||"Player")}</b><small>@${esc(x.handle||"")} · ${x.match_count} match${Number(x.match_count)===1?"":"es"}</small></span><strong>${fmt(x.score)}</strong></div>`).join("")}</div>
+   <details class="idrank-formula"><summary>How is the score calculated?</summary><p>Match points + (tries × 5) + (line breaks × 2) + goal-kick success % × 0.10 + tackle success % × 0.05 + pass success % × 0.05. Only sessions visible to you are counted.</p></details>`;
+ }catch(e){console.error("get_player_rankings",e);el.textContent="The ranking could not be loaded. Run the RUCKLY rankings SQL script in Supabase."}
 }
-
 
 function idSelectionGroups(){
  const map=new Map();
@@ -595,7 +572,7 @@ async function idSave(publish=false){const num=(i,a,b)=>{const t=idg(i).value;if
   const row={user_id:user.id,nationalities:nat,height_cm:h,weight_kg:w,pos_main:idg("id_p1").value||null,pos_secondary:idg("id_p2").value||null,club_name:idg("id_club").value.trim()||null,preferred_hand:idg("id_hand").value||null,preferred_foot:idg("id_foot").value||null,about:idg("id_ab").value.trim()||null,banner_path:bp,card_edition:idEd(),visibility:vis};
   const r=await sb.from("player_identity").upsert(row,{onConflict:"user_id"});if(r.error)return toast("Couldn’t save: "+r.error.message);
   if(f&&old&&old!==bp)try{await sb.storage.from("identity").remove([old])}catch(e){}
-  toast(publish?"Card updated and shared ✓":"Identity saved ✓");idMount(user.id,true)}catch(e){toast("Couldn’t save the identity")}}
+  toast(publish?"Card published and shared ✓":"Identity saved ✓");await idMount(user.id,true);if(publish){if(typeof renderRankings==="function")renderRankings();if(nv==="prof")prof()}}catch(e){toast("Couldn’t save the identity")}}
 async function idClick(e){const b=e.target.closest("[data-idact]");if(!b)return;const a=b.dataset.idact,id=b.dataset.id;
  if(a==="edit"){IDV.edit=true;IDV.pend=null;return idRender()}if(a==="cancel"){IDV.edit=false;IDV.pend=null;return idRender()}
  if(a==="ped"){IDV.pend=b.dataset.ed;const rc=document.querySelector("#idbox .rc");if(rc)rc.outerHTML=idCard();document.querySelectorAll("#idbox [data-idact=ped]").forEach(x=>x.classList.toggle("on",x.dataset.ed===IDV.pend));return}if(a==="save")return idSave();if(a==="publish"){["nationalities","height","weight","pos","club","hand","foot","about","banner"].forEach(k=>{const x=idg("idv_"+k);if(x)x.value="public"});return idSave(true)}
@@ -698,7 +675,7 @@ document.getElementById("spi").src=LOGO_F</script>
 <section id="hl" class="hide"><div id="drop" class="hide"><input type="file" id="fi" accept="" hidden></div><div id="hlist"></div></section>
 <section id="notif" class="hide"></section><section id="acct" class="hide"></section><section id="prof" class="hide"></section>
 <section id="insights" class="hide"></section><section id="rankings" class="hide"></section>
-<nav class="nav"><button data-n="feed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Feed</button><button data-n="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button><button data-n="rec" class="on"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Record</button><button data-n="rankings"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/></svg>Rankings</button><button data-n="insights"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h17M8 15l3-4 3 2 5-7"/></svg>Insights</button><button data-n="notif" id="nnt"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Activity<span class="bdg nbd hide">0</span></button><button data-n="acct"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg>Account</button></nav>
+<nav class="nav"><button data-n="feed"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Feed</button><button data-n="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button><button data-n="rec" class="on"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Record</button><button data-n="rankings"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/></svg>Rankings</button><button data-n="insights"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M8.2 14.5a7 7 0 1 1 7.6 0c-.9.6-1.3 1.3-1.5 2.5h-4.6c-.2-1.2-.6-1.9-1.5-2.5Z"/><path d="M9.5 9.5a2.5 2.5 0 0 1 5 0"/></svg>Insights</button><button data-n="notif" id="nnt"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Activity<span class="bdg nbd hide">0</span></button><button data-n="acct"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7"/></svg>Account</button></nav>
 <div id="foot"><button class="save" id="save">Save session</button>
 <div style="text-align:center"><button class="link" id="reset">Reset current session</button></div></div>
 
@@ -900,13 +877,19 @@ function renderInsights(){
 }
 
 let rankingPosition="All";
-async function renderRankings(){const root=$("rankings");if(!root)return;const positions=(typeof POS!=="undefined"?POS:[]);root.innerHTML=`<div class="card"><div class="mut" style="font-size:10px;letter-spacing:.16em">RUCKLY / PERFORMANCE</div><h2 style="margin:6px 0 12px">Rankings</h2><div class="chips" style="display:flex;gap:7px;overflow:auto;flex-wrap:nowrap;padding-bottom:8px">${["All",...positions].map(p=>`<button class="chip ${rankingPosition===p?"on":""}" data-rank-pos="${esc(p)}">${esc(p)}</button>`).join("")}</div><div id="ranking-results" class="mut">Loading rankings…</div></div>`;
- root.querySelectorAll('[data-rank-pos]').forEach(b=>b.onclick=()=>{rankingPosition=b.dataset.rankPos;renderRankings()});const out=$("ranking-results");if(!sb||!user){out.textContent="Sign in to view player rankings.";return}
- try{const [postsR,profilesR,identityR]=await Promise.all([sb.from("posts").select("user_id,session,created_at").eq("kind","session").limit(5000),sb.from("profiles").select("id,name,handle,pos,role").eq("role","player").limit(2000),sb.from("player_identity").select("user_id,pos_main,visibility").limit(2000)]);if(postsR.error)throw postsR.error;if(profilesR.error)throw profilesR.error;if(identityR.error)throw identityR.error;
- const prof=new Map((profilesR.data||[]).map(x=>[x.id,x])),ident=new Map((identityR.data||[]).map(x=>[x.user_id,x])),grouped=new Map();for(const p of postsR.data||[]){const s=p.session||{},pr=prof.get(p.user_id),di=ident.get(p.user_id),pos=di?.pos_main;if(!pr||!di||!pos||(rankingPosition!=="All"&&pos!==rankingPosition)||s.type!=="match")continue;const v=di.visibility||{};if(v.pos==="private"||(v.pos==="followers"&&p.user_id!==user.id))continue;const a=grouped.get(p.user_id)||{id:p.user_id,name:pr.name||pr.handle||"Player",handle:pr.handle||"",pos,n:0,pts:0,tr:0,k:0,km:0,tk:0,tkn:0,ps:0,psn:0,br:0};a.n++;["pts","tr","k","km","tk","tkn","ps","psn","br"].forEach(k=>a[k]+=Number(s[k])||0);grouped.set(p.user_id,a)}
- const rows=[...grouped.values()].map(a=>{const kick=a.k?100*a.km/a.k:0,tack=a.tkn?100*a.tk/a.tkn:0,pass=a.psn?100*a.ps/a.psn:0;a.score=a.pts+5*a.tr+2*a.br+.1*kick+.05*tack+.05*pass;return a}).sort((a,b)=>b.score-a.score||b.n-a.n);if(!rows.length){out.textContent="No public match statistics for this position yet.";return}
- const fmt=x=>Number(x).toFixed(1).replace(/\.0$/,'');out.innerHTML=rows.map((x,i)=>`<div class="idrank-row"><b class="idrank-num">${i+1}</b><span><b>${esc(x.name)} ${x.id===user.id?"(You)":""}</b><small>${esc(x.pos)} · @${esc(x.handle)} · ${x.n} matches</small></span><strong>${fmt(x.score)}</strong></div>`).join("")+`<details class="idrank-formula"><summary>How is the score calculated?</summary><p>Match points + tries × 5 + line breaks × 2 + goal-kick success % × 0.10 + tackle success % × 0.05 + pass success % × 0.05. Only public match sessions are counted.</p></details>`;
- }catch(e){out.textContent="Rankings could not be loaded. Check Supabase access policies for public sessions and player profiles."}}
+async function renderRankings(){
+ const root=$("rankings");if(!root)return;
+ const positions=(typeof POS!=="undefined"?POS:[]);
+ root.innerHTML=`<div class="card"><div class="mut" style="font-size:10px;letter-spacing:.16em">RUCKLY / PERFORMANCE</div><h2 style="margin:6px 0 12px">Rankings</h2><div class="chips" style="display:flex;gap:7px;overflow:auto;flex-wrap:nowrap;padding-bottom:8px">${["All",...positions].map(p=>`<button class="chip ${rankingPosition===p?"on":""}" data-rank-pos="${esc(p)}">${esc(p)}</button>`).join("")}</div><div id="ranking-results" class="mut">Loading rankings…</div></div>`;
+ root.querySelectorAll('[data-rank-pos]').forEach(b=>b.onclick=()=>{rankingPosition=b.dataset.rankPos;renderRankings()});
+ const out=$("ranking-results");if(!sb||!user){out.textContent="Sign in to view player rankings.";return}
+ try{
+  const r=await sb.rpc("get_player_rankings",{p_position:rankingPosition});if(r.error)throw r.error;
+  const rows=r.data||[];if(!rows.length){out.textContent="No visible match statistics for this position yet.";return}
+  const fmt=x=>Number(x).toFixed(1).replace(/\.0$/,'');
+  out.innerHTML=rows.map((x,i)=>`<div class="idrank-row"><b class="idrank-num">${i+1}</b><span><b>${esc(x.display_name||"Player")} ${x.user_id===user.id?"(You)":""}</b><small>${esc(x.pos_main||"")} · @${esc(x.handle||"")} · ${x.match_count} matches</small></span><strong>${fmt(x.score)}</strong></div>`).join("")+`<details class="idrank-formula"><summary>How is the score calculated?</summary><p>Match points + tries × 5 + line breaks × 2 + goal-kick success % × 0.10 + tackle success % × 0.05 + pass success % × 0.05. Only sessions visible to you are counted.</p></details>`;
+ }catch(e){console.error("get_player_rankings",e);out.textContent="Rankings could not be loaded. Run the RUCKLY rankings SQL script in Supabase."}
+}
 
 function show(){closeSheet();setAv();const r=nv==="rec";
  $("meta").classList.toggle("hide",!r||cur===3);$("foot").classList.toggle("hide",!r||cur===3);
@@ -1774,10 +1757,10 @@ const LV={};
 const lvSig=()=>JSON.stringify([FD.pos.map(p=>[p.id,p.caption,p.session]),FD.lk,FD.cc,FD.cl,FD.cm,Object.values(FD.pr).map(p=>[p.id,p.name,p.settings&&p.settings.avatar])]);
 async function liveTick(ev){if(!user||!sb||document.hidden||LV.b)return;if([...document.querySelectorAll("video")].some(v=>!v.paused&&!v.ended))return;LV.b=1;try{
  if(nv==="feed"){const g=lvSig();await loadFeed(1);await Promise.all(Object.keys(FD.open).filter(k=>FD.open[k]).map(k=>loadComments(k,1)));if(lvSig()!==g)renderFeed()}
- else if(ev&&!PV.open&&!FL.open){if(nv==="prof")await prof();else if(nv==="acct"&&!pe&&!(document.activeElement||{}).value)await acct()}
+ else if(ev&&!PV.open&&!FL.open){if(nv==="rankings")await renderRankings();else if(nv==="prof")await prof();else if(nv==="acct"&&!pe&&!(document.activeElement||{}).value)await acct()}
  if(PV.open&&PVD[PV.k]&&!PVD[PV.k].local)await pvLoad(PV.k)}catch(e){}LV.b=0}
 const liveEv=()=>{clearTimeout(LV.t);LV.t=setTimeout(()=>liveTick(1),700)};
-function liveStart(){if(LV.on||!sb||!user)return;LV.on=1;try{const c=sb.channel("live");["posts","comments","likes","comment_likes","profiles"].forEach(t=>c.on("postgres_changes",{event:"*",schema:"public",table:t},p=>{if(t==="profiles"&&p.new&&p.new.id){const x=FD.pr[p.new.id];if(x){x.settings=p.new.settings;x.name=p.new.name;x.pos=p.new.pos}}liveEv()}));c.subscribe()}catch(e){}setInterval(()=>liveTick(0),20000)}
+function liveStart(){if(LV.on||!sb||!user)return;LV.on=1;try{const c=sb.channel("live");["posts","player_identity","comments","likes","comment_likes","profiles"].forEach(t=>c.on("postgres_changes",{event:"*",schema:"public",table:t},p=>{if(t==="profiles"&&p.new&&p.new.id){const x=FD.pr[p.new.id];if(x){x.settings=p.new.settings;x.name=p.new.name;x.pos=p.new.pos}}liveEv()}));c.subscribe()}catch(e){}setInterval(()=>liveTick(0),20000)}
 {const _rf=renderFeed;renderFeed=function(){const a=document.activeElement,k=a&&a.dataset&&a.dataset.ci,v=k&&a.value;_rf();if(k){const n=document.querySelector(`[data-ci="${k}"]`);if(n){n.value=v;n.focus()}}}}
 
 /* comments: like + edit/delete menu */
