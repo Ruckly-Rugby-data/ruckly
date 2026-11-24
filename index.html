@@ -535,6 +535,25 @@ svg[aria-label="Kick map"] text{pointer-events:none}
 @keyframes idspin{to{transform:rotate(360deg)}}
 @media(max-width:600px){#idbox .id-hub-head{padding:13px;border-radius:13px}#idbox .id-hub-head h3{font-size:18px}#idbox .id-live-pill{font-size:8px;padding:5px 7px}#idbox .id-card-switch button{padding:11px 8px}#idbox .id-sharebar{gap:9px;padding:9px 11px}#idbox .id-sharebar .id-iconbtn{width:40px;height:40px}#idbox .id-publish-panel{padding:11px 12px}#idbox .id-main-actions{grid-template-columns:1fr 1fr}}
 </style>
+<style>
+/* RUCKLY Fun Card: centered, pro-card-inspired composition */
+#idbox .ruckly-fun-card{display:block;}
+#idbox .rf-position{left:0;right:0;top:25%;text-align:center;font-size:3.2cqw;letter-spacing:.16em;}
+#idbox .rf-flag{position:absolute;left:0;right:0;top:30%;margin:0;text-align:center;font-size:10cqw;line-height:1.1;filter:drop-shadow(0 3px 8px #0008);}
+#idbox .rf-name{left:4%;right:4%;top:46%;text-align:center;font-size:8.2cqw;line-height:1.02;letter-spacing:.025em;}
+#idbox .rf-age{left:4%;right:4%;top:54%;text-align:center;font-size:3.15cqw;letter-spacing:.12em;}
+#idbox .rf-club{left:4%;right:4%;top:61%;text-align:center;font-size:4.1cqw;letter-spacing:.12em;}
+#idbox .rf-details{left:6%;right:6%;top:69%;text-align:center;column-gap:2cqw;row-gap:2.2cqw;padding-top:2.4cqw;}
+#idbox .rf-attributes>div{align-items:center;text-align:center;justify-content:center;min-height:8.2cqw;}
+#idbox .rf-attributes span{font-size:2.25cqw;letter-spacing:.11em;}
+#idbox .rf-attributes b{font-size:7.2cqw;line-height:1.02;font-weight:950;}
+#idbox .rf-measurements{position:absolute;z-index:3;left:6%;right:6%;top:87%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1cqw;text-align:center;border-top:1px solid color-mix(in srgb,var(--fcac) 70%,transparent);padding-top:2cqw;}
+#idbox .rf-measurements>div{display:flex;flex-direction:column;gap:.6cqw;min-width:0;}
+#idbox .rf-measurements span{font-size:2cqw;letter-spacing:.08em;color:var(--fcmu);white-space:nowrap;}
+#idbox .rf-measurements b{font-size:3.25cqw;line-height:1.05;overflow-wrap:anywhere;}
+#idbox .rf-brandline{bottom:.8%;font-size:1.9cqw;}
+@media(max-width:600px){#idbox .rf-name{font-size:8cqw;}#idbox .rf-attributes b{font-size:7cqw;}#idbox .rf-measurements b{font-size:3.1cqw;}}
+</style>
 </head>
 <body>
 <script>
@@ -586,17 +605,28 @@ function idWatch(uid){
 async function idMount(uid,own,info){const box=idg("idbox");if(!box)return;
  if(!sb||!user){box.innerHTML='<div class="card mut">Log in to see player identities.</div>';return}
  if(own){try{await syncAll()}catch(e){console.warn("Historical session sync before card refresh",e)}}
- Object.assign(IDV,{uid,own,edit:false,banner:"",pend:null,info:info||{}});box.innerHTML='<div class="id-loading"><span class="id-spinner"></span><b>Loading your RUCKLY cards</b><small>Syncing profile and match stats…</small></div>';
- try{const[r,s1,a1,funr]=await Promise.all([sb.rpc("get_player_identity",{p_user:uid}),sb.from("player_selections").select("*").eq("user_id",uid).order("year",{ascending:false}),sb.from("player_awards").select("*").eq("user_id",uid).order("award_year",{ascending:false}),sb.rpc("get_public_fun_card",{p_user:uid})]);
-  if(r.error){console.error("get_player_identity",r.error);box.innerHTML='<div class="card"><b>RUCKLY CARD could not be loaded</b><div class="mut" style="margin-top:4px">Supabase could not load the published card. Check the RUCKLY card SQL migration and try again.</div></div>';return}
-  const onlineFun=funr.error?{}:(funr.data||{});
-  if(funr.error)console.error("get_public_fun_card RPC failed",funr.error);
-  IDV.d={...(r.data||{}),...onlineFun,is_published:onlineFun.is_published===true||r.data?.is_published===true};IDV.fun=onlineFun.fun_card||onlineFun;
+ Object.assign(IDV,{uid,own,edit:false,banner:"",pend:null,info:info||{}});box.innerHTML='<div class="id-loading"><span class="id-spinner"></span><b>Loading RUCKLY Card</b><small>Loading published player details…</small></div>';
+ try{
+  // A visitor must not depend on get_player_identity: its owner/profile RLS can
+  // legitimately return NULL for another account. The public-card RPC is the
+  // authoritative source for another player's published card.
+  const requests=own
+   ? await Promise.all([sb.rpc("get_player_identity",{p_user:uid}),sb.rpc("get_public_fun_card",{p_user:uid}),sb.from("player_selections").select("*").eq("user_id",uid).order("year",{ascending:false}),sb.from("player_awards").select("*").eq("user_id",uid).order("award_year",{ascending:false})])
+   : await Promise.all([Promise.resolve({data:null,error:null}),sb.rpc("get_public_fun_card",{p_user:uid}),Promise.resolve({data:[],error:null}),Promise.resolve({data:[],error:null})]);
+  const [r,funr,s1,a1]=requests;
+  if(own&&r.error){console.error("get_player_identity",r.error);box.innerHTML='<div class="card"><b>RUCKLY CARD could not be loaded</b><div class="mut" style="margin-top:4px">Could not load your player identity. Check the RUCKLY card database setup.</div></div>';return}
+  if(funr.error){console.error("get_public_fun_card RPC failed",funr.error);box.innerHTML='<div class="card"><b>RUCKLY CARD could not be loaded</b><div class="mut" style="margin-top:4px">The published-card request failed: '+esc(funr.error.message||"Check the public card SQL function and permissions.")+'</div></div>';return}
+  let onlineFun=funr.data||{};if(Array.isArray(onlineFun))onlineFun=onlineFun[0]||{};
+  if(typeof onlineFun==="string"){try{onlineFun=JSON.parse(onlineFun)}catch(_){onlineFun={}}}
+  if(!own&&!onlineFun.is_published){box.innerHTML='<div class="card" style="text-align:center;padding:24px"><b>RUCKLY CARD</b><div class="mut" style="margin-top:8px">This player has not published their card yet, or the card is not visible to this account.</div></div>';return}
+  IDV.d={...(r.data||{}),...onlineFun,is_published:onlineFun.is_published===true||r.data?.is_published===true};
+  IDV.fun=onlineFun.fun_card||onlineFun;
   IDV.mode="stats";IDV.sel=s1.error?[]:(s1.data||[]);IDV.aw=a1.error?[]:(a1.data||[]);
   try{await idRefreshStats(uid,false)}catch(e){console.warn("Card match stats",e);IDV.st=null}
-  const bp=(IDV.d&&IDV.d.banner_path)||(onlineFun&&onlineFun.banner_path);if(bp){const u=await sb.storage.from("identity").createSignedUrl(bp,3600);if(u.data)IDV.banner=u.data.signedUrl;else console.warn("Published card photo could not be loaded",u.error)}
+  const bp=IDV.d.banner_path||onlineFun.banner_path;
+  if(bp){const u=await sb.storage.from("identity").createSignedUrl(bp,3600);if(u.data)IDV.banner=u.data.signedUrl;else console.warn("Published card photo could not be loaded",u.error)}
   idRender();idWatch(uid);
- }catch(e){console.error("Player Card load",e);box.innerHTML='<div class="card mut">Couldn’t load the identity.</div>'}}
+ }catch(e){console.error("Player Card load",e);box.innerHTML='<div class="card mut">Couldn’t load the identity: '+esc(e&&e.message||"Unknown error")+'</div>'}}
 
 function idVsel(k,cur){return`<select id="idv_${k}" style="width:auto;min-height:0;padding:4px 6px;font-size:11px" aria-label="Visibility">${ID_VIS.map(v=>`<option value="${v[0]}"${(cur||"public")===v[0]?" selected":""}>${v[1]}</option>`).join("")}</select>`}
 const ID_ABBR={Prop:"PR",Hooker:"HK",Lock:"LK",Flanker:"FL","No. 8":"N8","Scrum-half":"SH","Fly-half":"FH",Center:"CE",Centre:"CE",Wing:"WG","Full-back":"FB"};
